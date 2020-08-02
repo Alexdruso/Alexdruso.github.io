@@ -1,4 +1,5 @@
-# Alexdruso.github.io
+# Welcome!
 
-Welcome this small side project of mine. 
-I am trying to make my first static website, feel free to help!
+Welcome to my personal website, created with [Jekyll](https://jekyllrb.com/) and hosted on [Github Pages](https://pages.github.com/)
+
+This website was originally forked from [barryclark/jekyll-now](https://github.com/barryclark/jekyll-now)
