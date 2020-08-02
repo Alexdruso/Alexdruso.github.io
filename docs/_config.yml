@@ -9,7 +9,7 @@ name: Alessandro Sanvito
 description: Data Science MSc. student at Polimi and KTH
 
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
-avatar: https://raw.githubusercontent.com/Alexdruso/Alexdruso.github.io/master/images/me.png
+avatar: https://raw.githubusercontent.com/Alexdruso/Alexdruso.github.io/master/images/me.jpg
 
 #
 # Flags below are optional
@@ -18,15 +18,15 @@ avatar: https://raw.githubusercontent.com/Alexdruso/Alexdruso.github.io/master/i
 # Includes an icon in the footer for each username you enter
 footer-links:
   dribbble:
-  email:
+  email: alessandro.sanvito@gmail.com
   facebook:
   flickr:
-  github: barryclark/jekyll-now
+  github: Alexdruso
   instagram:
   linkedin:
   pinterest:
   rss: # just type anything here for a working RSS icon
-  twitter: jekyllrb
+  twitter: 
   stackoverflow: # your stackoverflow profile, e.g. "users/50476/bart-kiers"
   youtube: # channel/<your_long_string> or user/<user-name>
   googleplus: # anything in your profile username that comes after plus.google.com/
