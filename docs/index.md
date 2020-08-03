@@ -1,9 +1,8 @@
 ---
 layout: page
-title: About
 ---
 
-Some information about you!
+# Hello there!
 
 ### More Information
 
@@ -11,4 +10,4 @@ A place to include any other types of information that you'd like to include abo
 
 ### Contact me
 
-[email@domain.com](mailto:email@domain.com)
+[alessandro.sanvito@gmail.com](mailto:alessandro.sanvito@gmail.com)
