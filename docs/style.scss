@@ -18,9 +18,9 @@ html {
 }
 
 body {
-	background: $darkerGray;
+	background: $white;
   font: 18px/1.4 $helvetica;
-  color: $lightGray;
+  color: $darkGray;
 }
 
 .container {
@@ -32,7 +32,7 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: $helveticaNeue;
-  color: $lightGray;
+  color: $darkerGray;
   font-weight: bold;
 
   line-height: 1.7;
@@ -61,7 +61,7 @@ h3 {
 
 h4 {
   font-size: 18px;
-  color: $lightGray;
+  color: $gray;
 }
 
 p {
@@ -117,17 +117,17 @@ img {
 
 .date {
   font-style: italic;
-  color: $lightGray;
+  color: $gray;
 }
 
 // Specify the color of the selection
 ::-moz-selection {
-  color: $lightGray;
-  background: $darkerGray;
+  color: $black;
+  background: $lightGray;
 }
 ::selection {
-  color: $lightGray;
-  background: $darkerGray;
+  color: $black;
+  background: $lightGray;
 }
 
 // Nicolas Gallagher's micro clearfix hack
@@ -152,11 +152,13 @@ img {
 
 .wrapper-masthead {
   margin-bottom: 50px;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
+  background-color: $lightBlue;
 }
 
 .masthead {
   padding: 20px 0;
-  border-bottom: 1px solid $lightGray;
 
   @include mobile {
     text-align: center;
@@ -192,7 +194,7 @@ img {
 
 .site-name {
   margin: 0;
-  color: $lightGray;
+  color: $white;
   cursor: pointer;
   font-family: $helveticaNeue;
   font-weight: 300;
@@ -254,9 +256,9 @@ nav {
 .post {
   blockquote {
     margin: 1.8em .8em;
-    border-left: 2px solid $lightGray;
+    border-left: 2px solid $gray;
     padding: 0.1em 1em;
-    color: $lightGray;
+    color: $gray;
     font-size: 22px;
     font-style: italic;
   }
@@ -271,11 +273,10 @@ nav {
   }
 }
 
-.wrapper-footer {
-  margin-top: 50px;
+.wrapper-footer { 
   border-top: 1px solid #ddd;
   border-bottom: 1px solid #ddd;
-  background-color: $darkerGray;
+  background-color: $lightBlue;
 }
 
 footer {
@@ -287,3 +288,4 @@ footer {
 // ... Otherwise it really bloats up the top of the CSS file and makes it difficult to find the start
 @import "highlights";
 @import "svg-icons";
+
