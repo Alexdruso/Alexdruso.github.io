@@ -9,7 +9,7 @@ name: Alessandro Sanvito
 description: Data Science MSc. student at Polimi and KTH
 
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
-avatar: https://raw.githubusercontent.com/Alexdruso/Alexdruso.github.io/master/docs/images/me.jpg
+avatar: /images/me.jpg
 
 #
 # Flags below are optional
