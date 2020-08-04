@@ -14,9 +14,9 @@ with a strong entrepreneurial mindset, as part of an Innovation&entrepreneurship
 
 Before that, I was a **Computer Engineering BSc.** student at Polimi and, as a result, I developed 
 a strong technical background. Although the main focus of the degree was computer science, 
-I spent some of my elective credits following **telecommunications courses** and I liked them so 
-much I am now to get a licence as a radio amateur. I hope one day to blend my interest in RF and 
-optical communication with a data-driven approach.
+I spent some of my elective credits to deepen my knowledge in the **telecommunications field** and 
+I liked it so much I am now to get a licence as a radio amateur. 
+I hope one day to blend my interest in RF and optical communication with a data-driven approach.
  
 Before that, I was a **liceo classico** student, studying the classical world (I know ancient
 greek and latin, for what it's worth) and, most of all, learning valuable communication, 
