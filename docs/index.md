@@ -24,7 +24,7 @@ critical thinking and creativity skills in a stimulating environment.
 
 In my spare time I am just a nerd enjoying tv series, board games and kickstarting too many 
 projects to pursue and finish. I am also a blood donor at [AVIS](https://www.avis.it/) and 
-a volunteer at [Tutto è Numero](https://www.tuttoenumero.circolomatematico.it/).
+a volunteer at [Tutto è Numero](https://https://circolomatematico.org/).
 
 If you are interested in my professional profile, you can find my CV [here](\public\Alessandro_Sanvito_CV.pdf).
 
