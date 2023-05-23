@@ -1,6 +1,6 @@
 ---
-layout: page
 title: Homepage
+layout: page
 ---
 
 **Hello there**, my name is **Alessandro Sanvito** and I am a COBOL dev...nah, 
