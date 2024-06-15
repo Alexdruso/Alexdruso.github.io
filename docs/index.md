@@ -3,7 +3,7 @@ title: Homepage
 layout: page
 ---
 
-**Hello there**, my name is **Alessandro Sanvito** and I am a SOFTWARE AND AI ENGINEER.
+**Hello there**, my name is **Alessandro Sanvito** and I am a software and AI engineer.
 
 Currently, I am working as a **Software Engineer** at **Optiver** in Amsterdam, focusing on high‑performance, low latency C++ and Python code for the financial industry.
 
