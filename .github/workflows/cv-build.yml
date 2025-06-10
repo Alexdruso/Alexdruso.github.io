@@ -21,15 +21,17 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Build CV
+      - name: Set up TeX Live
         uses: xu-cheng/texlive-action@v2
         with:
           scheme: full
-          working_directory: docs/cv-src
-          run: |
-            xelatex cv.tex
-            xelatex cv.tex
-            cp cv.pdf ../public/Alessandro_Sanvito_CV.pdf
+
+      - name: Build CV
+        run: |
+          cd docs/cv-src
+          xelatex cv.tex
+          xelatex cv.tex
+          cp cv.pdf ../public/Alessandro_Sanvito_CV.pdf
 
       - name: Build Jekyll site
         run: |
