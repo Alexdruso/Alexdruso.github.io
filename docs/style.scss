@@ -7,6 +7,7 @@
 
 @import "reset";
 @import "variables";
+@import "themes/minimal";
 // Syntax highlighting @import is at the bottom of this file
 
 /**************/
@@ -304,6 +305,98 @@ nav {
 footer {
   padding: 20px 0;
   text-align: center;
+}
+
+// Theme toggle button
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: $blue;
+  color: $white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  z-index: 1000;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  &:hover {
+    transform: scale(1.1);
+    background: $accentBlue;
+  }
+
+  .dark-theme & {
+    background: $dark-accent;
+    &:hover {
+      background: $dark-accent-hover;
+    }
+  }
+}
+
+// Dark theme styles
+.dark-theme {
+  background-color: $dark-bg;
+  color: $dark-text;
+
+  .wrapper-masthead {
+    background-color: $dark-bg;
+    border-color: $dark-border;
+  }
+
+  .site-name {
+    color: $dark-accent;
+  }
+
+  nav {
+    a {
+      color: $dark-accent;
+      &:hover {
+        color: $dark-accent-hover;
+      }
+    }
+  }
+
+  .post {
+    background-color: $dark-bg;
+    border-color: $dark-border;
+    
+    h1, h2, h3, h4, h5, h6 {
+      color: $dark-text;
+    }
+
+    a {
+      color: $dark-accent;
+      &:hover {
+        color: $dark-accent-hover;
+      }
+    }
+  }
+
+  blockquote {
+    background-color: rgba($dark-accent, 0.1);
+    border-color: $dark-accent;
+    color: $dark-text;
+  }
+
+  .wrapper-footer {
+    background-color: $dark-bg;
+    border-color: $dark-border;
+  }
+
+  .site-footer {
+    color: $dark-gray;
+  }
 }
 
 // Settled on moving the import of syntax highlighting to the bottom of the CSS

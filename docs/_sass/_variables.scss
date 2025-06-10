@@ -11,7 +11,7 @@ $georgia: Georgia, Cambria, "Times New Roman", Times, serif;
 $base-font-size: 16px;
 $small-font-size: 14px;
 
-// Colors
+// Light Theme Colors
 $black: #000;
 $darkerGray: #222;
 $darkGray: #333;
@@ -21,6 +21,14 @@ $white: #fff;
 $blue: #4183C4;
 $lightBlue: #e8f0fe;
 $accentBlue: #2258a5;
+
+// Dark Theme Colors
+$dark-bg: #1a1a1a;
+$dark-text: #e0e0e0;
+$dark-gray: #888;
+$dark-accent: #64b5f6;
+$dark-accent-hover: #90caf9;
+$dark-border: #333;
 
 // Mobile breakpoints
 @mixin mobile {
