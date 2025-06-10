@@ -84,3 +84,9 @@ exclude:
   - LICENSE
   - README.md
   - CNAME
+  - cv-src
+
+# Include these files in your production _site
+include:
+  - public
+  - .nojekyll
