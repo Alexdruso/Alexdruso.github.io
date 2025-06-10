@@ -26,14 +26,14 @@ jobs:
         with:
           version: '2023'
           scheme: 'full'
-          packages: 'latexmk'
-          path: '/usr/local/texlive/2023/bin/x86_64-linux'
+          packages: 'latexmk,fontspec,xcolor,hyperref,geometry,enumitem,fontawesome5'
 
       - name: Build CV
         run: |
           cd docs/cv-src
-          /usr/local/texlive/2023/bin/x86_64-linux/pdflatex cv.tex
-          /usr/local/texlive/2023/bin/x86_64-linux/pdflatex cv.tex
+          export PATH="/usr/local/texlive/2023/bin/x86_64-linux:$PATH"
+          pdflatex -interaction=nonstopmode cv.tex
+          pdflatex -interaction=nonstopmode cv.tex
           cp cv.pdf ../public/Alessandro_Sanvito_CV.pdf
 
       - name: Build Jekyll site
