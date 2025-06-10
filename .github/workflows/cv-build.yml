@@ -4,36 +4,35 @@ on:
   push:
     paths:
       - 'docs/**'
-      - '.github/workflows/cv-build.yml'
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Needed for pushing changes
+      contents: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
-          working-directory: docs
 
       - name: Set up TeX Live
         uses: xu-cheng/texlive-action@v2
         with:
-          texlive_version: '2023'
-          texlive_scheme: 'full'
+          version: '2023'
+          scheme: 'full'
+          packages: 'latexmk'
 
       - name: Build CV
         run: |
           cd docs/cv-src
           pdflatex cv.tex
-          pdflatex cv.tex  # Run twice for references
+          pdflatex cv.tex
           cp cv.pdf ../public/Alessandro_Sanvito_CV.pdf
 
       - name: Build Jekyll site
