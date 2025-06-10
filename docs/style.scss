@@ -367,12 +367,19 @@ footer {
     }
   }
 
+  // Main content area
+  #main {
+    h1, h2, h3, h4, h5, h6 {
+      color: #ffffff;
+    }
+  }
+
   .post {
     background-color: $dark-bg;
     border-color: $dark-border;
     
     h1, h2, h3, h4, h5, h6 {
-      color: $dark-text;
+      color: #ffffff;
     }
 
     a {
@@ -396,6 +403,374 @@ footer {
 
   .site-footer {
     color: $dark-gray;
+  }
+
+  // Blog specific dark theme adjustments
+  .blog-header {
+    h1 {
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+  }
+
+  .post {
+    h2 a {
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      &:hover {
+        color: $dark-accent-hover;
+        text-shadow: none;
+      }
+    }
+  }
+}
+
+// Blog styles
+.blog-header {
+  text-align: center;
+  margin-bottom: 3em;
+  padding: 2em 0;
+  border-bottom: 1px solid $lightGray;
+
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.5em;
+    color: $accentBlue;
+  }
+
+  .blog-description {
+    font-size: 1.2em;
+    color: $gray;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+.post {
+  margin-bottom: 3em;
+  padding-bottom: 2em;
+  border-bottom: 1px solid $lightGray;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .post-meta {
+    margin-bottom: 1em;
+    font-size: 0.9em;
+    color: $gray;
+
+    .post-date {
+      margin-right: 1em;
+    }
+
+    .post-categories {
+      .post-category {
+        display: inline-block;
+        padding: 0.2em 0.6em;
+        margin-right: 0.5em;
+        background-color: $lightBlue;
+        color: $accentBlue;
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+    }
+  }
+
+  h2 {
+    font-size: 1.8em;
+    margin: 0.5em 0;
+    
+    a {
+      color: $accentBlue;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $blue;
+      }
+    }
+  }
+
+  .entry {
+    margin: 1.5em 0;
+    line-height: 1.8;
+  }
+
+  .read-more {
+    display: inline-block;
+    font-weight: 600;
+    color: $accentBlue;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: $blue;
+      transform: translateX(5px);
+    }
+  }
+}
+
+.no-posts {
+  text-align: center;
+  padding: 3em 0;
+  color: $gray;
+  font-size: 1.2em;
+}
+
+// Dark theme adjustments for blog
+.dark-theme {
+  .blog-header {
+    border-color: $dark-border;
+
+    h1 {
+      color: $dark-accent;
+    }
+
+    .blog-description {
+      color: $dark-gray;
+    }
+  }
+
+  .post {
+    border-color: $dark-border;
+
+    .post-meta {
+      color: $dark-gray;
+
+      .post-categories .post-category {
+        background-color: rgba($dark-accent, 0.1);
+        color: $dark-accent;
+      }
+    }
+
+    h2 a {
+      color: $dark-accent;
+      &:hover {
+        color: $dark-accent-hover;
+      }
+    }
+
+    .read-more {
+      color: $dark-accent;
+      &:hover {
+        color: $dark-accent-hover;
+      }
+    }
+  }
+
+  .no-posts {
+    color: $dark-gray;
+  }
+}
+
+// CV Page Styles
+.cv-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2em 0;
+}
+
+.cv-header {
+  text-align: center;
+  margin-bottom: 3em;
+  padding-bottom: 2em;
+  border-bottom: 2px solid $lightBlue;
+
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.2em;
+    color: $accentBlue;
+  }
+
+  .cv-title {
+    font-size: 1.5em;
+    color: $gray;
+    margin-bottom: 1em;
+  }
+
+  .cv-contact {
+    p {
+      margin: 0.5em 0;
+      color: $gray;
+    }
+  }
+}
+
+.cv-section {
+  margin-bottom: 3em;
+
+  h2 {
+    color: $accentBlue;
+    border-bottom: 1px solid $lightBlue;
+    padding-bottom: 0.5em;
+    margin-bottom: 1.5em;
+  }
+}
+
+.cv-entry {
+  margin-bottom: 2em;
+
+  .cv-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-bottom: 0.5em;
+
+    h3 {
+      margin: 0;
+      color: $darkerGray;
+    }
+
+    .cv-company {
+      color: $accentBlue;
+      font-weight: 500;
+    }
+
+    .cv-date {
+      color: $gray;
+      font-size: 0.9em;
+    }
+  }
+
+  .cv-location {
+    color: $gray;
+    font-style: italic;
+    margin-bottom: 1em;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.5em;
+  }
+}
+
+.cv-skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2em;
+
+  .skill-category {
+    h3 {
+      color: $accentBlue;
+      margin-bottom: 1em;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: 0.5em;
+        color: $darkerGray;
+      }
+    }
+  }
+}
+
+.cv-download {
+  text-align: center;
+  margin-top: 3em;
+  padding-top: 2em;
+  border-top: 2px solid $lightBlue;
+
+  .download-button {
+    display: inline-block;
+    padding: 1em 2em;
+    background-color: $accentBlue;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: $blue;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// Dark theme adjustments for CV
+.dark-theme {
+  .cv-header {
+    border-color: $dark-border;
+
+    h1 {
+      color: $white;
+    }
+
+    .cv-title, .cv-contact p {
+      color: $dark-gray;
+    }
+  }
+
+  .cv-section h2 {
+    color: $white;
+    border-color: $dark-border;
+  }
+
+  .cv-entry {
+    .cv-entry-header {
+      h3 {
+        color: $white;
+      }
+
+      .cv-company {
+        color: $dark-accent;
+      }
+    }
+
+    .cv-location {
+      color: $dark-gray;
+    }
+
+    ul li {
+      color: $dark-text;
+    }
+  }
+
+  .cv-skills {
+    .skill-category {
+      h3 {
+        color: $white;
+      }
+
+      ul li {
+        color: $dark-text;
+      }
+    }
+  }
+
+  .cv-download {
+    border-color: $dark-border;
+
+    .download-button {
+      background-color: $dark-accent;
+      &:hover {
+        background-color: $dark-accent-hover;
+      }
+    }
+  }
+}
+
+// PDF Container Styles
+.pdf-container {
+  max-width: 1000px;
+  margin: 2em auto;
+  padding: 0 20px;
+  
+  iframe {
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+}
+
+// Dark theme adjustments for PDF container
+.dark-theme {
+  .pdf-container iframe {
+    border-color: $dark-border;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 }
 

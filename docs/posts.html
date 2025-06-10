@@ -1,20 +1,41 @@
 ---
-title: Blog
+title: Blog | Thoughts & Insights
 permalink: "/blog/"
 layout: default
 ---
 
+<div class="blog-header">
+  <h1>Blog</h1>
+  <p class="blog-description">Exploring the intersection of technology, AI, and software engineering through thoughtful insights and experiences.</p>
+</div>
+
 <div class="posts">
   {% for post in site.posts %}
     <article class="post">
+      <div class="post-meta">
+        <span class="post-date">{{ post.date | date: "%B %-d, %Y" }}</span>
+        {% if post.categories %}
+          <span class="post-categories">
+            {% for category in post.categories %}
+              <span class="post-category">{{ category }}</span>
+            {% endfor %}
+          </span>
+        {% endif %}
+      </div>
 
-      <h1><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h1>
+      <h2><a href="{{ site.baseurl }}{{ post.url }}">{{ post.title }}</a></h2>
 
       <div class="entry">
         {{ post.excerpt }}
       </div>
 
-      <a href="{{ site.baseurl }}{{ post.url }}" class="read-more">Read More</a>
+      <a href="{{ site.baseurl }}{{ post.url }}" class="read-more">Read More →</a>
     </article>
   {% endfor %}
 </div>
+
+{% if site.posts.size == 0 %}
+  <div class="no-posts">
+    <p>No posts yet. Check back soon for new content!</p>
+  </div>
+{% endif %}
