@@ -1,68 +1,74 @@
 ---
-title: Alessandro Sanvito | Quantitative Developer
+title: Alessandro Sanvito | Software and AI Engineer
 layout: page
 ---
 
-I'm **Alessandro Sanvito**, a Quantitative Developer at **Optiver** in Amsterdam, where I specialize in building high-performance trading systems for systematic options trading. My work combines advanced quantitative models with low-latency engineering to develop robust, scalable trading infrastructure.
+I'm **Alessandro Sanvito**, a Software Engineer at **Optiver** in Amsterdam, where I specialize in developing and optimizing high-performance, low-latency systems for mission-critical financial applications. My work combines advanced software engineering with real-time processing to create robust, scalable solutions.
 
-## Current Focus
+## 1. Current Focus
 
-At **Optiver**, I'm part of a systematic options trading desk, where I:
-- Design and implement high-performance trading systems in C++ and Python
-- Develop and optimize quantitative models for options pricing and risk management
-- Build robust infrastructure for real-time market data processing
-- Create tools for automated trading strategies and risk monitoring
-- Collaborate with traders and researchers to implement new trading ideas
+At **Optiver**, I'm working on:
+- Developing and optimizing high-performance, low-latency C++ and Python systems
+- Collaborating with multidisciplinary teams on scalable, efficient software solutions
+- Gaining expertise in algorithm design and parallel computing
+- Working in latency-sensitive environments for real-time applications
 
-## Technical Expertise
+## 2. Professional Experience
 
-My technical background spans several key areas:
+### 2.1. Software Engineer at Optiver
+**Amsterdam, Netherlands** (August 2023 - Present)
+- Developing and optimizing high-performance, low-latency C++ and Python systems for mission-critical financial applications
+- Collaborating with multidisciplinary teams to implement scalable, efficient software solutions in latency-sensitive environments
+- Gaining expertise in algorithm design and parallel computing, relevant for real-time AI-driven applications
 
-### Quantitative Development
-- High-performance computing and low-latency systems
-- Options pricing models and risk management
-- Market microstructure and order book analysis
-- Statistical arbitrage and algorithmic trading
-- Real-time data processing and analysis
+### 2.2. AI Research Intern at Mercedes-Benz (AI-SEE Project)
+**Stuttgart, Germany** (May 2022 - June 2023)
+- Conducted cutting-edge research on 3D human avatar modeling from monocular video data
+- Designed and implemented generative neural models, including NeRFs and Diffusion Models
+- Collaborated with a cross-functional R&D team, resulting in a publication at ICCV
+- Leveraged skills in deep learning, 3D modeling, and generative AI
 
-### Software Engineering
+## 3. Education
+
+### 3.1. MSc. in ICT Innovation, Data Science
+**KTH Royal Institute of Technology** (Sept. 2020 - May 2023)
+- Final grade: A - Excellent
+- Implemented neural network architectures in NumPy (MLPs, Hopfield Networks, Deep Belief Networks)
+- Reproduced data mining-related papers in Python and Java
+
+### 3.2. MSc. in Computer Science and Engineering
+**Polytechnic University of Milan** (Sept. 2020 - Jul. 2023)
+- Final grade: 110/110 cum laude
+- Developed a winning ML solution for the RecSys Challenge 2021
+- Built a recommender system for a book catalogue with NumPy, SciPy, and Pandas
+
+### 3.3. BSc. in Engineering of Computing Systems
+**Polytechnic University of Milan** (Sept. 2017 - Jul. 2020)
+- Final grade: 109/110
+- Implemented a cardboard game in Java with extensive testing
+- Created a performance-oriented graph manipulation tool in C
+
+## 4. Technical Skills
+
+### 4.1. Programming & Development
 - C++ and Python for high-performance applications
+- Java development with testing frameworks (JUnit, Mockito)
 - Distributed systems and parallel computing
 - System architecture and optimization
+
+### 4.2. AI & Machine Learning
+- Deep learning and neural networks
+- Computer vision and 3D modeling
+- Generative AI (NeRFs, Diffusion Models)
+- Data mining and recommender systems
+
+### 4.3. Tools & Technologies
+- NumPy, SciPy, Pandas for data analysis
+- Dask, Catboost, XGBoost for machine learning
+- Version control and CI/CD
 - Testing and validation frameworks
-- Continuous integration and deployment
 
-### Research & Innovation
-My recent work at **Mercedes-Benz** in Stuttgart focused on AI research, specifically:
-- 3D human avatar modeling from monocular videos
-- Computer vision under adverse conditions
-- Published research at **ICCV** on generative neural models
-- Experience with deep learning and computer vision
-
-## Education & Background
-
-I hold a **MSc. in ICT Innovation, Data Science** through a double-degree program between [Polimi](https://www.polimi.it/en/) and [KTH](https://www.kth.se/en), as part of the [EIT Digital Master program](https://masterschool.eitdigital.eu/programmes/dsc/). This program provided me with:
-- Advanced knowledge in distributed systems and big data
-- Expertise in machine learning and predictive algorithms
-- Strong foundation in innovation and entrepreneurship
-- Experience in international research environments
-
-My journey began with a **BSc. in Engineering of Computing Systems** from Polimi, where I developed expertise in:
-- Computer Science fundamentals
-- Telecommunications and networking
-- System architecture and design
-- Software development methodologies
-
-## Beyond the Code
-
-When I'm not developing trading systems, I'm:
-- Contributing to society as a blood donor at [AVIS](https://www.avis.it/)
-- Supporting mathematical education as a volunteer at [Tutto è Numero](https://circolomatematico.org/)
-- Exploring new technologies and quantitative methods
-- Enjoying TV series and board games
-- Pursuing my interest in radio communications as an amateur radio enthusiast
-
-## Connect With Me
+## 5. Connect With Me
 
 Interested in my professional journey? Check out my [CV](/public/Alessandro_Sanvito_CV.pdf) for a detailed overview of my experience and skills.
 
