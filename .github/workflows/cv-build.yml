@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'docs/**'
+      - '.github/workflows/cv-build.yml'
   workflow_dispatch:
 
 jobs:
@@ -11,9 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -21,20 +21,15 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Set up TeX Live
+      - name: Build CV
         uses: xu-cheng/texlive-action@v2
         with:
-          version: '2023'
-          scheme: 'full'
-          packages: 'latexmk,fontspec,xcolor,hyperref,geometry,enumitem,fontawesome5'
-
-      - name: Build CV
-        run: |
-          cd docs/cv-src
-          export PATH="/usr/local/texlive/2023/bin/x86_64-linux:$PATH"
-          pdflatex -interaction=nonstopmode cv.tex
-          pdflatex -interaction=nonstopmode cv.tex
-          cp cv.pdf ../public/Alessandro_Sanvito_CV.pdf
+          scheme: full
+          working_directory: docs/cv-src
+          run: |
+            xelatex cv.tex
+            xelatex cv.tex
+            cp cv.pdf ../public/Alessandro_Sanvito_CV.pdf
 
       - name: Build Jekyll site
         run: |
