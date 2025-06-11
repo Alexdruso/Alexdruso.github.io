@@ -1,0 +1,7 @@
+- title: About Me
+  url: /
+  icon: fa-user
+
+- title: CV
+  url: /cv/
+  icon: fa-file-alt

@@ -19,6 +19,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
   </head>
@@ -35,8 +36,12 @@
           </div>
 
           <nav>
-            <a href="/">About me</a>
-            <a href="/cv">CV</a>
+            {% for item in site.data.navigation %}
+              <a href="{{ item.url }}" {% if page.url == item.url %}class="active"{% endif %}>
+                {% if item.icon %}<i class="fas {{ item.icon }}"></i>{% endif %}
+                {{ item.title }}
+              </a>
+            {% endfor %}
           </nav>
         </header>
       </div>
