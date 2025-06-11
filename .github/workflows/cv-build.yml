@@ -5,6 +5,7 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/cv-build.yml'
+      - 'Makefile'
   workflow_dispatch:
 
 jobs:
@@ -26,12 +27,15 @@ jobs:
         with:
           scheme: full
 
+      - name: Install required fonts
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-roboto fonts-font-awesome
+
       - name: Build CV
         run: |
-          cd docs/cv-src
-          xelatex cv.tex
-          xelatex cv.tex
-          cp cv.pdf ../public/Alessandro_Sanvito_CV.pdf
+          make clean
+          make cv
 
       - name: Build Jekyll site
         run: |
