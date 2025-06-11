@@ -837,6 +837,17 @@ footer {
   }
 }
 
+@media (max-width: 768px) {
+  .about-container {
+    padding: 20px;
+    padding-right: 20px;
+  }
+
+  .profile-picture {
+    display: none;
+  }
+}
+
 // Game styles
 .game-container {
   max-width: 800px;
