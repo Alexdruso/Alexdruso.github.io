@@ -22,66 +22,13 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
-      - name: Set up TeX Live
-        uses: xu-cheng/texlive-action@v2
-        with:
-          scheme: full
-          packages: |
-            collection-fontsrecommended
-            collection-latexrecommended
-            collection-latexextra
-            collection-fontsextra
-            collection-langenglish
-            collection-langother
-            collection-latex
-            collection-luatex
-            collection-xetex
-            collection-bibtexextra
-            collection-binextra
-            collection-pictures
-            collection-plaingeneric
-            collection-pstricks
-            collection-publishers
-            collection-science
-            collection-texworks
-            collection-wintools
-            collection-xetex
-            collection-langcjk
-            collection-langcyrillic
-            collection-langeuropean
-            collection-langother
-            collection-langpolish
-            collection-langportuguese
-            collection-langspanish
-            collection-latexrecommended
-            collection-latexextra
-            collection-fontsrecommended
-            collection-fontsextra
-            collection-latex
-            collection-luatex
-            collection-xetex
-            collection-bibtexextra
-            collection-binextra
-            collection-pictures
-            collection-plaingeneric
-            collection-pstricks
-            collection-publishers
-            collection-science
-            collection-texworks
-            collection-wintools
-            collection-xetex
-            collection-langcjk
-            collection-langcyrillic
-            collection-langeuropean
-            collection-langother
-            collection-langpolish
-            collection-langportuguese
-            collection-langspanish
-
-      - name: Install required fonts
+      - name: Install TeX Live and xelatex
         run: |
           sudo apt-get update
+          sudo apt-get install -y texlive-full texlive-xetex
           sudo apt-get install -y fonts-roboto fonts-font-awesome
+          # Verify xelatex installation
+          xelatex --version
 
       - name: Build CV
         run: |
