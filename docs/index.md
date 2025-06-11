@@ -3,7 +3,14 @@ title: Alessandro Sanvito | Software and AI Engineer
 layout: page
 ---
 
-I'm **Alessandro Sanvito**, a Software Engineer at **Optiver** in Amsterdam, where I specialize in developing and optimizing high-performance, low-latency systems for mission-critical financial applications. My work combines advanced software engineering with real-time processing to create robust, scalable solutions.
+<div class="about-container">
+  <div class="about-content">
+    I'm **Alessandro Sanvito**, a Software Engineer at **Optiver** in Amsterdam, where I specialize in developing and optimizing high-performance, low-latency systems for mission-critical financial applications. My work combines advanced software engineering with real-time processing to create robust, scalable solutions.
+  </div>
+  <div class="profile-picture">
+    <img src="/images/alessandro.jpeg" alt="Alessandro Sanvito" />
+  </div>
+</div>
 
 ## 1. Current Focus
 
