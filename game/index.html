@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Software Engineer at Optiver">
+    <meta name="author" content="Alessandro Sanvito">
+    <title>Snake Game | Alessandro Sanvito – Alessandro Sanvito</title>
+
+        <meta charset="utf-8" />
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+
+    
+    <meta name="description" content="Software Engineer at Optiver">
+    <meta property="og:description" content="Software Engineer at Optiver" />
+    
+    <meta name="author" content="Alessandro Sanvito" />
+
+    
+    <meta property="og:title" content="Snake Game | Alessandro Sanvito" />
+    <meta property="twitter:title" content="Snake Game | Alessandro Sanvito" />
+    
+
+    <!--[if lt IE 9]>
+      <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link rel="alternate" type="application/rss+xml" title="Alessandro Sanvito - Software Engineer at Optiver" href="/feed.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Created with Jekyll Now - http://github.com/barryclark/jekyll-now -->
+  </head>
+
+  <body>
+    <div class="wrapper-masthead">
+      <div class="container">
+        <header class="masthead clearfix">
+          <a href="/" class="site-avatar"><img src="/images/me.jpg" alt="Alessandro Sanvito" /></a>
+
+          <div class="site-info">
+            <h1 class="site-name"><a href="/">Alessandro Sanvito</a></h1>
+            <p class="site-description">Software Engineer at Optiver</p>
+          </div>
+
+          <nav>
+            
+              <a href="/" >
+                <i class="fas fa-user"></i>
+                About Me
+              </a>
+            
+              <a href="/cv/" >
+                <i class="fas fa-file-alt"></i>
+                CV
+              </a>
+            
+          </nav>
+        </header>
+      </div>
+    </div>
+
+    <div id="main" role="main" class="container">
+      <div class="game-container">
+  <h1>Snake Game</h1>
+  <p class="game-description">Take a break and play a classic game of Snake! Use arrow keys to control the snake and eat the food to grow longer.</p>
+  
+  <div class="game-wrapper">
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div class="game-controls">
+      <div class="score">Score: <span id="score">0</span></div>
+      <button id="startButton">Start Game</button>
+      <button id="resetButton">Reset Game</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Game constants
+const GRID_SIZE = 20;
+const GAME_SPEED = 100;
+const CANVAS_SIZE = 400;
+
+// Game variables
+let canvas, ctx;
+let snake = [];
+let food = {};
+let direction = 'right';
+let nextDirection = 'right';
+let gameLoop;
+let score = 0;
+let gameStarted = false;
+
+// Initialize game
+function initGame() {
+  canvas = document.getElementById('gameCanvas');
+  if (!canvas) {
+    console.error('Canvas element not found!');
+    return;
+  }
+  
+  ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.error('Could not get canvas context!');
+    return;
+  }
+  
+  // Initialize snake
+  snake = [
+    {x: 5, y: 5},
+    {x: 4, y: 5},
+    {x: 3, y: 5}
+  ];
+  
+  // Initialize food
+  generateFood();
+  
+  // Set up event listeners
+  document.addEventListener('keydown', handleKeyPress);
+  
+  const startButton = document.getElementById('startButton');
+  const resetButton = document.getElementById('resetButton');
+  
+  if (startButton) {
+    startButton.addEventListener('click', startGame);
+  }
+  
+  if (resetButton) {
+    resetButton.addEventListener('click', resetGame);
+  }
+  
+  // Draw initial state
+  draw();
+}
+
+// Generate food at random position
+function generateFood() {
+  food = {
+    x: Math.floor(Math.random() * (CANVAS_SIZE / GRID_SIZE)),
+    y: Math.floor(Math.random() * (CANVAS_SIZE / GRID_SIZE))
+  };
+  
+  // Make sure food doesn't appear on snake
+  while (snake.some(segment => segment.x === food.x && segment.y === food.y)) {
+    food = {
+      x: Math.floor(Math.random() * (CANVAS_SIZE / GRID_SIZE)),
+      y: Math.floor(Math.random() * (CANVAS_SIZE / GRID_SIZE))
+    };
+  }
+}
+
+// Handle keyboard input
+function handleKeyPress(e) {
+  if (!gameStarted) return;
+  
+  switch(e.key) {
+    case 'ArrowUp':
+      if (direction !== 'down') nextDirection = 'up';
+      break;
+    case 'ArrowDown':
+      if (direction !== 'up') nextDirection = 'down';
+      break;
+    case 'ArrowLeft':
+      if (direction !== 'right') nextDirection = 'left';
+      break;
+    case 'ArrowRight':
+      if (direction !== 'left') nextDirection = 'right';
+      break;
+  }
+}
+
+// Move snake
+function moveSnake() {
+  direction = nextDirection;
+  const head = {x: snake[0].x, y: snake[0].y};
+  
+  switch(direction) {
+    case 'up':
+      head.y--;
+      break;
+    case 'down':
+      head.y++;
+      break;
+    case 'left':
+      head.x--;
+      break;
+    case 'right':
+      head.x++;
+      break;
+  }
+  
+  // Check for collisions
+  if (checkCollision(head)) {
+    gameOver();
+    return;
+  }
+  
+  snake.unshift(head);
+  
+  // Check if snake ate food
+  if (head.x === food.x && head.y === food.y) {
+    score += 10;
+    const scoreElement = document.getElementById('score');
+    if (scoreElement) {
+      scoreElement.textContent = score;
+    }
+    generateFood();
+  } else {
+    snake.pop();
+  }
+}
+
+// Check for collisions
+function checkCollision(head) {
+  // Wall collision
+  if (head.x < 0 || head.x >= CANVAS_SIZE / GRID_SIZE ||
+      head.y < 0 || head.y >= CANVAS_SIZE / GRID_SIZE) {
+    return true;
+  }
+  
+  // Self collision
+  return snake.some(segment => segment.x === head.x && segment.y === head.y);
+}
+
+// Draw game state
+function draw() {
+  if (!ctx || !canvas) return;
+  
+  // Clear canvas
+  ctx.fillStyle = '#f0f0f0';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  
+  // Draw snake
+  snake.forEach((segment, index) => {
+    // Make head slightly darker
+    ctx.fillStyle = index === 0 ? '#388E3C' : '#4CAF50';
+    ctx.fillRect(
+      segment.x * GRID_SIZE,
+      segment.y * GRID_SIZE,
+      GRID_SIZE - 1,
+      GRID_SIZE - 1
+    );
+  });
+  
+  // Draw food
+  ctx.fillStyle = '#FF5722';
+  ctx.fillRect(
+    food.x * GRID_SIZE,
+    food.y * GRID_SIZE,
+    GRID_SIZE - 1,
+    GRID_SIZE - 1
+  );
+}
+
+// Game loop
+function gameLoop() {
+  moveSnake();
+  draw();
+}
+
+// Start game
+function startGame() {
+  const startButton = document.getElementById('startButton');
+  if (!startButton) return;
+  
+  if (!gameStarted) {
+    gameStarted = true;
+    startButton.textContent = 'Pause Game';
+    gameLoop = setInterval(gameLoop, GAME_SPEED);
+  } else {
+    gameStarted = false;
+    startButton.textContent = 'Resume Game';
+    clearInterval(gameLoop);
+  }
+}
+
+// Reset game
+function resetGame() {
+  clearInterval(gameLoop);
+  gameStarted = false;
+  score = 0;
+  
+  const scoreElement = document.getElementById('score');
+  const startButton = document.getElementById('startButton');
+  
+  if (scoreElement) {
+    scoreElement.textContent = score;
+  }
+  
+  if (startButton) {
+    startButton.textContent = 'Start Game';
+  }
+  
+  direction = 'right';
+  nextDirection = 'right';
+  initGame();
+}
+
+// Game over
+function gameOver() {
+  clearInterval(gameLoop);
+  gameStarted = false;
+  
+  const startButton = document.getElementById('startButton');
+  if (startButton) {
+    startButton.textContent = 'Start Game';
+  }
+  
+  alert(`Game Over! Your score: ${score}`);
+}
+
+// Initialize game when page loads
+window.addEventListener('load', initGame);
+</script> 
+
+    </div>
+
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          
+<a href="mailto:alessandro.sanvito@gmail.com"><i class="svg-icon email"></i></a>
+
+
+<a href="https://github.com/Alexdruso"><i class="svg-icon github"></i></a>
+
+<a href="https://www.linkedin.com/in/alessandro-sanvito-07706114b"><i class="svg-icon linkedin"></i></a>
+
+
+
+
+
+
+        </footer>
+      </div>
+    </div>
+
+    <button class="theme-toggle" aria-label="Toggle dark mode">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
+    <script>
+      // Theme switcher
+      const themeToggle = document.querySelector('.theme-toggle');
+      const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+      
+      // Check for saved theme preference or use system preference
+      const currentTheme = localStorage.getItem('theme') || 
+        (prefersDarkScheme.matches ? 'dark' : 'light');
+      
+      // Apply theme on load
+      if (currentTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+
+      // Toggle theme
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.body.classList.toggle('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+
+      // Listen for system theme changes
+      prefersDarkScheme.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+          document.body.classList.toggle('dark-theme', e.matches);
+        }
+      });
+    </script>
+
+    
+	<!-- Google Analytics -->
+	<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-174483391-1', 'auto');
+		ga('send', 'pageview', {
+		  'page': '/game/',
+		  'title': 'Snake Game | Alessandro Sanvito'
+		});
+	</script>
+	<!-- End Google Analytics -->
+
+
+  </body>
+</html>
