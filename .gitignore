@@ -24,3 +24,8 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo 
+
+cv.aux
+cv.log
+cv.out
+cv.pdf
