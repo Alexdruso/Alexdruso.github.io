@@ -26,6 +26,57 @@ jobs:
         uses: xu-cheng/texlive-action@v2
         with:
           scheme: full
+          packages: |
+            collection-fontsrecommended
+            collection-latexrecommended
+            collection-latexextra
+            collection-fontsextra
+            collection-langenglish
+            collection-langother
+            collection-latex
+            collection-luatex
+            collection-xetex
+            collection-bibtexextra
+            collection-binextra
+            collection-pictures
+            collection-plaingeneric
+            collection-pstricks
+            collection-publishers
+            collection-science
+            collection-texworks
+            collection-wintools
+            collection-xetex
+            collection-langcjk
+            collection-langcyrillic
+            collection-langeuropean
+            collection-langother
+            collection-langpolish
+            collection-langportuguese
+            collection-langspanish
+            collection-latexrecommended
+            collection-latexextra
+            collection-fontsrecommended
+            collection-fontsextra
+            collection-latex
+            collection-luatex
+            collection-xetex
+            collection-bibtexextra
+            collection-binextra
+            collection-pictures
+            collection-plaingeneric
+            collection-pstricks
+            collection-publishers
+            collection-science
+            collection-texworks
+            collection-wintools
+            collection-xetex
+            collection-langcjk
+            collection-langcyrillic
+            collection-langeuropean
+            collection-langother
+            collection-langpolish
+            collection-langportuguese
+            collection-langspanish
 
       - name: Install required fonts
         run: |
