@@ -5,7 +5,7 @@ layout: page
 
 <div class="about-container">
   <div class="about-content">
-    I'm **Alessandro Sanvito**, a Software Engineer at **Optiver** in Amsterdam, where I specialize in developing and optimizing high-performance, low-latency systems for mission-critical financial applications. My work combines advanced software engineering with real-time processing to create robust, scalable solutions.
+    I'm <strong>Alessandro Sanvito</strong>, a Software Engineer at <strong>Optiver</strong> in Amsterdam, where I specialize in developing and optimizing high-performance, low-latency systems for mission-critical financial applications. My work combines advanced software engineering with real-time processing to create robust, scalable solutions.
   </div>
   <div class="profile-picture">
     <img src="/images/alessandro.jpeg" alt="Alessandro Sanvito" />
@@ -14,7 +14,7 @@ layout: page
 
 ## 1. Current Focus
 
-At **Optiver**, I'm working on:
+At <strong>Optiver</strong>, I'm working on:
 - Developing and optimizing high-performance, low-latency C++ and Python systems
 - Collaborating with multidisciplinary teams on scalable, efficient software solutions
 - Gaining expertise in algorithm design and parallel computing
@@ -23,13 +23,13 @@ At **Optiver**, I'm working on:
 ## 2. Professional Experience
 
 ### 2.1. Software Engineer at Optiver
-**Amsterdam, Netherlands** (August 2023 - Present)
+<strong>Amsterdam, Netherlands</strong> (August 2023 - Present)
 - Developing and optimizing high-performance, low-latency C++ and Python systems for mission-critical financial applications
 - Collaborating with multidisciplinary teams to implement scalable, efficient software solutions in latency-sensitive environments
 - Gaining expertise in algorithm design and parallel computing, relevant for real-time AI-driven applications
 
 ### 2.2. AI Research Intern at Mercedes-Benz (AI-SEE Project)
-**Stuttgart, Germany** (May 2022 - June 2023)
+<strong>Stuttgart, Germany</strong> (May 2022 - June 2023)
 - Conducted cutting-edge research on 3D human avatar modeling from monocular video data
 - Designed and implemented generative neural models, including NeRFs and Diffusion Models
 - Collaborated with a cross-functional R&D team, resulting in a publication at ICCV
@@ -38,19 +38,19 @@ At **Optiver**, I'm working on:
 ## 3. Education
 
 ### 3.1. MSc. in ICT Innovation, Data Science
-**KTH Royal Institute of Technology** (Sept. 2020 - May 2023)
+<strong>KTH Royal Institute of Technology</strong> (Sept. 2020 - May 2023)
 - Final grade: A - Excellent
 - Implemented neural network architectures in NumPy (MLPs, Hopfield Networks, Deep Belief Networks)
 - Reproduced data mining-related papers in Python and Java
 
 ### 3.2. MSc. in Computer Science and Engineering
-**Polytechnic University of Milan** (Sept. 2020 - Jul. 2023)
+<strong>Polytechnic University of Milan</strong> (Sept. 2020 - Jul. 2023)
 - Final grade: 110/110 cum laude
 - Developed a winning ML solution for the RecSys Challenge 2021
 - Built a recommender system for a book catalogue with NumPy, SciPy, and Pandas
 
 ### 3.3. BSc. in Engineering of Computing Systems
-**Polytechnic University of Milan** (Sept. 2017 - Jul. 2020)
+<strong>Polytechnic University of Milan</strong> (Sept. 2017 - Jul. 2020)
 - Final grade: 109/110
 - Implemented a cardboard game in Java with extensive testing
 - Created a performance-oriented graph manipulation tool in C
