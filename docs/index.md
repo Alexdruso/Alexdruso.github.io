@@ -58,22 +58,29 @@ At <strong>Optiver</strong>, I'm working on:
 ## 4. Technical Skills
 
 ### 4.1. Programming & Development
-- C++ and Python for high-performance applications
-- Java development with testing frameworks (JUnit, Mockito)
+- Python and SQL for data processing and analysis
+- Java and C++ for high-performance applications
 - Distributed systems and parallel computing
 - System architecture and optimization
 
-### 4.2. AI & Machine Learning
-- Deep learning and neural networks
-- Computer vision and 3D modeling
-- Generative AI (NeRFs, Diffusion Models)
-- Data mining and recommender systems
+### 4.2. Data Processing & Analysis
+- Big Data: Spark, Polars, DuckDB
+- Databases: PostgreSQL, Delta Lake
+- Data Analysis: Pandas, NumPy
+- Data Visualization: Matplotlib, Plotly
 
-### 4.3. Tools & Technologies
-- NumPy, SciPy, Pandas for data analysis
-- Dask, Catboost, XGBoost for machine learning
-- Version control and CI/CD
-- Testing and validation frameworks
+### 4.3. Machine Learning & AI
+- Deep Learning: PyTorch, TensorFlow
+- Computer Vision and 3D Modeling
+- Generative AI: NeRFs, Diffusion Models
+- Classical ML: scikit-learn, Catboost, XGBoost
+- Research Experience: Published at ICCV
+
+### 4.4. Tools & Technologies
+- Version Control: Git
+- Containerization: Docker
+- Operating Systems: Linux
+- CI/CD and pytest
 
 ## 5. Connect With Me
 
