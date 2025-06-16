@@ -35,6 +35,14 @@ jobs:
           make clean
           make cv
 
+      - name: Commit CV
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'github-actions@github.com'
+          git add docs/assets/cv.pdf
+          git commit -m "Update CV" || exit 0
+          git push
+
       - name: Build Jekyll site
         run: |
           cd docs
