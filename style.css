@@ -973,29 +973,23 @@ code {
 .about-container {
   position: relative;
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
   gap: 2rem;
-  margin-bottom: 2rem;
-  padding-right: 350px;
+  margin-bottom: 3rem;
 }
 
 .about-content {
   flex: 1;
-  max-width: 100%;
+  max-width: 55%;
 }
 
 .profile-picture {
-  position: fixed;
-  right: 20px;
-  top: 250px;
-  bottom: 80px;
-  height: calc(100vh - 330px);
-  width: auto;
+  flex-shrink: 0;
+  width: 400px;
+  height: 500px;
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  z-index: 100;
 }
 .profile-picture img {
   width: 100%;
@@ -1008,26 +1002,18 @@ code {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   }
 }
-@media screen and (max-width: 1200px) {
+@media screen and (max-width: 768px) {
   .about-container {
-    padding-right: 0;
-  }
-  .profile-picture {
-    position: static;
-    height: 400px;
-    width: 100%;
-    margin: 2rem auto;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-}
-@media (max-width: 768px) {
-  .about-container {
+    flex-direction: column;
     padding: 20px;
-    padding-right: 20px;
+  }
+  .about-content {
+    max-width: 100%;
   }
   .profile-picture {
-    display: none;
+    width: 100%;
+    height: 400px;
+    margin: 0 auto;
   }
 }
 .game-container {
