@@ -29,3 +29,5 @@ cv.aux
 cv.log
 cv.out
 cv.pdf
+
+.jekyll_cache/
