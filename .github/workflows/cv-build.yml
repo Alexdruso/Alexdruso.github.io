@@ -39,7 +39,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@github.com'
-          git add docs/assets/cv.pdf
+          git add docs/public/Alessandro_Sanvito_CV.pdf
           git commit -m "Update CV" || exit 0
           git push
 
