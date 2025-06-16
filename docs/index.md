@@ -5,7 +5,7 @@ layout: page
 
 <div class="about-container">
   <div class="about-content">
-    I'm <strong>Alessandro Sanvito</strong>, a Software Engineer at <strong>Optiver</strong> in Amsterdam, where I specialize in developing and optimizing high-performance, low-latency systems for mission-critical financial applications. My work combines advanced software engineering with real-time processing to create robust, scalable solutions.
+    I'm <strong>Alessandro Sanvito</strong>, a Software Engineer at <strong>Optiver</strong> in Amsterdam, where I work in the Data Driven Algorithmic Position Taking team. I specialize in developing data pipelines and trading strategies for systematic trading, combining software engineering expertise with quantitative finance knowledge to create impactful solutions.
   </div>
   <div class="profile-picture">
     <img src="/images/alessandro.jpeg" alt="Alessandro Sanvito" />
@@ -15,18 +15,18 @@ layout: page
 ## 1. Current Focus
 
 At <strong>Optiver</strong>, I'm working on:
-- Developing and optimizing high-performance, low-latency C++ and Python systems
-- Collaborating with multidisciplinary teams on scalable, efficient software solutions
-- Gaining expertise in algorithm design and parallel computing
-- Working in latency-sensitive environments for real-time applications
+- Developing and maintaining data pipelines using Python, Spark, Polars, and DuckDB
+- Building and optimizing data storage solutions with PostgreSQL and Delta tables
+- Collaborating with quantitative researchers and traders on systematic trading strategies
+- Contributing directly to desk PnL through technical solutions and strategy implementation
 
 ## 2. Professional Experience
 
 ### 2.1. Software Engineer at Optiver
 <strong>Amsterdam, Netherlands</strong> (August 2023 - Present)
-- Developing and optimizing high-performance, low-latency C++ and Python systems for mission-critical financial applications
-- Collaborating with multidisciplinary teams to implement scalable, efficient software solutions in latency-sensitive environments
-- Gaining expertise in algorithm design and parallel computing, relevant for real-time AI-driven applications
+- Working in the Data Driven Algorithmic Position Taking team, developing and maintaining data pipelines and trading strategies for the Quantitative Volatility Strategies desk
+- Building and optimizing data processing systems using Python, Spark, Polars, and DuckDB, with a focus on efficient data storage and retrieval from PostgreSQL and Delta tables
+- Collaborating closely with quantitative researchers and traders to implement and optimize systematic trading strategies, with direct impact on desk PnL
 
 ### 2.2. AI Research Intern at Mercedes-Benz (AI-SEE Project)
 <strong>Stuttgart, Germany</strong> (May 2022 - June 2023)
