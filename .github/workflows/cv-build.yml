@@ -2,6 +2,8 @@ name: Build Site and CV
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'docs/**'
       - '.github/workflows/cv-build.yml'
@@ -14,20 +16,23 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.2'
           bundler-cache: true
+          working-directory: docs
 
       - name: Install TeX Live and xelatex
         run: |
           sudo apt-get update
-          sudo apt-get install -y texlive-full texlive-xetex
+          sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-fonts-extra texlive-latex-extra
           sudo apt-get install -y fonts-roboto fonts-font-awesome
-          # Verify xelatex installation
           xelatex --version
 
       - name: Build CV
@@ -40,18 +45,20 @@ jobs:
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@github.com'
           git add docs/public/Alessandro_Sanvito_CV.pdf
-          git commit -m "Update CV" || exit 0
-          git push
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update CV"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
 
       - name: Build Jekyll site
-        run: |
-          cd docs
-          bundle install
-          bundle exec jekyll build
+        working-directory: docs
+        run: bundle exec jekyll build
 
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs/_site
-          commit_message: "Update site and CV" 
+          commit_message: "Update site and CV"
