@@ -3,7 +3,7 @@ name: Build Site and CV
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'docs/**'
       - '.github/workflows/cv-build.yml'
