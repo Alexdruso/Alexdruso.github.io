@@ -2,6 +2,10 @@
   url: /
   icon: fa-user
 
+- title: Publications
+  url: /publications/
+  icon: fa-graduation-cap
+
 - title: CV
   url: /cv/
   icon: fa-file-alt

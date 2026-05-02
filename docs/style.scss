@@ -941,3 +941,184 @@ footer {
   }
 }
 
+// Publications
+.publications {
+  margin-bottom: 3rem;
+}
+
+.publications-header {
+  color: $gray;
+  font-size: 0.95em;
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $lightGray;
+}
+
+.publication-card {
+  padding: 1.25rem 0 1.5rem;
+  border-bottom: 1px solid $lightGray;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.publication-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85em;
+}
+
+.venue-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+
+  &.venue-top {
+    background-color: $accentBlue;
+    color: $white;
+  }
+
+  &.venue-strong {
+    background-color: $lightBlue;
+    color: $accentBlue;
+  }
+}
+
+.publication-year {
+  color: $gray;
+  font-weight: 500;
+}
+
+.first-author-chip {
+  background-color: #fff4d6;
+  color: #8a6d00;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8em;
+}
+
+.publication-title {
+  font-size: 1.2em;
+  margin: 0.2rem 0 0.4rem;
+  line-height: 1.35;
+
+  a {
+    color: $darkerGray;
+    text-decoration: none;
+    border-bottom: none;
+
+    &:hover {
+      color: $blue;
+    }
+  }
+}
+
+.publication-authors {
+  color: $gray;
+  font-size: 0.95em;
+  margin: 0 0 0.5rem;
+
+  strong {
+    color: $darkerGray;
+  }
+}
+
+.publication-tldr {
+  margin: 0 0 0.5rem;
+  color: $darkGray;
+}
+
+.publication-links {
+  margin: 0;
+  font-size: 0.9em;
+
+  a {
+    color: $blue;
+    text-decoration: none;
+    margin-right: 1rem;
+
+    i {
+      margin-right: 0.25rem;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Dark theme adjustments for publications
+.dark-theme {
+  .publications-header {
+    color: $dark-gray;
+    border-bottom-color: $dark-border;
+  }
+
+  .publication-card {
+    border-bottom-color: $dark-border;
+  }
+
+  .publication-title a {
+    color: $dark-text;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+
+  .publication-authors {
+    color: $dark-gray;
+
+    strong {
+      color: $dark-text;
+    }
+  }
+
+  .publication-tldr {
+    color: $dark-text;
+  }
+
+  .publication-year {
+    color: $dark-gray;
+  }
+
+  .venue-badge.venue-top {
+    background-color: $dark-accent;
+    color: $dark-bg;
+  }
+
+  .venue-badge.venue-strong {
+    background-color: $dark-border;
+    color: $dark-accent-hover;
+  }
+
+  .first-author-chip {
+    background-color: #4a3d00;
+    color: #ffe27a;
+  }
+
+  .publication-links a {
+    color: $dark-accent;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+}
+
+@include mobile {
+  .publication-title {
+    font-size: 1.1em;
+  }
+
+  .publication-meta {
+    font-size: 0.8em;
+  }
+}
