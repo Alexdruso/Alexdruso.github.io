@@ -1,0 +1,66 @@
+# Source of truth for the website's publications page.
+# Keep in sync with docs/cv-src/cv/publications.tex and Google Scholar.
+# Sorted reverse-chronologically; the publications page sorts by `year` anyway.
+
+- title: "HINT: Learning Complete Human Neural Representations from Limited Viewpoints"
+  authors:
+    - "A. Sanvito"
+    - "A. Ramazzina"
+    - "S. Walz"
+    - "M. Bijelic"
+    - "F. Heide"
+  venue: "IEEE IV"
+  venue_full: "IEEE Intelligent Vehicles Symposium"
+  year: 2024
+  tier: top
+  first_author: true
+  tldr: "Builds complete 3D human avatars from a handful of camera views using a sagittal-plane symmetry prior and explicit body-model supervision — designed for sparse-view setups like in-vehicle perception."
+  arxiv: "https://arxiv.org/abs/2405.19712"
+
+- title: "ScatterNeRF: Seeing Through Fog with Physically-Based Inverse Neural Rendering"
+  authors:
+    - "A. Ramazzina"
+    - "M. Bijelic"
+    - "S. Walz"
+    - "A. Sanvito"
+    - "D. Scheuble"
+    - "F. Heide"
+  venue: "ICCV"
+  venue_full: "IEEE/CVF International Conference on Computer Vision"
+  year: 2023
+  tier: top
+  first_author: false
+  tldr: "A NeRF that disentangles fog from the underlying scene using physics-based scattering losses, enabling clearer reconstruction in adverse weather for autonomous driving."
+  arxiv: "https://arxiv.org/abs/2305.02103"
+
+- title: "United We Stand, Divided We Fall: Leveraging Ensembles of Recommenders to Compete with Budget Constrained Resources"
+  authors:
+    - "P. Maldini"
+    - "A. Sanvito"
+    - "M. Surricchio"
+  venue: "ACM RecSys Challenge"
+  venue_full: "Proceedings of the Recommender Systems Challenge 2022"
+  year: 2022
+  tier: strong
+  first_author: false
+  tldr: "Ensemble of lightweight recommenders that beats heavyweight competitors under tight compute budgets — entry to the ACM RecSys Challenge 2022."
+
+- title: "Lightweight and Scalable Model for Tweet Engagements Predictions in a Resource-constrained Environment"
+  authors:
+    - "L. Carminati"
+    - "G. Lodigiani"
+    - "P. Maldini"
+    - "S. Meta"
+    - "S. Metaj"
+    - "A. Pisa"
+    - "A. Sanvito"
+    - "M. Surricchio"
+    - "F. B. Pérez Maurera"
+    - "C. Bernardis"
+    - "M. Ferrari Dacrema"
+  venue: "ACM RecSys Challenge"
+  venue_full: "Proceedings of the Recommender Systems Challenge 2021"
+  year: 2021
+  tier: strong
+  first_author: false
+  tldr: "Optimized LightGBM pipeline for predicting Twitter engagements at scale — finished 4th overall and 1st among academic teams in the ACM RecSys Challenge 2021."
