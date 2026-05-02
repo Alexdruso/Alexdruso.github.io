@@ -6,6 +6,10 @@
   url: /publications/
   icon: fa-graduation-cap
 
+- title: Projects
+  url: /projects/
+  icon: fa-code-branch
+
 - title: CV
   url: /cv/
   icon: fa-file-alt

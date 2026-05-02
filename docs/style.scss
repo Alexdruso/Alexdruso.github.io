@@ -1122,3 +1122,172 @@ footer {
     font-size: 0.8em;
   }
 }
+
+// Projects
+.projects {
+  margin-bottom: 3rem;
+}
+
+.projects-header {
+  color: $gray;
+  font-size: 0.95em;
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $lightGray;
+}
+
+.project-card {
+  padding: 1.25rem 0 1.5rem;
+  border-bottom: 1px solid $lightGray;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85em;
+}
+
+.project-year {
+  color: $gray;
+  font-weight: 500;
+}
+
+.role-chip {
+  background-color: $lightBlue;
+  color: $accentBlue;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8em;
+}
+
+.project-title {
+  font-size: 1.2em;
+  margin: 0.2rem 0 0.4rem;
+  line-height: 1.35;
+
+  a {
+    color: $darkerGray;
+    text-decoration: none;
+    border-bottom: none;
+
+    &:hover {
+      color: $blue;
+    }
+  }
+}
+
+.project-context {
+  color: $gray;
+  font-style: italic;
+  font-size: 0.95em;
+  margin: 0 0 0.5rem;
+}
+
+.project-description {
+  margin: 0 0 0.5rem;
+  color: $darkGray;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.6rem;
+}
+
+.tag-chip {
+  display: inline-block;
+  background-color: $lightGray;
+  color: $darkGray;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+.project-links {
+  margin: 0;
+  font-size: 0.9em;
+
+  a {
+    color: $blue;
+    text-decoration: none;
+    margin-right: 1rem;
+
+    i {
+      margin-right: 0.25rem;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Dark theme adjustments for projects
+.dark-theme {
+  .projects-header {
+    color: $dark-gray;
+    border-bottom-color: $dark-border;
+  }
+
+  .project-card {
+    border-bottom-color: $dark-border;
+  }
+
+  .project-title a {
+    color: $dark-text;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+
+  .project-context {
+    color: $dark-gray;
+  }
+
+  .project-description {
+    color: $dark-text;
+  }
+
+  .project-year {
+    color: $dark-gray;
+  }
+
+  .role-chip {
+    background-color: $dark-border;
+    color: $dark-accent-hover;
+  }
+
+  .tag-chip {
+    background-color: $dark-border;
+    color: $dark-text;
+  }
+
+  .project-links a {
+    color: $dark-accent;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+}
+
+@include mobile {
+  .project-title {
+    font-size: 1.1em;
+  }
+
+  .project-meta {
+    font-size: 0.8em;
+  }
+}

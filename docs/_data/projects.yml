@@ -1,0 +1,109 @@
+# Source of truth for the website's projects page.
+# Curated list of GitHub repositories Alessandro meaningfully contributed to —
+# mostly coursework from PoliMi and KTH, two ACM RecSys Challenge entries,
+# and one hackathon. Forks and throwaway sandboxes are intentionally excluded.
+# Sorted reverse-chronologically; the projects page sorts by `year` anyway.
+
+- title: "RecSys Challenge 2022 — 11th place"
+  repo: "https://github.com/Alexdruso/recsys2022"
+  year: 2022
+  role: "Team (3)"
+  context: "ACM RecSys Challenge 2022 @ Politecnico di Milano"
+  description: "11th-place solution to the ACM RecSys Challenge 2022. Three-stage pipeline: collaborative / content / graph recommenders, neural sequence models (Transformer, BiLSTM, GRU), and a 10-fold LGBM ranker on top — reached ~0.1965 MRR@100 on test."
+  tags: ["Python", "TensorFlow", "LightGBM", "Recommender Systems"]
+
+- title: "DD2437 — Artificial Neural Networks and Deep Architectures"
+  repo: "https://github.com/Alexdruso/DD2437-ANNDA-Colasanti-Sanvito-Stuart"
+  year: 2022
+  role: "Team (3)"
+  context: "DD2437 @ KTH Royal Institute of Technology"
+  description: "Four lab assignments implementing classical and deep neural architectures from scratch: perceptron / MLP, RBF networks and SOMs, Hopfield networks, and Restricted Boltzmann Machines / Deep Belief Networks."
+  tags: ["Python", "NumPy", "Jupyter", "Neural Networks"]
+
+- title: "II2202 — Quantum Ridge Regression on D-Wave"
+  repo: "https://github.com/Alexdruso/II2202-Research-Quantum-ML-Sanvito-Stuart"
+  year: 2022
+  role: "Team (2)"
+  context: "II2202 Research Methodology @ KTH Royal Institute of Technology"
+  description: "Empirical study of training Ridge regression on a D-Wave hybrid quantum annealer vs. classical Cholesky decomposition. Found that quantum-trained models do not match classical reliability across the datasets tested."
+  tags: ["Python", "D-Wave", "Quantum ML"]
+
+- title: "HackaTUMeme — gamified movie recommender"
+  repo: "https://github.com/Alexdruso/HackaTUMeme"
+  year: 2022
+  role: "Hackathon team"
+  context: "HackaTUM @ TU München"
+  description: "Conversational movie recommender that explores MovieLens as a graph rather than as a static carousel: temporarily expands the user profile during a session and surfaces films through trivia and social context."
+  tags: ["Python", "Django", "Lenskit", "TypeScript"]
+
+- title: "ID2222 — Data Mining lab assignments"
+  repo: "https://github.com/Alexdruso/ID2222-Data-Mining-Sanvito-Stuart"
+  year: 2023
+  role: "Team (2)"
+  context: "ID2222 Data Mining @ KTH Royal Institute of Technology"
+  description: "Five labs covering core data-mining algorithms: shingling + min-hash + LSH for near-duplicate detection, A-Priori association rules, the Triest streaming triangle counter, spectral clustering, and the JaBeJa graph partitioner."
+  tags: ["Java", "Jupyter", "Algorithms"]
+
+- title: "RecSys Challenge 2021 — Trial&Error team"
+  repo: "https://github.com/Alexdruso/recsys-challenge-2021-twitter-1"
+  year: 2021
+  role: "Team (8)"
+  context: "ACM RecSys Challenge 2021 @ Politecnico di Milano"
+  description: "Tweet-engagement prediction pipeline for the ACM RecSys Challenge 2021. LightGBM / XGBoost / CatBoost gradient boosting on transformer-derived features, distributed with Dask on AWS GPU/CPU instances."
+  tags: ["Python", "LightGBM", "XGBoost", "Transformers", "AWS"]
+
+- title: "Quantum linear regression on Orquestra"
+  repo: "https://github.com/Alexdruso/linear-regression-orquestra"
+  year: 2021
+  role: "Solo"
+  context: "Independent project"
+  description: "Orquestra component that trains an OLS linear regression model via simulated / quantum annealing — a stepping stone toward the later D-Wave Ridge regression study."
+  tags: ["Python", "Orquestra", "Quantum ML"]
+
+- title: "DB2 — JEE database application"
+  repo: "https://github.com/Alexdruso/db2-project"
+  year: 2021
+  role: "Solo"
+  context: "Databases 2 @ Politecnico di Milano"
+  description: "Enterprise-Java web application built on JPA, JEE, and Thymeleaf — full DDL schema, persistence layer, and templated UI for a Databases 2 course assignment."
+  tags: ["Java", "JEE", "JPA", "Thymeleaf"]
+
+- title: "CLup — RASD & Design Document"
+  repo: "https://github.com/Alexdruso/RivaSanvitoVecchio"
+  year: 2021
+  role: "Team (3)"
+  context: "Software Engineering 2 @ Politecnico di Milano"
+  description: "Requirements & Specification (RASD v1.2) and Design Document (DD v1.0) for the CLup queue-management application. Models written in Alloy and MagicDraw, mockups in Moqups."
+  tags: ["LaTeX", "Alloy", "Requirements Engineering"]
+
+- title: "Santorini — distributed multiplayer board game"
+  repo: "https://github.com/Alexdruso/ing-sw-2020-Riva-Sanvito-Truong"
+  year: 2020
+  role: "Team (3)"
+  context: "Software Engineering @ Politecnico di Milano"
+  description: "Full implementation of the Santorini board game in Java SE 14: socket networking, multiple concurrent matches, CLI + GUI clients, five advanced god powers, and a CircleCI pipeline with ~95% server-side test coverage."
+  tags: ["Java", "Maven", "Sockets", "CircleCI"]
+
+- title: "RecSys Challenge 2020 — PoliMi"
+  repo: "https://github.com/Alexdruso/recsys-challenge-2020-polimi"
+  year: 2020
+  role: "Solo"
+  context: "Recommender Systems course challenge @ Politecnico di Milano"
+  description: "5th / 8th (public / private) out of 66 in the in-class Kaggle challenge. Generalised N-score hybrid over MF-IALS, RP3-Beta and SLIM-ElasticNet, with a GPU-accelerated MF that cut training from ~10 min to 30 s."
+  tags: ["Python", "Cython", "Recommender Systems", "GPU"]
+
+- title: "Working-zones address decoder (VHDL)"
+  repo: "https://github.com/Alexdruso/Progetto-di-reti-logiche-2019"
+  year: 2020
+  role: "Team (2)"
+  context: "Reti Logiche @ Politecnico di Milano"
+  description: "VHDL hardware module that decodes 8-bit memory addresses using the working-zones locality scheme to reduce switching activity. Verified with Vivado testbenches; graded 30/30 cum laude."
+  tags: ["VHDL", "Vivado", "Digital Design"]
+
+- title: "API — graph-relationship engine in C"
+  repo: "https://github.com/Alexdruso/API-project"
+  year: 2019
+  role: "Solo"
+  context: "Algoritmi e Principi dell'Informatica @ Politecnico di Milano"
+  description: "Graph-mutation program (addent / addrel / delent / delrel / report) written in C and tuned for an automated grader on both runtime and memory budgets. Final score 30/30 cum laude."
+  tags: ["C", "Algorithms", "Performance"]
