@@ -5,7 +5,7 @@ layout: page
 
 <div class="about-container">
   <div class="about-content">
-    I'm <strong>Alessandro Sanvito</strong>, a Software Engineer at <strong>Optiver</strong> in Amsterdam, where I work in the Data Driven Algorithmic Position Taking team. I specialize in developing data pipelines and trading strategies for systematic trading, combining software engineering expertise with quantitative finance knowledge to create impactful solutions.
+    I'm <strong>Alessandro Sanvito</strong>, a Software Engineer at <strong>Optiver</strong> in Amsterdam, where I work in the Quantitative Volatility Strategies team. I build high-performance research infrastructure that sits at the intersection of quantitative research and engineering, turning large-scale market data into systematic trading strategies.
   </div>
 </div>
 
@@ -13,11 +13,11 @@ layout: page
 
 <div class="about-container">
   <div class="about-content">
-    My professional path has been driven by a passion for technology and innovation, leading me through various exciting roles in software engineering and artificial intelligence. Currently, I'm making my mark at Optiver in Amsterdam, where I'm part of the Data Driven Algorithmic Position Taking team. Here, I'm combining my expertise in software engineering with quantitative finance to develop sophisticated data pipelines and trading strategies that directly impact our trading operations.
+    My professional path has been driven by a passion for technology and innovation, leading me through various exciting roles in software engineering and artificial intelligence. Currently, I'm making my mark at Optiver in Amsterdam, where I'm part of the Quantitative Volatility Strategies team — having joined the firm in Options Data Engineering before moving into my current role. Here, I'm combining my expertise in software engineering with quantitative finance to build the research infrastructure that powers systematic trading.
 
-    My work at Optiver involves creating robust data processing systems using modern technologies like Python, Spark, Polars, and DuckDB. I focus on building efficient data storage solutions with PostgreSQL and Delta tables, while working closely with quantitative researchers and traders to implement and optimize systematic trading strategies. This role allows me to blend technical expertise with business impact, as our solutions directly contribute to the desk's performance.
+    My work at Optiver centres on architecting data pipelines with Python, Spark, Polars, and DuckDB that process 10+ TB of instrument-level data, where I've cut core backtest execution times by around 60%. I work closely with Quantitative Researchers and traders to seed strategies in new product groups and tighten the research-to-production feedback loop for high-frequency strategies. This role lets me blend deep technical work with business impact, as the tooling I build feeds directly into desk PnL.
 
-    Before joining Optiver, I had the incredible opportunity to work as an AI Research Intern at Mercedes-Benz, where I was part of the AI-SEE Project in Stuttgart. This experience was transformative, as I delved into cutting-edge research on 3D human avatar modeling from monocular video data. I designed and implemented innovative generative neural models, including NeRFs and Diffusion Models, pushing the boundaries of what's possible in computer vision. Our team's work was recognized with publications at the International Conference on Computer Vision (ICCV) and the IEEE Intelligent Vehicles Symposium (IV) — see the full list on my <a href="/publications/">publications page</a>.
+    Before joining Optiver, I had the incredible opportunity to work on the AI-SEE Project at Mercedes-Benz in Böblingen, first as a working student and then as a master thesis student. This experience was transformative, as I delved into cutting-edge research on 3D scene reconstruction and human avatar modelling from monocular video data, pushing Neural Radiance Fields and Diffusion Models to perform under fog, haze, and limited viewpoints. I co-authored ScatterNeRF at the International Conference on Computer Vision (ICCV) and HINT at the IEEE Intelligent Vehicles Symposium (IV) — see the full list on my <a href="/publications/">publications page</a>.
   </div>
   <div class="profile-picture">
     <img src="/images/alessandro.jpeg" alt="Alessandro Sanvito" />
