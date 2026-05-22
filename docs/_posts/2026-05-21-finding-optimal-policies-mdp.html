@@ -281,11 +281,18 @@ excerpt: "What should a 3rd grader do after school — study, play, or rest? Tur
       😴 Exhausted &rarr; 😐 Tired &rarr; 🙂 Balanced &rarr; 💪 Focused &rarr; ⭐ Star
     </div>
     <div class="concept-card" style="border-left-color:#e74c3c">
-      <div class="clabel">Actions A</div>
-      What Luca can do each afternoon:<br><br>
-      📚 <strong>Study</strong> — homework, notes (+1 happiness)<br>
-      🎮 <strong>Play</strong> — video games, pure fun (+4 happiness)<br>
-      💤 <strong>Rest</strong> — nap, recharge (+0 happiness)
+      <div class="clabel">Actions A &amp; Rewards R(s,a)</div>
+      Three choices each afternoon — but the happiness they bring <strong>depends on Luca's state</strong>. A Star Student enjoys everything more:<br><br>
+      <small>
+      <table style="border-collapse:collapse;width:100%;font-size:0.8rem">
+        <tr><th style="text-align:left;padding:2px 4px"></th><th style="padding:2px 4px">📚 Study</th><th style="padding:2px 4px">🎮 Play</th><th style="padding:2px 4px">💤 Rest</th></tr>
+        <tr><td style="padding:2px 4px">😴 Exhausted</td><td style="padding:2px 4px;text-align:center">+2</td><td style="padding:2px 4px;text-align:center">+4</td><td style="padding:2px 4px;text-align:center">0</td></tr>
+        <tr><td style="padding:2px 4px">😐 Tired</td><td style="padding:2px 4px;text-align:center">+3</td><td style="padding:2px 4px;text-align:center">+5</td><td style="padding:2px 4px;text-align:center">+1</td></tr>
+        <tr><td style="padding:2px 4px">🙂 Balanced</td><td style="padding:2px 4px;text-align:center">+5</td><td style="padding:2px 4px;text-align:center">+7</td><td style="padding:2px 4px;text-align:center">+3</td></tr>
+        <tr><td style="padding:2px 4px">💪 Focused</td><td style="padding:2px 4px;text-align:center">+8</td><td style="padding:2px 4px;text-align:center">+10</td><td style="padding:2px 4px;text-align:center">+6</td></tr>
+        <tr><td style="padding:2px 4px">⭐ Star</td><td style="padding:2px 4px;text-align:center"><strong>+12</strong></td><td style="padding:2px 4px;text-align:center"><strong>+14</strong></td><td style="padding:2px 4px;text-align:center"><strong>+10</strong></td></tr>
+      </table>
+      </small>
     </div>
     <div class="concept-card" style="border-left-color:#9b59b6">
       <div class="clabel">Transitions P(s'|s,a)</div>
@@ -329,13 +336,15 @@ excerpt: "What should a 3rd grader do after school — study, play, or rest? Tur
   <p>Reading left to right: the value of state <em>s</em> equals the best action <em>a</em> you can take, where "best" means: (immediate reward) + (discount &times; expected value of next state).</p>
 
   <div class="example-box">
-    <strong>Worked example.</strong> Suppose we temporarily guess V*(s) = 10 for all states. What's the Q-value of each action when Luca is <strong>Balanced</strong> (🙂)?
+    <strong>Iteration 1</strong> (V = 0 everywhere): Q(Balanced, 📚 Study) = 5 + 0 = <strong>5</strong>, Q(Balanced, 🎮 Play) = 7 + 0 = <strong>7</strong>, Q(Balanced, 💤 Rest) = 3 + 0 = <strong>3</strong>. Play wins on pure immediate reward.
     <br><br>
-    Q(Balanced, 📚 Study) = <strong>1</strong> + 0.9 &times; (0.1&times;10 + 0.3&times;10 + 0.6&times;10) = 1 + 9 = <strong>10.0</strong><br>
-    Q(Balanced, 🎮 Play)  = <strong>4</strong> + 0.9 &times; (0.4&times;10 + 0.4&times;10 + 0.2&times;10) = 4 + 9 = <strong>13.0</strong><br>
-    Q(Balanced, 💤 Rest)  = <strong>0</strong> + 0.9 &times; (0.3&times;10 + 0.5&times;10 + 0.2&times;10) = 0 + 9 = &nbsp;<strong>9.0</strong>
+    <strong>After convergence</strong> (V approximately [70, 80, 94, 106, 113]):
+    <br>
+    Q(Balanced, 📚 Study) = 5 + 0.9&times;(0.1&times;80 + 0.3&times;94 + 0.6&times;106) = 5 + 89.8 = <strong>94.8 ← winner</strong><br>
+    Q(Balanced, 🎮 Play)&nbsp; = 7 + 0.9&times;(0.4&times;80 + 0.4&times;94 + 0.2&times;106) = 7 + 81.7 = <strong>88.7</strong><br>
+    Q(Balanced, 💤 Rest)&nbsp; = 3 + 0.9&times;(0.5&times;94 + 0.4&times;106 + 0.1&times;113) = 3 + 90.6 = <strong>93.6</strong>
     <br><br>
-    With all values equal, Play wins purely on immediate reward. But as V values <em>differentiate</em> between states — Star becoming far more valuable than Exhausted — the long-term math shifts. That's what value iteration does next.
+    Play's +2 immediate lead is overwhelmed because Study transitions toward Focused and Star — states where the daily reward is 10–14, not 7. The long-term math is decisive.
   </div>
 </div>
 
@@ -425,9 +434,19 @@ const STATES = [
 ];
 
 const ACTIONS = [
-  { id: 0, name: "Study", emoji: "📚", reward: 1, color: "#4a90e2" },
-  { id: 1, name: "Play",  emoji: "🎮", reward: 4, color: "#e74c3c" },
-  { id: 2, name: "Rest",  emoji: "💤", reward: 0, color: "#27ae60" }
+  { id: 0, name: "Study", emoji: "📚", color: "#4a90e2" },
+  { id: 1, name: "Play",  emoji: "🎮", color: "#e74c3c" },
+  { id: 2, name: "Rest",  emoji: "💤", color: "#27ae60" }
+];
+
+// REWARDS[state][action]: happiness = state wellbeing + action base
+// wellbeing: [0,1,3,6,10] | action base: study=2, play=4, rest=0
+const REWARDS = [
+  [ 2,  4,  0],  // Exhausted
+  [ 3,  5,  1],  // Tired
+  [ 5,  7,  3],  // Balanced
+  [ 8, 10,  6],  // Focused
+  [12, 14, 10]   // Star
 ];
 
 const GAMMA = 0.9;
@@ -442,12 +461,12 @@ const T = [
   [ // 1: Tired
     [{s:0,p:.1},{s:1,p:.4},{s:2,p:.5}],
     [{s:0,p:.5},{s:1,p:.4},{s:2,p:.1}],
-    [{s:1,p:.2},{s:2,p:.6},{s:3,p:.2}]
+    [{s:1,p:.4},{s:2,p:.5},{s:3,p:.1}]
   ],
   [ // 2: Balanced
     [{s:1,p:.1},{s:2,p:.3},{s:3,p:.6}],
     [{s:1,p:.4},{s:2,p:.4},{s:3,p:.2}],
-    [{s:2,p:.3},{s:3,p:.5},{s:4,p:.2}]
+    [{s:2,p:.5},{s:3,p:.4},{s:4,p:.1}]
   ],
   [ // 3: Focused
     [{s:2,p:.1},{s:3,p:.3},{s:4,p:.6}],
@@ -471,9 +490,9 @@ const R = 42; // node radius
 //  BELLMAN HELPERS
 // ─────────────────────────────────────────────────────────────
 function qValues(V, s) {
-  return ACTIONS.map(a => {
-    let q = a.reward;
-    for (const {s: sp, p} of T[s][a.id]) q += GAMMA * p * V[sp];
+  return ACTIONS.map((a, ai) => {
+    let q = REWARDS[s][ai];
+    for (const {s: sp, p} of T[s][ai]) q += GAMMA * p * V[sp];
     return q;
   });
 }
@@ -556,7 +575,7 @@ function policy(V) {
   ACTIONS.forEach(ac => {
     const b = document.createElement('button');
     b.className = 'action-btn'; b.dataset.action = ac.id;
-    b.textContent = `${ac.emoji} ${ac.name} (+${ac.reward})`;
+    b.textContent = `${ac.emoji} ${ac.name}`;
     b.addEventListener('click', () => pickAction(ac.id));
     aDiv.appendChild(b);
   });
@@ -606,7 +625,7 @@ function policy(V) {
     });
 
     // Info panel
-    let html = `<strong>${STATES[selState].emoji} ${STATES[selState].name}</strong> takes action <strong>${ac.emoji} ${ac.name}</strong> (immediate reward: +${ac.reward}) and lands in:<br><br>`;
+    let html = `<strong>${STATES[selState].emoji} ${STATES[selState].name}</strong> takes action <strong>${ac.emoji} ${ac.name}</strong> (immediate reward: +${REWARDS[selState][selAction]}) and lands in:<br><br>`;
     trans.forEach(({s: to, p}) => {
       const pct = Math.round(p*100);
       html += `<div class="prob-row">
@@ -690,14 +709,15 @@ function makeMove(aId) {
   const ac = ACTIONS[aId];
   const from = play.state;
   const next = sample(from, aId);
-  play.score += ac.reward;
-  play.hist.push({s: from, a: aId, ns: next, r: ac.reward});
+  const reward = REWARDS[from][aId];
+  play.score += reward;
+  play.hist.push({s: from, a: aId, ns: next, r: reward});
 
   const log = document.getElementById('play-log');
   const entry = document.createElement('div');
   entry.className = 'log-entry popin';
   const dir = next > from ? ' ↑' : next < from ? ` <span class="lbad">↓</span>` : '';
-  entry.innerHTML = `<strong>Day ${play.day}</strong>: ${STATES[from].emoji}→${ac.emoji}→${STATES[next].emoji} <span class="lg">+${ac.reward}</span>${dir}`;
+  entry.innerHTML = `<strong>Day ${play.day}</strong>: ${STATES[from].emoji}→${ac.emoji}→${STATES[next].emoji} <span class="lg">+${reward}</span>${dir}`;
   log.prepend(entry);
 
   play.state = next;
@@ -849,7 +869,7 @@ function tryShowComparison() {
   let optScore = 0;
   const rows = play.hist.map((h, i) => {
     const oa = pol[h.s];
-    const or = ACTIONS[oa].reward;
+    const or = REWARDS[h.s][oa];
     optScore += or;
     return {day: i+1, s: h.s, ya: h.a, oa, ns: h.ns, yr: h.r, or};
   });
