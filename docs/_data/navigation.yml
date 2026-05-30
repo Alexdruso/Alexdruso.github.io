@@ -10,6 +10,10 @@
   url: /projects/
   icon: fa-code-branch
 
+- title: Blog
+  url: /blog/
+  icon: fa-pen-nib
+
 - title: CV
   url: /cv/
   icon: fa-file-alt
