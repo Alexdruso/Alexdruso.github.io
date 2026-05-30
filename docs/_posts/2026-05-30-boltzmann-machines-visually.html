@@ -1,0 +1,1073 @@
+---
+layout: post
+title: "Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons"
+date: 2026-05-30
+categories: [Machine Learning, Interactive]
+excerpt: "You already know Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual refresher with live energy landscapes, annealing, and a trainable RBM."
+---
+
+<style>
+/* ===== layout ===== */
+.bm-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
+.dark-theme .bm-section { background: #1e1e2e; border-color: #313244; }
+.bm-section h3 { margin-top: 0; color: #8e44ad; }
+.dark-theme .bm-section h3 { color: #c8a2e8; }
+.bm-section h4 { margin-bottom: 0.5rem; }
+
+.bm-equation {
+  padding: 1rem 1.5rem;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+  font-size: 1.1rem;
+  text-align: center;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+.dark-theme .bm-equation { background: #14141e; border-color: #313244; }
+.bm-equation .big { font-size: 1.25rem; }
+
+.bm-note {
+  background: #f3e9fb;
+  border-radius: 8px;
+  padding: 0.9rem 1.1rem;
+  border-left: 4px solid #8e44ad;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+.dark-theme .bm-note { background: #251a30; border-left-color: #c8a2e8; }
+
+.bm-example {
+  background: #fff8e1;
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #ffe082;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+.dark-theme .bm-example { background: #2a2500; border-color: #554400; }
+
+/* ===== controls ===== */
+.bm-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
+.bm-btn {
+  padding: 0.5rem 1.1rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #8e44ad;
+  color: white;
+  font-family: inherit;
+}
+.bm-btn.sec { background: #5d6d7e; }
+.bm-btn:hover:not(:disabled) { filter: brightness(0.9); }
+.bm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.bm-reset {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.bm-reset:hover { background: #eee; }
+.dark-theme .bm-reset { border-color: #444; color: #ccc; }
+.dark-theme .bm-reset:hover { background: #252535; }
+
+.bm-slider { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px;
+  background: linear-gradient(90deg,#3498db,#e74c3c); outline: none; cursor: pointer; }
+.bm-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
+  border-radius: 50%; background: #fff; border: 2px solid #8e44ad; cursor: pointer; }
+.bm-slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff;
+  border: 2px solid #8e44ad; cursor: pointer; }
+.bm-temp-readout { font-weight: 700; font-size: 1.05rem; min-width: 4.5rem; display: inline-block; }
+
+/* ===== grids of binary units ===== */
+.bm-grid { display: grid; gap: 4px; }
+.bm-cell {
+  border-radius: 6px;
+  border: 2px solid #cfd6dd;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, transform 0.1s;
+  padding: 0;
+}
+.dark-theme .bm-cell { background: #11111a; border-color: #2d2d40; }
+.bm-cell.on { background: #8e44ad; border-color: #6c3483; }
+.bm-cell:active { transform: scale(0.93); }
+.bm-cell.flash { box-shadow: 0 0 0 3px rgba(241,196,15,0.7); }
+
+.bm-thumb { display: grid; gap: 2px; }
+.bm-thumb .tc { border-radius: 2px; background: #e3e8ee; }
+.dark-theme .bm-thumb .tc { background: #1d1d2c; }
+.bm-thumb .tc.on { background: #8e44ad; }
+
+.bm-flexwrap { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
+.bm-panel { flex: 1; min-width: 240px; }
+
+.bm-stat { text-align: center; }
+.bm-stat .lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; }
+.bm-stat .val { font-size: 1.7rem; font-weight: 700; color: #8e44ad; line-height: 1.1; }
+.dark-theme .bm-stat .val { color: #c8a2e8; }
+.bm-statrow { display: flex; gap: 2rem; justify-content: center; margin: 0.5rem 0; }
+
+.bm-tag {
+  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
+  font-size: 0.8rem; font-weight: 600;
+}
+.bm-tag.good { background: #d5f5e3; color: #1e8449; }
+.bm-tag.warn { background: #fdebd0; color: #b9770e; }
+.bm-tag.hot  { background: #fadbd8; color: #c0392b; }
+.dark-theme .bm-tag.good { background: #14331f; color: #6fcf97; }
+.dark-theme .bm-tag.warn { background: #3a2c10; color: #f0b24a; }
+.dark-theme .bm-tag.hot  { background: #3a1714; color: #f1948a; }
+
+svg text { fill: #555; }
+.dark-theme svg text { fill: #bbb; }
+
+.bm-chartwrap { background: #fff; border: 1px solid #e6e6ee; border-radius: 8px; padding: 0.4rem; }
+.dark-theme .bm-chartwrap { background: #11111a; border-color: #2a2a3e; }
+
+.bm-segbtns { display: inline-flex; border-radius: 8px; overflow: hidden; border: 1px solid #8e44ad; }
+.bm-segbtns button {
+  background: transparent; border: none; padding: 0.45rem 0.9rem; cursor: pointer;
+  font-family: inherit; font-size: 0.85rem; font-weight: 600; color: #8e44ad;
+}
+.bm-segbtns button.active { background: #8e44ad; color: #fff; }
+.dark-theme .bm-segbtns { border-color: #c8a2e8; }
+.dark-theme .bm-segbtns button { color: #c8a2e8; }
+.dark-theme .bm-segbtns button.active { background: #8e44ad; color: #fff; }
+
+.bm-legend { font-size: 0.78rem; opacity: 0.75; display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.4rem; }
+.bm-legend span::before { content: "■ "; }
+
+@keyframes bmpop { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.bm-pop { animation: bmpop 0.25s ease; }
+</style>
+
+<p>
+  When I first met Boltzmann machines at university, they arrived as a footnote to <strong>Hopfield networks</strong>: "now make the neurons flip a coin instead of following the rule deterministically." I nodded, passed the exam, and promptly lost the intuition. This post is the refresher I wish I'd had — built around things you can poke, drag, and run.
+</p>
+
+<p>
+  Here's the one-sentence story, and everything below just unpacks it:
+</p>
+
+<div class="bm-note">
+  A Hopfield network rolls <em>downhill</em> on an energy landscape until it gets stuck in the nearest valley. A <strong>Boltzmann machine</strong> adds a "temperature" that lets neurons occasionally roll <em>uphill</em> — so instead of freezing in the first local minimum, the network <em>samples</em> states with probability set by their energy. Cool the temperature slowly and it settles into deep valleys; learn the energy landscape from data and it becomes a generative model.
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. RECAP: HOPFIELD / ENERGY                                  -->
+<!-- ============================================================ -->
+<div class="bm-section">
+  <h3>⛰️ The setup you already know: energy</h3>
+  <p style="margin-top:0">
+    Take <em>N</em> units, each either <strong>on (+1)</strong> or <strong>off (−1)</strong>. Connect them symmetrically with weights <em>w<sub>ij</sub></em> (and give each a bias <em>b<sub>i</sub></em>). The whole configuration <strong>s</strong> has a single scalar <strong>energy</strong>:
+  </p>
+  <div class="bm-equation">
+    <span class="big">E(<strong>s</strong>) = −&Sigma;<sub>i&lt;j</sub> w<sub>ij</sub> s<sub>i</sub> s<sub>j</sub> &nbsp;−&nbsp; &Sigma;<sub>i</sub> b<sub>i</sub> s<sub>i</sub></span>
+  </div>
+  <p>
+    Two units that "want" to agree have <em>w<sub>ij</sub> &gt; 0</em>: matching signs lower the energy. The whole point of an associative memory is to <strong>carve valleys</strong> into this landscape at the patterns we want to remember. The classic <strong>Hebbian rule</strong> — <em>w<sub>ij</sub> = &Sigma;<sub>patterns</sub> &xi;<sub>i</sub> &xi;<sub>j</sub></em> — does exactly that: each stored pattern <strong>&xi;</strong> becomes a local minimum.
+  </p>
+  <p>
+    In a Hopfield network, recall is deterministic: repeatedly set each unit to whatever sign lowers the energy. You slide downhill and stop. That's great — until "downhill" dumps you into a shallow <em>spurious</em> valley that isn't any real memory, with no way back out. Hold that thought.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. CENTERPIECE: STOCHASTIC NEURONS + TEMPERATURE             -->
+<!-- ============================================================ -->
+<div class="bm-section">
+  <h3>🌡️ The one new ingredient: temperature</h3>
+  <p style="margin-top:0">
+    Below is a tiny network of <strong>9 units</strong> drawn as a 3×3 grid, with two patterns stored by the Hebbian rule: a <strong>T</strong> and an <strong>L</strong>. Instead of flipping units deterministically, each update is a coin flip biased by the energy:
+  </p>
+  <div class="bm-equation">
+    <span class="big">p(s<sub>i</sub> = +1) = &sigma;( &Delta;E<sub>i</sub> / T )</span>
+    &nbsp;&nbsp;where&nbsp; &Delta;E<sub>i</sub> = 2(&Sigma;<sub>j</sub> w<sub>ij</sub> s<sub>j</sub> + b<sub>i</sub>),&nbsp; &sigma;(x)=1/(1+e<sup>−x</sup>)
+  </div>
+  <p style="margin-top:0">
+    &Delta;E<sub>i</sub> is simply how much energy the network <em>saves</em> by switching unit <em>i</em> on. Drag the temperature and watch the dynamics change completely:
+  </p>
+
+  <div class="bm-flexwrap">
+    <div class="bm-panel" style="flex:0 0 auto">
+      <div id="bmA-grid" class="bm-grid" style="grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px);margin:0 auto"></div>
+      <div style="text-align:center;margin-top:0.6rem">
+        <span id="bmA-status" class="bm-tag warn">exploring</span>
+      </div>
+      <div style="display:flex;gap:0.75rem;justify-content:center;margin-top:0.75rem;align-items:center">
+        <div style="text-align:center">
+          <div style="font-size:0.7rem;opacity:0.6">stored: T</div>
+          <div id="bmA-thT" class="bm-thumb" style="grid-template-columns:repeat(3,12px);grid-template-rows:repeat(3,12px)"></div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:0.7rem;opacity:0.6">stored: L</div>
+          <div id="bmA-thL" class="bm-thumb" style="grid-template-columns:repeat(3,12px);grid-template-rows:repeat(3,12px)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bm-panel">
+      <div class="bm-controls" style="margin-top:0">
+        <span style="font-size:0.85rem">🌡️ Temperature</span>
+        <input type="range" id="bmA-temp" class="bm-slider" min="2" max="400" value="20" style="flex:1;min-width:120px">
+        <span class="bm-temp-readout" id="bmA-tval">0.20</span>
+      </div>
+      <div class="bm-controls">
+        <button class="bm-btn" id="bmA-run">▶ Run</button>
+        <button class="bm-btn sec" id="bmA-step">Step (1 sweep)</button>
+        <button class="bm-reset" id="bmA-corrupt">✦ Corrupt a memory</button>
+        <button class="bm-reset" id="bmA-rand">🎲 Randomize</button>
+      </div>
+      <div class="bm-statrow">
+        <div class="bm-stat"><div class="lab">Energy</div><div class="val" id="bmA-energy">0.0</div></div>
+        <div class="bm-stat"><div class="lab">Updates</div><div class="val" id="bmA-count">0</div></div>
+      </div>
+      <div class="bm-chartwrap">
+        <svg id="bmA-chart" width="100%" height="120" viewBox="0 0 400 120" preserveAspectRatio="none" style="display:block"></svg>
+      </div>
+      <div class="bm-legend"><span style="color:#8e44ad">energy over time</span></div>
+    </div>
+  </div>
+
+  <div class="bm-note" style="margin-bottom:0">
+    <strong>Try this:</strong> set temperature very low (slide left) and hit <em>Run</em> — the network freezes into T or L, exactly like Hopfield recall. Now crank it high: the grid <em>boils</em>, energy stays high, nothing settles. The interesting regime is in between. Hit <em>Corrupt a memory</em> at low temperature to watch <strong>pattern completion</strong> happen live.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. THE SIGMOID RULE                                          -->
+<!-- ============================================================ -->
+<div class="bm-section">
+  <h3>🎲 Why a sigmoid? Temperature interpolates between a thermostat and a coin</h3>
+  <p style="margin-top:0">
+    The update rule is the whole personality of the network, so it's worth staring at. The probability a unit turns on is a sigmoid of <em>(energy saved) / temperature</em>. The plot shows that curve; drag temperature to reshape it.
+  </p>
+
+  <div class="bm-flexwrap">
+    <div class="bm-panel" style="flex:2">
+      <div class="bm-chartwrap">
+        <svg id="bmB-svg" width="100%" height="260" viewBox="0 0 460 260"></svg>
+      </div>
+    </div>
+    <div class="bm-panel">
+      <div class="bm-controls" style="margin-top:0">
+        <span style="font-size:0.85rem">🌡️ T</span>
+        <input type="range" id="bmB-temp" class="bm-slider" min="3" max="600" value="100" style="flex:1">
+        <span class="bm-temp-readout" id="bmB-tval">1.00</span>
+      </div>
+      <div class="bm-controls">
+        <span style="font-size:0.85rem">&Delta;E</span>
+        <input type="range" id="bmB-de" class="bm-slider" min="-60" max="60" value="20" style="flex:1">
+        <span class="bm-temp-readout" id="bmB-deval">+2.0</span>
+      </div>
+      <div class="bm-statrow">
+        <div class="bm-stat"><div class="lab">p(turn on)</div><div class="val" id="bmB-prob">0.88</div></div>
+      </div>
+      <div id="bmB-msg" style="font-size:0.85rem;opacity:0.8;text-align:center;min-height:2.4em"></div>
+    </div>
+  </div>
+
+  <div class="bm-flexwrap" style="margin-top:1rem">
+    <div class="bm-example" style="flex:1;margin:0">
+      <strong>T → 0 (cold):</strong> the sigmoid becomes a step. p≈1 whenever turning on lowers energy, p≈0 otherwise. This is exactly a Hopfield update — a deterministic thermostat. Great for locking in, hopeless for escaping.
+    </div>
+    <div class="bm-example" style="flex:1;margin:0">
+      <strong>T → ∞ (hot):</strong> the sigmoid flattens to 0.5 everywhere. The unit ignores the energy entirely and flips a fair coin. Maximum exploration, zero memory.
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. ENERGY -> PROBABILITY (Boltzmann distribution)            -->
+<!-- ============================================================ -->
+<div class="bm-section">
+  <h3>📊 Energy becomes probability: the Boltzmann distribution</h3>
+  <p style="margin-top:0">
+    Here's the payoff that gives the machine its name. If you let those stochastic units run forever, the network doesn't converge to a single state — it visits every configuration <strong>s</strong> with a probability that depends only on its energy:
+  </p>
+  <div class="bm-equation">
+    <span class="big">p(<strong>s</strong>) = e<sup>−E(<strong>s</strong>)/T</sup> / Z</span>,
+    &nbsp;&nbsp; Z = &Sigma;<sub><strong>s'</strong></sub> e<sup>−E(<strong>s'</strong>)/T</sup>
+  </div>
+  <p style="margin-top:0">
+    Low energy → high probability. The network spends most of its time in the deepest valleys. To <em>see</em> this, here's a small 4-unit network — only <strong>2<sup>4</sup> = 16</strong> possible states, so we can plot the entire distribution at once. Each bar is one full configuration (shown as 4 cells); height is its probability. Drag temperature and watch the distribution morph.
+  </p>
+
+  <div class="bm-controls">
+    <span style="font-size:0.85rem">🌡️ Temperature</span>
+    <input type="range" id="bmC-temp" class="bm-slider" min="5" max="500" value="100" style="flex:1;max-width:340px">
+    <span class="bm-temp-readout" id="bmC-tval">1.00</span>
+  </div>
+  <div class="bm-chartwrap">
+    <svg id="bmC-svg" width="100%" height="240" viewBox="0 0 720 240"></svg>
+  </div>
+  <div class="bm-legend">
+    <span style="color:#1a5276">low energy (likely)</span>
+    <span style="color:#c0392b">high energy (rare)</span>
+  </div>
+
+  <div class="bm-flexwrap" style="margin-top:1rem">
+    <div class="bm-example" style="flex:1;margin:0">
+      <strong>Cold:</strong> almost all probability mass piles onto the single lowest-energy state. The machine is effectively a deterministic memory — it "knows the answer."
+    </div>
+    <div class="bm-example" style="flex:1;margin:0">
+      <strong>Hot:</strong> the bars flatten toward a uniform distribution — every state is roughly equally likely. The machine has "forgotten" its structure.
+    </div>
+  </div>
+  <p>
+    This is the deep idea: <strong>shaping the weights shapes the energy, which shapes a probability distribution over states.</strong> Learning a Boltzmann machine means molding that distribution to match your data.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. SIMULATED ANNEALING                                       -->
+<!-- ============================================================ -->
+<div class="bm-section">
+  <h3>❄️ Simulated annealing: start hot, cool slowly, land deep</h3>
+  <p style="margin-top:0">
+    Now the practical magic. To find a <em>deep</em> valley (a real memory, not a spurious one), don't go straight to T≈0 — you'll freeze wherever you happen to be. Instead, start <strong>hot</strong> so the network roams freely over the whole landscape, then <strong>cool gradually</strong> so it settles into the deepest basin it found. This is <em>simulated annealing</em>, borrowed straight from metallurgy.
+  </p>
+  <p style="margin-top:0">Pick a strategy, then <em>Run</em> a single descent and watch the energy trace. Then race 200 runs of each to see who reliably reaches a stored memory.</p>
+
+  <div class="bm-controls">
+    <div class="bm-segbtns" id="bmD-mode">
+      <button data-mode="greedy">Greedy (cold)</button>
+      <button data-mode="hot">Always hot</button>
+      <button data-mode="anneal" class="active">Annealed ❄️</button>
+    </div>
+    <button class="bm-btn" id="bmD-run">▶ Run once</button>
+    <button class="bm-btn sec" id="bmD-race">🏁 Race 200 runs each</button>
+  </div>
+
+  <div class="bm-flexwrap">
+    <div class="bm-panel" style="flex:0 0 auto;text-align:center">
+      <div id="bmD-grid" class="bm-grid" style="grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px);margin:0 auto"></div>
+      <div style="margin-top:0.5rem"><span id="bmD-result" class="bm-tag warn">—</span></div>
+    </div>
+    <div class="bm-panel">
+      <div class="bm-chartwrap">
+        <svg id="bmD-svg" width="100%" height="180" viewBox="0 0 420 180"></svg>
+      </div>
+      <div class="bm-legend">
+        <span style="color:#8e44ad">energy</span>
+        <span style="color:#e67e22">temperature</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="bmD-race-wrap" style="display:none;margin-top:1rem">
+    <h4>🏁 Out of 200 runs from random starts, how often did each reach a stored memory?</h4>
+    <div id="bmD-race-bars"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. LEARNING                                                  -->
+<!-- ============================================================ -->
+<div class="bm-section">
+  <h3>🧠 Learning: two phases, one elegant rule</h3>
+  <p style="margin-top:0">
+    So far we <em>hand-built</em> the valleys with the Hebbian rule. The real question is: can the network <strong>learn</strong> its own energy landscape so that its Boltzmann distribution matches a dataset? Yes — and the rule is beautifully symmetric. To make data likely, nudge the weights by the difference between two correlation measurements:
+  </p>
+  <div class="bm-equation">
+    <span class="big">&Delta;w<sub>ij</sub> = &epsilon;&nbsp;( &nbsp;&langle; s<sub>i</sub> s<sub>j</sub> &rangle;<sub>data</sub> &nbsp;−&nbsp; &langle; s<sub>i</sub> s<sub>j</sub> &rangle;<sub>model</sub>&nbsp; )</span>
+  </div>
+  <div class="bm-flexwrap">
+    <div class="bm-example" style="flex:1;margin:0">
+      <strong>Positive phase ("wake"):</strong> clamp the visible units to a real data example and measure how often unit <em>i</em> and <em>j</em> fire together. This <em>digs valleys under the data</em>.
+    </div>
+    <div class="bm-example" style="flex:1;margin:0">
+      <strong>Negative phase ("sleep"):</strong> let the network run free — dreaming — and measure the same correlation under its own distribution. This <em>fills in valleys the model invented</em> on its own.
+    </div>
+  </div>
+  <p>
+    When the two correlations match, the model's distribution equals the data's and learning stops. The catch: that negative-phase expectation requires sampling from the full network, which is exponentially expensive. That cost is exactly what the <strong>Restricted</strong> Boltzmann machine was invented to dodge.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 7. RBM                                                       -->
+<!-- ============================================================ -->
+<div class="bm-section">
+  <h3>🔗 Restricted Boltzmann Machines: make the sampling cheap</h3>
+  <p style="margin-top:0">
+    The trick is structural. Split the units into a <strong>visible</strong> layer (the data) and a <strong>hidden</strong> layer (learned features), and <em>forbid</em> connections within a layer. The graph becomes bipartite:
+  </p>
+  <div class="bm-chartwrap" style="margin-bottom:1rem">
+    <svg id="bmE-arch" width="100%" height="170" viewBox="0 0 460 170"></svg>
+  </div>
+  <p style="margin-top:0">
+    Because no two hidden units talk to each other, <strong>given the visible layer every hidden unit is independent</strong> — you can sample the whole hidden layer in one shot, and vice versa. That makes a single round-trip <strong>v → h → v′</strong> (the heart of <em>Contrastive Divergence</em>) trivially fast, and it's all you need for a good gradient estimate.
+  </p>
+  <p style="margin-top:0">
+    Below, an RBM with 9 visible units (a 3×3 image) and 4 hidden units learns three little shapes — <strong>T, L, and a square-ish O</strong> — via CD-1, live in your browser. Watch reconstruction error drop and the hidden units grow into feature detectors.
+    <em style="opacity:0.7">(RBMs conventionally use 0/1 units, so this section switches from ±1 to {0,1}.)</em>
+  </p>
+
+  <div class="bm-controls">
+    <button class="bm-btn" id="bmE-train">🚀 Train (CD-1)</button>
+    <button class="bm-reset" id="bmE-resetw">↺ Reset weights</button>
+    <span id="bmE-epoch" style="font-size:0.85rem;opacity:0.75"></span>
+  </div>
+
+  <div class="bm-flexwrap">
+    <div class="bm-panel">
+      <h4 style="margin-top:0">Reconstruction error</h4>
+      <div class="bm-chartwrap">
+        <svg id="bmE-err" width="100%" height="150" viewBox="0 0 400 150"></svg>
+      </div>
+    </div>
+    <div class="bm-panel">
+      <h4 style="margin-top:0">Hidden-unit receptive fields</h4>
+      <div id="bmE-fields" style="display:flex;gap:0.8rem;flex-wrap:wrap"></div>
+      <div class="bm-legend">
+        <span style="color:#c0392b">negative weight</span>
+        <span style="color:#2471a3">positive weight</span>
+      </div>
+    </div>
+  </div>
+
+  <h4>Reconstruct a pattern: v → h → v′</h4>
+  <p style="margin-top:0;font-size:0.92rem">
+    Click cells to draw on the visible layer (or load a corrupted shape), then push it once through the hidden layer and back. A trained RBM <strong>cleans up the input</strong>, snapping it toward a shape it knows.
+  </p>
+  <div class="bm-flexwrap" style="align-items:center;justify-content:center">
+    <div style="text-align:center">
+      <div style="font-size:0.75rem;opacity:0.6;margin-bottom:0.3rem">visible (click to edit)</div>
+      <div id="bmE-vis" class="bm-grid" style="grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px)"></div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:0.75rem;opacity:0.6;margin-bottom:0.3rem">hidden activations</div>
+      <div id="bmE-hid" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:0.75rem;opacity:0.6;margin-bottom:0.3rem">reconstruction v′</div>
+      <div id="bmE-rec" class="bm-grid" style="grid-template-columns:repeat(3,46px);grid-template-rows:repeat(3,46px)"></div>
+    </div>
+  </div>
+  <div class="bm-controls" style="justify-content:center">
+    <button class="bm-btn" id="bmE-recon">↻ v → h → v′</button>
+    <button class="bm-reset" id="bmE-corrupt">✦ Load corrupted T</button>
+    <button class="bm-reset" id="bmE-clear">Clear</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- WRAP UP                                                      -->
+<!-- ============================================================ -->
+<div class="bm-section">
+  <h3>🎯 The whole story in one breath</h3>
+  <ul style="line-height:1.7">
+    <li><strong>Energy</strong> turns a network's weights into a landscape; stored patterns are valleys.</li>
+    <li><strong>Temperature + a sigmoid</strong> turn deterministic descent (Hopfield) into stochastic sampling.</li>
+    <li>Run long enough and states appear with the <strong>Boltzmann probability</strong> <em>e<sup>−E/T</sup>/Z</em>.</li>
+    <li><strong>Annealing</strong> — hot then cold — escapes spurious minima and lands in deep ones.</li>
+    <li><strong>Learning</strong> matches data correlations (wake) to model correlations (sleep).</li>
+    <li><strong>RBMs</strong> restrict the graph to a bipartite one, making that sampling fast — the ancestor of deep belief nets and a cornerstone of the early deep-learning revival.</li>
+  </ul>
+  <p style="margin-bottom:0">
+    Same energy idea you met behind Hopfield networks — but once you let the neurons gamble, a deterministic memory becomes a generative model. That's the Boltzmann machine.
+  </p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const sigmoid = x => 1 / (1 + Math.exp(-x));
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+  // Patterns on a 3x3 grid, in {-1,+1}
+  const mk = a => a.map(v => (v ? 1 : -1));
+  const PAT_T = mk([1,1,1, 0,1,0, 0,1,0]);
+  const PAT_L = mk([1,0,0, 1,0,0, 1,1,1]);
+  const N = 9;
+
+  // Hebbian weights from the two stored patterns
+  function buildHebbian(patterns) {
+    const W = Array.from({length: N}, () => new Array(N).fill(0));
+    const b = new Array(N).fill(0);
+    for (const p of patterns) {
+      for (let i = 0; i < N; i++) {
+        b[i] += p[i];
+        for (let j = 0; j < N; j++) if (i !== j) W[i][j] += p[i] * p[j];
+      }
+    }
+    for (let i = 0; i < N; i++) { b[i] /= N; for (let j = 0; j < N; j++) W[i][j] /= N; }
+    return { W, b };
+  }
+  const HEB = buildHebbian([PAT_T, PAT_L]);
+
+  function energy(s, W, b) {
+    let e = 0;
+    for (let i = 0; i < N; i++) {
+      e -= b[i] * s[i];
+      for (let j = i + 1; j < N; j++) e -= W[i][j] * s[i] * s[j];
+    }
+    return e;
+  }
+  function field(s, i, W, b) {
+    let h = b[i];
+    for (let j = 0; j < N; j++) if (j !== i) h += W[i][j] * s[j];
+    return h;
+  }
+  function samePattern(s, p) { for (let i = 0; i < N; i++) if (s[i] !== p[i]) return false; return true; }
+
+  function makeGrid(el, n, cellClass) {
+    const cells = [];
+    el.innerHTML = "";
+    for (let i = 0; i < n; i++) {
+      const c = document.createElement("button");
+      c.className = cellClass || "bm-cell";
+      c.type = "button";
+      el.appendChild(c);
+      cells.push(c);
+    }
+    return cells;
+  }
+  function paintThumb(el, pat) {
+    el.innerHTML = "";
+    for (let i = 0; i < N; i++) {
+      const c = document.createElement("div");
+      c.className = "tc" + (pat[i] === 1 ? " on" : "");
+      el.appendChild(c);
+    }
+  }
+
+  // ============================================================
+  // DEMO A — stochastic neurons + temperature
+  // ============================================================
+  (function () {
+    const gridEl = document.getElementById("bmA-grid");
+    const cells = makeGrid(gridEl, N);
+    paintThumb(document.getElementById("bmA-thT"), PAT_T);
+    paintThumb(document.getElementById("bmA-thL"), PAT_L);
+
+    let s = PAT_T.slice();
+    let count = 0;
+    let running = false, raf = null;
+    const hist = [];
+    const tempSlider = document.getElementById("bmA-temp");
+    const tval = document.getElementById("bmA-tval");
+
+    const tempOf = () => tempSlider.value / 100;
+
+    function paint() {
+      for (let i = 0; i < N; i++) cells[i].classList.toggle("on", s[i] === 1);
+      const e = energy(s, HEB.W, HEB.b);
+      document.getElementById("bmA-energy").textContent = e.toFixed(2);
+      document.getElementById("bmA-count").textContent = count;
+      const status = document.getElementById("bmA-status");
+      if (samePattern(s, PAT_T)) { status.textContent = "locked: memory T ✓"; status.className = "bm-tag good"; }
+      else if (samePattern(s, PAT_L)) { status.textContent = "locked: memory L ✓"; status.className = "bm-tag good"; }
+      else if (tempOf() > 1.5) { status.textContent = "boiling 🔥"; status.className = "bm-tag hot"; }
+      else { status.textContent = "exploring"; status.className = "bm-tag warn"; }
+      drawChart();
+    }
+
+    function drawChart() {
+      const svg = document.getElementById("bmA-chart");
+      const W_ = 400, H_ = 120, pad = 6;
+      const lo = -5.2, hi = 3.2; // energy range
+      const xs = hist.length > 1 ? (W_ - 2 * pad) / (hist.length - 1) : 0;
+      const y = e => H_ - pad - ((e - lo) / (hi - lo)) * (H_ - 2 * pad);
+      let d = "";
+      hist.forEach((e, k) => { d += (k === 0 ? "M" : "L") + (pad + k * xs).toFixed(1) + " " + y(e).toFixed(1) + " "; });
+      const zeroY = y(0);
+      svg.innerHTML =
+        `<line x1="${pad}" y1="${zeroY}" x2="${W_-pad}" y2="${zeroY}" stroke="#ccc" stroke-dasharray="3 3"/>` +
+        `<text x="${pad+2}" y="${zeroY-3}" font-size="9" opacity="0.6">E=0</text>` +
+        `<path d="${d}" fill="none" stroke="#8e44ad" stroke-width="2"/>`;
+    }
+
+    function pushHist(e) { hist.push(e); if (hist.length > 120) hist.shift(); }
+
+    function asyncUpdate() {
+      // one random unit (Glauber dynamics)
+      const i = (Math.random() * N) | 0;
+      const dE = 2 * field(s, i, HEB.W, HEB.b);
+      s[i] = Math.random() < sigmoid(dE / tempOf()) ? 1 : -1;
+      count++;
+      pushHist(energy(s, HEB.W, HEB.b));
+    }
+    function sweep() {
+      const order = [...Array(N).keys()].sort(() => Math.random() - 0.5);
+      for (const i of order) {
+        const dE = 2 * field(s, i, HEB.W, HEB.b);
+        s[i] = Math.random() < sigmoid(dE / tempOf()) ? 1 : -1;
+        count++;
+      }
+      pushHist(energy(s, HEB.W, HEB.b));
+    }
+
+    let acc = 0, last = 0;
+    function loop(t) {
+      if (!running) return;
+      if (!last) last = t;
+      acc += t - last; last = t;
+      // throttle ~ updates so the chart is readable
+      while (acc > 40) { asyncUpdate(); acc -= 40; }
+      paint();
+      raf = requestAnimationFrame(loop);
+    }
+
+    const runBtn = document.getElementById("bmA-run");
+    runBtn.addEventListener("click", () => {
+      running = !running;
+      runBtn.textContent = running ? "⏸ Pause" : "▶ Run";
+      if (running) { last = 0; acc = 0; raf = requestAnimationFrame(loop); }
+      else if (raf) cancelAnimationFrame(raf);
+    });
+    document.getElementById("bmA-step").addEventListener("click", () => { sweep(); paint(); });
+    document.getElementById("bmA-rand").addEventListener("click", () => {
+      s = Array.from({length: N}, () => (Math.random() < 0.5 ? 1 : -1));
+      hist.length = 0; pushHist(energy(s, HEB.W, HEB.b)); paint();
+    });
+    document.getElementById("bmA-corrupt").addEventListener("click", () => {
+      const base = Math.random() < 0.5 ? PAT_T : PAT_L;
+      s = base.slice();
+      const flips = new Set();
+      while (flips.size < 3) flips.add((Math.random() * N) | 0);
+      flips.forEach(i => { s[i] = -s[i]; cells[i].classList.add("flash"); setTimeout(() => cells[i].classList.remove("flash"), 600); });
+      hist.length = 0; pushHist(energy(s, HEB.W, HEB.b)); paint();
+    });
+    cells.forEach((c, i) => c.addEventListener("click", () => { s[i] = -s[i]; pushHist(energy(s, HEB.W, HEB.b)); paint(); }));
+    tempSlider.addEventListener("input", () => { tval.textContent = tempOf().toFixed(2); paint(); });
+
+    tval.textContent = tempOf().toFixed(2);
+    pushHist(energy(s, HEB.W, HEB.b));
+    paint();
+  })();
+
+  // ============================================================
+  // DEMO B — the sigmoid rule
+  // ============================================================
+  (function () {
+    const svg = document.getElementById("bmB-svg");
+    const tempSlider = document.getElementById("bmB-temp");
+    const deSlider = document.getElementById("bmB-de");
+    const tval = document.getElementById("bmB-tval");
+    const deval = document.getElementById("bmB-deval");
+    const probEl = document.getElementById("bmB-prob");
+    const msgEl = document.getElementById("bmB-msg");
+
+    const W_ = 460, H_ = 260, padL = 44, padR = 16, padT = 16, padB = 36;
+    const xMin = -6, xMax = 6;
+    const X = x => padL + (x - xMin) / (xMax - xMin) * (W_ - padL - padR);
+    const Y = p => H_ - padB - p * (H_ - padT - padB);
+
+    function draw() {
+      const T = tempSlider.value / 100;
+      const dE = deSlider.value / 10;
+      tval.textContent = T.toFixed(2);
+      deval.textContent = (dE >= 0 ? "+" : "") + dE.toFixed(1);
+      const p = sigmoid(dE / T);
+      probEl.textContent = p.toFixed(2);
+
+      let path = "";
+      for (let px = 0; px <= 200; px++) {
+        const x = xMin + (xMax - xMin) * px / 200;
+        const yy = sigmoid(x / T);
+        path += (px === 0 ? "M" : "L") + X(x).toFixed(1) + " " + Y(yy).toFixed(1) + " ";
+      }
+      // gridlines + axes
+      let grid = "";
+      [0, 0.25, 0.5, 0.75, 1].forEach(p2 => {
+        grid += `<line x1="${padL}" y1="${Y(p2)}" x2="${W_-padR}" y2="${Y(p2)}" stroke="#ddd" stroke-width="1"/>`;
+        grid += `<text x="${padL-6}" y="${Y(p2)+3}" font-size="10" text-anchor="end">${p2}</text>`;
+      });
+      [-6,-3,0,3,6].forEach(x => {
+        grid += `<line x1="${X(x)}" y1="${padT}" x2="${X(x)}" y2="${H_-padB}" stroke="#eee" stroke-width="1"/>`;
+        grid += `<text x="${X(x)}" y="${H_-padB+16}" font-size="10" text-anchor="middle">${x>0?"+":""}${x}</text>`;
+      });
+      const half = `<line x1="${padL}" y1="${Y(0.5)}" x2="${W_-padR}" y2="${Y(0.5)}" stroke="#bbb" stroke-dasharray="4 4"/>`;
+      const marker =
+        `<line x1="${X(dE)}" y1="${padT}" x2="${X(dE)}" y2="${H_-padB}" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3 3"/>` +
+        `<circle cx="${X(dE)}" cy="${Y(p)}" r="6" fill="#e74c3c"/>` +
+        `<text x="${X(dE)+9}" y="${Y(p)-6}" font-size="12" fill="#e74c3c" font-weight="700">p=${p.toFixed(2)}</text>`;
+      svg.innerHTML =
+        grid + half +
+        `<path d="${path}" fill="none" stroke="#8e44ad" stroke-width="2.5"/>` +
+        marker +
+        `<text x="${X(0)}" y="${H_-4}" font-size="11" text-anchor="middle">energy saved by turning on  (&Delta;E)</text>` +
+        `<text x="14" y="${padT+90}" font-size="11" transform="rotate(-90 14 ${padT+90})" text-anchor="middle">p(unit on)</text>`;
+
+      if (T < 0.2) msgEl.innerHTML = "Nearly a step function — this is a <strong>deterministic Hopfield update</strong>.";
+      else if (T > 3) msgEl.innerHTML = "Almost flat at 0.5 — the unit is basically <strong>flipping a coin</strong>.";
+      else msgEl.innerHTML = "A soft threshold: lowering energy is likely but not certain — room to explore.";
+    }
+    tempSlider.addEventListener("input", draw);
+    deSlider.addEventListener("input", draw);
+    draw();
+  })();
+
+  // ============================================================
+  // DEMO C — Boltzmann distribution over a 4-unit network
+  // ============================================================
+  (function () {
+    const n = 4;
+    // weights with a unique global minimum, some frustration
+    const W = [[0,2,-1,0.6],[2,0,0.4,-1],[-1,0.4,0,1.8],[0.6,-1,1.8,0]];
+    const b = [0.5,-0.3,0.15,-0.1];
+    function E(st) {
+      let e = 0;
+      for (let i = 0; i < n; i++) { e -= b[i]*st[i]; for (let j = i+1; j < n; j++) e -= W[i][j]*st[i]*st[j]; }
+      return e;
+    }
+    const states = [];
+    for (let m = 0; m < (1 << n); m++) {
+      const st = [];
+      for (let i = 0; i < n; i++) st.push(((m >> i) & 1) ? 1 : -1);
+      states.push({ st, e: E(st) });
+    }
+    states.sort((a, b2) => a.e - b2.e); // sort by energy ascending
+    const eLo = states[0].e, eHi = states[states.length - 1].e;
+
+    const svg = document.getElementById("bmC-svg");
+    const tempSlider = document.getElementById("bmC-temp");
+    const tval = document.getElementById("bmC-tval");
+    const W_ = 720, H_ = 240, padT = 12, padB = 44;
+    const slot = W_ / states.length;
+    const barW = slot * 0.7;
+
+    function energyColor(e) {
+      const t = (e - eLo) / (eHi - eLo + 1e-9); // 0 low ... 1 high
+      // interpolate blue(low) -> red(high)
+      const r = Math.round(26 + t * (192 - 26));
+      const g = Math.round(82 + t * (57 - 82));
+      const bl = Math.round(118 + t * (43 - 118));
+      return `rgb(${r},${g},${bl})`;
+    }
+
+    function draw() {
+      const T = tempSlider.value / 100;
+      tval.textContent = T.toFixed(2);
+      const ps = states.map(s => Math.exp(-s.e / T));
+      const Z = ps.reduce((a, x) => a + x, 0);
+      const probs = ps.map(p => p / Z);
+      const pMax = Math.max(...probs);
+      const top = (H_ - padT - padB);
+
+      let out = "";
+      states.forEach((s, k) => {
+        const x = k * slot + (slot - barW) / 2;
+        const h = (probs[k] / pMax) * top;
+        const yTop = H_ - padB - h;
+        out += `<rect x="${x.toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="3" fill="${energyColor(s.e)}"/>`;
+        // probability label on tallest few
+        if (probs[k] > 0.04) out += `<text x="${(x+barW/2).toFixed(1)}" y="${(yTop-4).toFixed(1)}" font-size="9" text-anchor="middle">${(probs[k]*100).toFixed(0)}%</text>`;
+        // mini 2x2 state glyph under bar
+        const gx = k * slot + slot/2, gy = H_ - padB + 8, cs = 7;
+        for (let i = 0; i < n; i++) {
+          const cx = gx - cs + (i % 2) * cs, cy = gy + Math.floor(i / 2) * cs;
+          out += `<rect x="${cx}" y="${cy}" width="${cs-1.5}" height="${cs-1.5}" rx="1" fill="${s.st[i]===1?'#8e44ad':'#d8dde3'}"/>`;
+        }
+      });
+      // label global min
+      out += `<text x="${(0*slot+slot/2).toFixed(1)}" y="${H_-2}" font-size="9" text-anchor="middle" fill="#1a5276" font-weight="700">min E</text>`;
+      svg.innerHTML = out;
+    }
+    tempSlider.addEventListener("input", draw);
+    draw();
+  })();
+
+  // ============================================================
+  // DEMO D — simulated annealing
+  // ============================================================
+  (function () {
+    const cells = makeGrid(document.getElementById("bmD-grid"), N);
+    const svg = document.getElementById("bmD-svg");
+    let mode = "anneal";
+
+    document.querySelectorAll("#bmD-mode button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#bmD-mode button").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        mode = btn.dataset.mode;
+      });
+    });
+
+    function tempSchedule(mode, k, K) {
+      if (mode === "greedy") return 0.05;
+      if (mode === "hot") return 2.0;
+      return 3.0 * Math.pow(0.06 / 3.0, k / K); // anneal 3.0 -> 0.06
+    }
+
+    function runOnce(mode, record) {
+      let s = Array.from({length: N}, () => (Math.random() < 0.5 ? 1 : -1));
+      const K = 50;
+      const eTrace = [], tTrace = [];
+      for (let k = 0; k < K; k++) {
+        const T = tempSchedule(mode, k, K);
+        const order = [...Array(N).keys()].sort(() => Math.random() - 0.5);
+        for (const i of order) {
+          const dE = 2 * field(s, i, HEB.W, HEB.b);
+          s[i] = Math.random() < sigmoid(dE / T) ? 1 : -1;
+        }
+        if (record) { eTrace.push(energy(s, HEB.W, HEB.b)); tTrace.push(T); }
+      }
+      return { s, eTrace, tTrace };
+    }
+
+    function paintGrid(s) { for (let i = 0; i < N; i++) cells[i].classList.toggle("on", s[i] === 1); }
+
+    function drawTraces(eTrace, tTrace) {
+      const W_ = 420, H_ = 180, pad = 8;
+      const K = eTrace.length;
+      const eLo = -5.2, eHi = 3.2, tHi = 3.2;
+      const xs = K > 1 ? (W_ - 2*pad) / (K - 1) : 0;
+      const yE = e => H_ - pad - (e - eLo) / (eHi - eLo) * (H_ - 2*pad);
+      const yT = t => H_ - pad - (t / tHi) * (H_ - 2*pad);
+      let de = "", dt = "";
+      eTrace.forEach((e, k) => { de += (k===0?"M":"L") + (pad+k*xs).toFixed(1) + " " + yE(e).toFixed(1) + " "; });
+      tTrace.forEach((t, k) => { dt += (k===0?"M":"L") + (pad+k*xs).toFixed(1) + " " + yT(t).toFixed(1) + " "; });
+      svg.innerHTML =
+        `<path d="${dt}" fill="none" stroke="#e67e22" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>` +
+        `<path d="${de}" fill="none" stroke="#8e44ad" stroke-width="2.5"/>` +
+        `<text x="${W_-pad}" y="${yE(-5)}" font-size="9" text-anchor="end" opacity="0.6">deep memory</text>`;
+    }
+
+    function setResult(s) {
+      const r = document.getElementById("bmD-result");
+      if (samePattern(s, PAT_T)) { r.textContent = "reached memory T ✓"; r.className = "bm-tag good"; }
+      else if (samePattern(s, PAT_L)) { r.textContent = "reached memory L ✓"; r.className = "bm-tag good"; }
+      else { r.textContent = "stuck (spurious / unsettled)"; r.className = "bm-tag warn"; }
+    }
+
+    // animated single run
+    document.getElementById("bmD-run").addEventListener("click", () => {
+      const { s, eTrace, tTrace } = runOnce(mode, true);
+      // animate the trace growing
+      let k = 1;
+      const tick = () => {
+        drawTraces(eTrace.slice(0, k), tTrace.slice(0, k));
+        if (k < eTrace.length) { k++; requestAnimationFrame(tick); }
+        else { paintGrid(s); setResult(s); }
+      };
+      tick();
+    });
+
+    document.getElementById("bmD-race").addEventListener("click", () => {
+      const modes = ["greedy", "hot", "anneal"];
+      const labels = { greedy: "Greedy (cold)", hot: "Always hot", anneal: "Annealed ❄️" };
+      const colors = { greedy: "#e74c3c", hot: "#e67e22", anneal: "#27ae60" };
+      const res = {};
+      modes.forEach(m => {
+        let solved = 0;
+        for (let t = 0; t < 200; t++) {
+          const { s } = runOnce(m, false);
+          if (samePattern(s, PAT_T) || samePattern(s, PAT_L)) solved++;
+        }
+        res[m] = solved / 200;
+      });
+      const wrap = document.getElementById("bmD-race-wrap");
+      wrap.style.display = "block";
+      const bars = document.getElementById("bmD-race-bars");
+      bars.innerHTML = modes.map(m => {
+        const pct = Math.round(res[m] * 100);
+        return `<div style="display:flex;align-items:center;gap:0.6rem;margin:0.4rem 0">
+          <span style="width:130px;font-size:0.85rem">${labels[m]}</span>
+          <div style="flex:1;background:#e8e8ef;border-radius:6px;overflow:hidden;height:22px;max-width:360px">
+            <div class="bm-pop" style="width:${pct}%;height:100%;background:${colors[m]};border-radius:6px"></div>
+          </div>
+          <strong style="width:3rem">${pct}%</strong>
+        </div>`;
+      }).join("");
+    });
+
+    // initial
+    const init = runOnce("anneal", true);
+    paintGrid(init.s); drawTraces(init.eTrace, init.tTrace); setResult(init.s);
+  })();
+
+  // ============================================================
+  // DEMO E — RBM (0/1 units), live CD-1 training
+  // ============================================================
+  (function () {
+    const V = 9, H = 4, sig = sigmoid;
+    // training data in {0,1}: T, L, O(ring-ish)
+    const DATA = [
+      [1,1,1, 0,1,0, 0,1,0], // T
+      [1,0,0, 1,0,0, 1,1,1], // L
+      [1,1,1, 1,0,1, 1,1,1]  // O
+    ];
+    let Wt, bv, bh, trained = false;
+
+    function initW() {
+      Wt = Array.from({length: V}, () => Array.from({length: H}, () => (Math.random()*2-1)*0.1));
+      bv = new Array(V).fill(0);
+      bh = new Array(H).fill(0);
+      trained = false;
+    }
+    initW();
+
+    const propUp = v => { const h = []; for (let j=0;j<H;j++){ let a=bh[j]; for(let i=0;i<V;i++) a+=v[i]*Wt[i][j]; h.push(sig(a)); } return h; };
+    const propDown = h => { const v = []; for (let i=0;i<V;i++){ let a=bv[i]; for(let j=0;j<H;j++) a+=h[j]*Wt[i][j]; v.push(sig(a)); } return v; };
+    const bern = p => (Math.random() < p ? 1 : 0);
+
+    function cdStep(lr) {
+      let sqErr = 0;
+      for (const v0 of DATA) {
+        const h0p = propUp(v0);
+        const h0 = h0p.map(bern);
+        const v1p = propDown(h0);
+        const v1 = v1p.map(bern);
+        const h1p = propUp(v1);
+        for (let i=0;i<V;i++) for (let j=0;j<H;j++) Wt[i][j] += lr*(v0[i]*h0p[j] - v1p[i]*h1p[j]);
+        for (let i=0;i<V;i++) bv[i] += lr*(v0[i]-v1p[i]);
+        for (let j=0;j<H;j++) bh[j] += lr*(h0p[j]-h1p[j]);
+        for (let i=0;i<V;i++) sqErr += (v0[i]-v1p[i])*(v0[i]-v1p[i]);
+      }
+      return sqErr / DATA.length;
+    }
+
+    // ---- viz: receptive fields ----
+    const fieldsEl = document.getElementById("bmE-fields");
+    function drawFields() {
+      let maxAbs = 0.0001;
+      for (let i=0;i<V;i++) for (let j=0;j<H;j++) maxAbs = Math.max(maxAbs, Math.abs(Wt[i][j]));
+      fieldsEl.innerHTML = "";
+      for (let j=0;j<H;j++) {
+        const wrap = document.createElement("div");
+        wrap.style.textAlign = "center";
+        const g = document.createElement("div");
+        g.className = "bm-grid";
+        g.style.gridTemplateColumns = "repeat(3,15px)";
+        g.style.gridTemplateRows = "repeat(3,15px)";
+        for (let i=0;i<V;i++) {
+          const c = document.createElement("div");
+          const w = Wt[i][j] / maxAbs; // -1..1
+          let col;
+          if (w >= 0) { const t = w; col = `rgb(${Math.round(255-150*t)},${Math.round(255-100*t)},255)`; }
+          else { const t = -w; col = `rgb(255,${Math.round(255-150*t)},${Math.round(255-150*t)})`; }
+          c.style.background = col;
+          c.style.borderRadius = "2px";
+          g.appendChild(c);
+        }
+        const lab = document.createElement("div");
+        lab.style.fontSize = "0.65rem"; lab.style.opacity = "0.6";
+        lab.textContent = "h" + (j+1);
+        wrap.appendChild(g); wrap.appendChild(lab);
+        fieldsEl.appendChild(wrap);
+      }
+    }
+
+    // ---- viz: error curve ----
+    const errSvg = document.getElementById("bmE-err");
+    const errHist = [];
+    function drawErr() {
+      const W_=400,H_=150,pad=10;
+      if (errHist.length < 2) { errSvg.innerHTML = `<text x="${W_/2}" y="${H_/2}" font-size="12" text-anchor="middle" opacity="0.5">press Train</text>`; return; }
+      const hi = Math.max(...errHist), lo = 0;
+      const xs = (W_-2*pad)/(errHist.length-1);
+      const y = e => H_-pad - (e-lo)/(hi-lo+1e-9)*(H_-2*pad);
+      let d="";
+      errHist.forEach((e,k)=>{ d += (k===0?"M":"L")+(pad+k*xs).toFixed(1)+" "+y(e).toFixed(1)+" "; });
+      errSvg.innerHTML =
+        `<path d="${d}" fill="none" stroke="#8e44ad" stroke-width="2"/>` +
+        `<text x="${W_-pad}" y="${y(errHist[errHist.length-1])-6}" font-size="10" text-anchor="end" fill="#8e44ad">${errHist[errHist.length-1].toFixed(2)}</text>` +
+        `<text x="${pad}" y="${H_-2}" font-size="9" opacity="0.6">epochs &rarr;</text>`;
+    }
+
+    // ---- training loop (chunked across frames) ----
+    const epochEl = document.getElementById("bmE-epoch");
+    let training = false;
+    function train() {
+      if (training) return;
+      training = true;
+      errHist.length = 0;
+      const total = 4000, chunk = 120;
+      let ep = 0;
+      const step = () => {
+        for (let c = 0; c < chunk && ep < total; c++, ep++) {
+          const err = cdStep(0.1);
+          if (ep % 40 === 0) errHist.push(err);
+        }
+        drawErr(); drawFields();
+        epochEl.textContent = "epoch " + ep + " / " + total;
+        if (ep < total) requestAnimationFrame(step);
+        else { training = false; trained = true; epochEl.textContent = "trained ✓ (" + total + " epochs)"; reconstruct(); }
+      };
+      step();
+    }
+
+    document.getElementById("bmE-train").addEventListener("click", train);
+    document.getElementById("bmE-resetw").addEventListener("click", () => {
+      initW(); errHist.length = 0; drawErr(); drawFields(); epochEl.textContent = "weights reset"; clearHidden();
+    });
+
+    // ---- reconstruction panel ----
+    const visCells = makeGrid(document.getElementById("bmE-vis"), V);
+    const recCells = makeGrid(document.getElementById("bmE-rec"), V);
+    const hidEl = document.getElementById("bmE-hid");
+    let vState = DATA[0].slice();
+
+    function paintVis() { for (let i=0;i<V;i++) visCells[i].classList.toggle("on", vState[i]===1); }
+    function clearHidden() {
+      hidEl.innerHTML = "";
+      for (let j=0;j<H;j++){ const b=document.createElement("div"); b.style.cssText="width:70px;height:14px;border-radius:7px;background:#e8e8ef"; hidEl.appendChild(b); }
+      recCells.forEach(c=>{ c.classList.remove("on"); c.style.background=""; });
+    }
+    function reconstruct() {
+      const hp = propUp(vState);
+      hidEl.innerHTML = "";
+      for (let j=0;j<H;j++) {
+        const outer = document.createElement("div");
+        outer.style.cssText = "width:70px;height:14px;border-radius:7px;background:#e8e8ef;overflow:hidden";
+        const inner = document.createElement("div");
+        inner.style.cssText = `width:${Math.round(hp[j]*100)}%;height:100%;background:#8e44ad;border-radius:7px`;
+        outer.appendChild(inner); hidEl.appendChild(outer);
+      }
+      const h = hp.map(bern);
+      const vp = propDown(h);
+      for (let i=0;i<V;i++) {
+        const on = vp[i] > 0.5;
+        recCells[i].classList.toggle("on", on);
+      }
+    }
+
+    visCells.forEach((c,i)=>c.addEventListener("click", ()=>{ vState[i] = vState[i]?0:1; paintVis(); }));
+    document.getElementById("bmE-recon").addEventListener("click", reconstruct);
+    document.getElementById("bmE-corrupt").addEventListener("click", () => {
+      vState = [1,1,1, 0,0,0, 0,1,0]; // T with broken stem
+      paintVis(); if (trained) reconstruct(); else clearHidden();
+    });
+    document.getElementById("bmE-clear").addEventListener("click", () => { vState = new Array(V).fill(0); paintVis(); clearHidden(); });
+
+    // ---- architecture diagram ----
+    (function () {
+      const svg = document.getElementById("bmE-arch");
+      const W_=460,H_=170;
+      const vx = 120, hx = 340;
+      const vys = [], hys = [];
+      for (let i=0;i<V;i++) vys.push(20 + i*(H_-40)/(V-1));
+      for (let j=0;j<H;j++) hys.push(40 + j*(H_-80)/(H-1));
+      let s = "";
+      for (let i=0;i<V;i++) for (let j=0;j<H;j++)
+        s += `<line x1="${vx}" y1="${vys[i]}" x2="${hx}" y2="${hys[j]}" stroke="#cdb4e0" stroke-width="0.6" opacity="0.7"/>`;
+      vys.forEach(y => s += `<circle cx="${vx}" cy="${y}" r="7" fill="#8e44ad"/>`);
+      hys.forEach(y => s += `<circle cx="${hx}" cy="${y}" r="9" fill="#e67e22"/>`);
+      s += `<text x="${vx}" y="12" font-size="12" text-anchor="middle" font-weight="700">visible (data)</text>`;
+      s += `<text x="${hx}" y="22" font-size="12" text-anchor="middle" font-weight="700">hidden (features)</text>`;
+      s += `<text x="${vx}" y="${H_-2}" font-size="10" text-anchor="middle" opacity="0.7">9 units</text>`;
+      s += `<text x="${hx}" y="${H_-2}" font-size="10" text-anchor="middle" opacity="0.7">4 units · no in-layer links</text>`;
+      svg.innerHTML = s;
+    })();
+
+    drawErr(); drawFields(); paintVis(); clearHidden();
+  })();
+})();
+</script>
