@@ -1,7 +1,8 @@
-    <meta charset="utf-8" />
-    <meta content='text/html; charset=utf-8' http-equiv='Content-Type'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0'>
+    <link rel="canonical" href="{{ page.url | absolute_url }}" />
+    <meta property="og:url" content="{{ page.url | absolute_url }}" />
+    <meta property="og:type" content="{% if page.id %}article{% else %}website{% endif %}" />
+    <meta property="og:image" content="{{ site.avatar | absolute_url }}" />
+    <meta name="twitter:card" content="summary" />
 
     {% if page.excerpt %}
     <meta name="description" content="{{ page.excerpt| strip_html }}" />
