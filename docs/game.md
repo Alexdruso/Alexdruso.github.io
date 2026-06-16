@@ -1,6 +1,6 @@
 ---
 title: Snake Game | Alessandro Sanvito
-layout: game
+layout: default
 permalink: /game/
 ---
 
@@ -30,7 +30,7 @@ let snake = [];
 let food = {};
 let direction = 'right';
 let nextDirection = 'right';
-let gameLoop;
+let gameInterval;
 let score = 0;
 let gameStarted = false;
 
@@ -209,17 +209,17 @@ function startGame() {
   if (!gameStarted) {
     gameStarted = true;
     startButton.textContent = 'Pause Game';
-    gameLoop = setInterval(gameLoop, GAME_SPEED);
+    gameInterval = setInterval(gameLoop, GAME_SPEED);
   } else {
     gameStarted = false;
     startButton.textContent = 'Resume Game';
-    clearInterval(gameLoop);
+    clearInterval(gameInterval);
   }
 }
 
 // Reset game
 function resetGame() {
-  clearInterval(gameLoop);
+  clearInterval(gameInterval);
   gameStarted = false;
   score = 0;
   
@@ -241,7 +241,7 @@ function resetGame() {
 
 // Game over
 function gameOver() {
-  clearInterval(gameLoop);
+  clearInterval(gameInterval);
   gameStarted = false;
   
   const startButton = document.getElementById('startButton');
