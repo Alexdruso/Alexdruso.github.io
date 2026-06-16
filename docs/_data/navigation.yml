@@ -17,3 +17,7 @@
 - title: CV
   url: /cv/
   icon: fa-file-alt
+
+- title: Snake
+  url: /game/
+  icon: fa-gamepad
