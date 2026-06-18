@@ -1,0 +1,267 @@
+<style>
+/* ============================================================
+   Study Notes — shared design system
+   Sleek/futuristic: cyan-teal accent, hairline borders, flat
+   single-accent controls, monospace numerals, glow in dark only.
+   Adaptive light + dark via tokens. Every selector is scoped
+   under .study-note so nothing leaks to the rest of the site.
+   ============================================================ */
+.study-note {
+  --sn-accent: #0891b2;
+  --sn-accent-strong: #06b6d4;
+  --sn-accent-soft: rgba(8, 145, 178, 0.10);
+  --sn-accent-line: rgba(8, 145, 178, 0.30);
+  --sn-on-accent: #ffffff;
+
+  --sn-panel: #ffffff;
+  --sn-panel-inset: #f6f8fa;
+  --sn-section: #f7f9fb;
+  --sn-border: rgba(15, 23, 42, 0.08);
+  --sn-grid: rgba(15, 23, 42, 0.10);
+
+  --sn-text: #1f2933;
+  --sn-muted: #64748b;
+
+  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
+  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
+  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
+
+  --sn-radius: 12px;
+  --sn-radius-sm: 8px;
+  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sn-glow: none;
+  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+.dark-theme .study-note {
+  --sn-accent: #22d3ee;
+  --sn-accent-strong: #67e8f9;
+  --sn-accent-soft: rgba(34, 211, 238, 0.12);
+  --sn-accent-line: rgba(34, 211, 238, 0.35);
+  --sn-on-accent: #06141a;
+
+  --sn-panel: #11131c;
+  --sn-panel-inset: #161a26;
+  --sn-section: #14161f;
+  --sn-border: rgba(148, 163, 184, 0.14);
+  --sn-grid: rgba(148, 163, 184, 0.16);
+
+  --sn-text: #e2e8f0;
+  --sn-muted: #94a3b8;
+
+  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
+  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
+  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
+
+  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+/* ---- sections / cards ---- */
+.study-note .se-section,
+.study-note .bm-section,
+.study-note .mdp-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: var(--sn-radius);
+  background: var(--sn-section);
+  border: 1px solid var(--sn-border);
+  box-shadow: var(--sn-shadow);
+}
+.study-note .se-section h3,
+.study-note .bm-section h3,
+.study-note .mdp-section h3 {
+  margin-top: 0;
+  color: var(--sn-accent);
+  letter-spacing: -0.01em;
+}
+
+/* ---- equation boxes ---- */
+.study-note .se-equation,
+.study-note .bm-equation,
+.study-note .equation-box {
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  font-size: 1.1rem;
+  text-align: center;
+  overflow-x: auto;
+}
+.study-note .se-equation .big,
+.study-note .bm-equation .big { font-size: 1.25rem; }
+
+/* ---- callout / note ---- */
+.study-note .se-note,
+.study-note .bm-note {
+  background: var(--sn-accent-soft);
+  border-radius: var(--sn-radius-sm);
+  border-left: 3px solid var(--sn-accent);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- example box ---- */
+.study-note .se-example,
+.study-note .bm-example,
+.study-note .example-box {
+  background: var(--sn-panel-inset);
+  border: 1px solid var(--sn-border);
+  border-left: 3px solid var(--sn-warn);
+  border-radius: var(--sn-radius-sm);
+  padding: 1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- chart containers ---- */
+.study-note .se-chartwrap,
+.study-note .bm-chartwrap,
+.study-note .graph-wrap {
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem;
+}
+.study-note .graph-wrap { overflow-x: auto; }
+
+/* ---- primary buttons ---- */
+.study-note .se-btn,
+.study-note .bm-btn,
+.study-note .vi-btn {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--sn-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-on-accent);
+  background: var(--sn-accent);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
+}
+.study-note .se-btn:hover:not(:disabled),
+.study-note .bm-btn:hover:not(:disabled),
+.study-note .vi-btn:hover:not(:disabled) {
+  background: var(--sn-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sn-glow);
+}
+.study-note .se-btn:disabled,
+.study-note .bm-btn:disabled,
+.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* secondary variant */
+.study-note .se-btn.sec,
+.study-note .bm-btn.sec,
+.study-note .vi-btn.sec {
+  background: transparent;
+  color: var(--sn-accent);
+  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
+}
+.study-note .se-btn.sec:hover:not(:disabled),
+.study-note .bm-btn.sec:hover:not(:disabled),
+.study-note .vi-btn.sec:hover:not(:disabled) {
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+}
+
+/* ---- ghost / reset buttons ---- */
+.study-note .se-reset,
+.study-note .bm-reset,
+.study-note .reset-link {
+  background: none;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-muted);
+  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
+}
+.study-note .se-reset:hover,
+.study-note .bm-reset:hover,
+.study-note .reset-link:hover {
+  background: var(--sn-accent-soft);
+  border-color: var(--sn-accent-line);
+  color: var(--sn-accent);
+}
+
+/* ---- range sliders: flat, single-accent ---- */
+.study-note input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+  outline: none;
+  cursor: pointer;
+}
+.study-note input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
+}
+.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.study-note input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+}
+.study-note input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+}
+
+/* ---- status pills ---- */
+.study-note .se-tag,
+.study-note .bm-tag {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
+}
+.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
+.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
+
+/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
+.study-note .se-stat .val,
+.study-note .bm-stat .val,
+.study-note .score-item .sval,
+.study-note .compare-score {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-accent);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.study-note .se-readout,
+.study-note .bm-temp-readout {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sn-accent);
+}
+
+/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
+.study-note svg text { fill: var(--sn-muted); }
+</style>
