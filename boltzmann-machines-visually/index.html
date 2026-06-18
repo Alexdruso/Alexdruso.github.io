@@ -93,146 +93,317 @@
 
   <div class="entry">
     <style>
-/* ===== layout ===== */
-.bm-section {
+/* ============================================================
+   Study Notes — shared design system
+   Sleek/futuristic: cyan-teal accent, hairline borders, flat
+   single-accent controls, monospace numerals, glow in dark only.
+   Adaptive light + dark via tokens. Every selector is scoped
+   under .study-note so nothing leaks to the rest of the site.
+   ============================================================ */
+.study-note {
+  --sn-accent: #0891b2;
+  --sn-accent-strong: #06b6d4;
+  --sn-accent-soft: rgba(8, 145, 178, 0.10);
+  --sn-accent-line: rgba(8, 145, 178, 0.30);
+  --sn-on-accent: #ffffff;
+
+  --sn-panel: #ffffff;
+  --sn-panel-inset: #f6f8fa;
+  --sn-section: #f7f9fb;
+  --sn-border: rgba(15, 23, 42, 0.08);
+  --sn-grid: rgba(15, 23, 42, 0.10);
+
+  --sn-text: #1f2933;
+  --sn-muted: #64748b;
+
+  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
+  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
+  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
+
+  --sn-radius: 12px;
+  --sn-radius-sm: 8px;
+  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sn-glow: none;
+  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+.dark-theme .study-note {
+  --sn-accent: #22d3ee;
+  --sn-accent-strong: #67e8f9;
+  --sn-accent-soft: rgba(34, 211, 238, 0.12);
+  --sn-accent-line: rgba(34, 211, 238, 0.35);
+  --sn-on-accent: #06141a;
+
+  --sn-panel: #11131c;
+  --sn-panel-inset: #161a26;
+  --sn-section: #14161f;
+  --sn-border: rgba(148, 163, 184, 0.14);
+  --sn-grid: rgba(148, 163, 184, 0.16);
+
+  --sn-text: #e2e8f0;
+  --sn-muted: #94a3b8;
+
+  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
+  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
+  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
+
+  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+/* ---- sections / cards ---- */
+.study-note .se-section,
+.study-note .bm-section,
+.study-note .mdp-section {
   margin: 2rem 0;
   padding: 1.5rem;
-  border-radius: 12px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
+  border-radius: var(--sn-radius);
+  background: var(--sn-section);
+  border: 1px solid var(--sn-border);
+  box-shadow: var(--sn-shadow);
 }
-.dark-theme .bm-section { background: #1e1e2e; border-color: #313244; }
-.bm-section h3 { margin-top: 0; color: #8e44ad; }
-.dark-theme .bm-section h3 { color: #c8a2e8; }
-.bm-section h4 { margin-bottom: 0.5rem; }
+.study-note .se-section h3,
+.study-note .bm-section h3,
+.study-note .mdp-section h3 {
+  margin-top: 0;
+  color: var(--sn-accent);
+  letter-spacing: -0.01em;
+}
 
-.bm-equation {
+/* ---- equation boxes ---- */
+.study-note .se-equation,
+.study-note .bm-equation,
+.study-note .equation-box {
   padding: 1rem 1.5rem;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
+  margin: 1rem 0;
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
   font-size: 1.1rem;
   text-align: center;
-  margin: 1rem 0;
   overflow-x: auto;
 }
-.dark-theme .bm-equation { background: #14141e; border-color: #313244; }
-.bm-equation .big { font-size: 1.25rem; }
+.study-note .se-equation .big,
+.study-note .bm-equation .big { font-size: 1.25rem; }
 
-.bm-note {
-  background: #f3e9fb;
-  border-radius: 8px;
+/* ---- callout / note ---- */
+.study-note .se-note,
+.study-note .bm-note {
+  background: var(--sn-accent-soft);
+  border-radius: var(--sn-radius-sm);
+  border-left: 3px solid var(--sn-accent);
   padding: 0.9rem 1.1rem;
-  border-left: 4px solid #8e44ad;
   font-size: 0.9rem;
   margin: 1rem 0;
 }
-.dark-theme .bm-note { background: #251a30; border-left-color: #c8a2e8; }
 
-.bm-example {
-  background: #fff8e1;
-  border-radius: 8px;
+/* ---- example box ---- */
+.study-note .se-example,
+.study-note .bm-example,
+.study-note .example-box {
+  background: var(--sn-panel-inset);
+  border: 1px solid var(--sn-border);
+  border-left: 3px solid var(--sn-warn);
+  border-radius: var(--sn-radius-sm);
   padding: 1rem;
-  border: 1px solid #ffe082;
   font-size: 0.9rem;
   margin: 1rem 0;
 }
-.dark-theme .bm-example { background: #2a2500; border-color: #554400; }
 
-/* ===== controls ===== */
-.bm-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
-.bm-btn {
+/* ---- chart containers ---- */
+.study-note .se-chartwrap,
+.study-note .bm-chartwrap,
+.study-note .graph-wrap {
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem;
+}
+.study-note .graph-wrap { overflow-x: auto; }
+
+/* ---- primary buttons ---- */
+.study-note .se-btn,
+.study-note .bm-btn,
+.study-note .vi-btn {
   padding: 0.5rem 1.1rem;
-  border-radius: 8px;
   border: none;
+  border-radius: var(--sn-radius-sm);
   font-size: 0.9rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  background: #8e44ad;
-  color: white;
   font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-on-accent);
+  background: var(--sn-accent);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
 }
-.bm-btn.sec { background: #5d6d7e; }
-.bm-btn:hover:not(:disabled) { filter: brightness(0.9); }
-.bm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.bm-reset {
+.study-note .se-btn:hover:not(:disabled),
+.study-note .bm-btn:hover:not(:disabled),
+.study-note .vi-btn:hover:not(:disabled) {
+  background: var(--sn-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sn-glow);
+}
+.study-note .se-btn:disabled,
+.study-note .bm-btn:disabled,
+.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* secondary variant */
+.study-note .se-btn.sec,
+.study-note .bm-btn.sec,
+.study-note .vi-btn.sec {
+  background: transparent;
+  color: var(--sn-accent);
+  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
+}
+.study-note .se-btn.sec:hover:not(:disabled),
+.study-note .bm-btn.sec:hover:not(:disabled),
+.study-note .vi-btn.sec:hover:not(:disabled) {
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+}
+
+/* ---- ghost / reset buttons ---- */
+.study-note .se-reset,
+.study-note .bm-reset,
+.study-note .reset-link {
   background: none;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
   padding: 0.4rem 0.85rem;
   font-size: 0.85rem;
-  cursor: pointer;
   font-family: inherit;
-  transition: background 0.15s;
+  cursor: pointer;
+  color: var(--sn-muted);
+  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
 }
-.bm-reset:hover { background: #eee; }
-.dark-theme .bm-reset { border-color: #444; color: #ccc; }
-.dark-theme .bm-reset:hover { background: #252535; }
+.study-note .se-reset:hover,
+.study-note .bm-reset:hover,
+.study-note .reset-link:hover {
+  background: var(--sn-accent-soft);
+  border-color: var(--sn-accent-line);
+  color: var(--sn-accent);
+}
 
-.bm-slider { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px;
-  background: linear-gradient(90deg,#3498db,#e74c3c); outline: none; cursor: pointer; }
-.bm-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
-  border-radius: 50%; background: #fff; border: 2px solid #8e44ad; cursor: pointer; }
-.bm-slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff;
-  border: 2px solid #8e44ad; cursor: pointer; }
-.bm-temp-readout { font-weight: 700; font-size: 1.05rem; min-width: 4.5rem; display: inline-block; }
+/* ---- range sliders: flat, single-accent ---- */
+.study-note input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+  outline: none;
+  cursor: pointer;
+}
+.study-note input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
+}
+.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.study-note input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+}
+.study-note input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+}
+
+/* ---- status pills ---- */
+.study-note .se-tag,
+.study-note .bm-tag {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
+}
+.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
+.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
+
+/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
+.study-note .se-stat .val,
+.study-note .bm-stat .val,
+.study-note .score-item .sval,
+.study-note .compare-score {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-accent);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.study-note .se-readout,
+.study-note .bm-temp-readout {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sn-accent);
+}
+
+/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
+.study-note svg text { fill: var(--sn-muted); }
+</style>
+
+
+<div class="study-note">
+
+<style>
+/* Note-specific layout. Shared components (sections, buttons, sliders,
+   tags, equations, notes, charts, numerals) live in study-note-styles.html. */
+.bm-section h4 { margin-bottom: 0.5rem; }
+
+.bm-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
+.bm-temp-readout { font-size: 1.05rem; min-width: 4.5rem; display: inline-block; }
 
 /* ===== grids of binary units ===== */
 .bm-grid { display: grid; gap: 4px; }
 .bm-cell {
   border-radius: 6px;
-  border: 2px solid #cfd6dd;
-  background: #fff;
+  border: 1px solid var(--sn-border);
+  background: var(--sn-panel-inset);
   cursor: pointer;
-  transition: background 0.18s, border-color 0.18s, transform 0.1s;
+  transition: background 0.18s var(--sn-ease), border-color 0.18s, transform 0.1s;
   padding: 0;
 }
-.dark-theme .bm-cell { background: #11111a; border-color: #2d2d40; }
-.bm-cell.on { background: #8e44ad; border-color: #6c3483; }
+.bm-cell.on { background: var(--sn-accent); border-color: var(--sn-accent); }
 .bm-cell:active { transform: scale(0.93); }
-.bm-cell.flash { box-shadow: 0 0 0 3px rgba(241,196,15,0.7); }
+.bm-cell.flash { box-shadow: 0 0 0 3px var(--sn-accent-line); }
 
 .bm-thumb { display: grid; gap: 2px; }
-.bm-thumb .tc { border-radius: 2px; background: #e3e8ee; }
-.dark-theme .bm-thumb .tc { background: #1d1d2c; }
-.bm-thumb .tc.on { background: #8e44ad; }
+.bm-thumb .tc { border-radius: 2px; background: var(--sn-panel-inset); }
+.bm-thumb .tc.on { background: var(--sn-accent); }
 
 .bm-flexwrap { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
 .bm-panel { flex: 1; min-width: 240px; }
 
 .bm-stat { text-align: center; }
 .bm-stat .lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; }
-.bm-stat .val { font-size: 1.7rem; font-weight: 700; color: #8e44ad; line-height: 1.1; }
-.dark-theme .bm-stat .val { color: #c8a2e8; }
+.bm-stat .val { font-size: 1.7rem; }
 .bm-statrow { display: flex; gap: 2rem; justify-content: center; margin: 0.5rem 0; }
 
-.bm-tag {
-  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
-  font-size: 0.8rem; font-weight: 600;
-}
-.bm-tag.good { background: #d5f5e3; color: #1e8449; }
-.bm-tag.warn { background: #fdebd0; color: #b9770e; }
-.bm-tag.hot  { background: #fadbd8; color: #c0392b; }
-.dark-theme .bm-tag.good { background: #14331f; color: #6fcf97; }
-.dark-theme .bm-tag.warn { background: #3a2c10; color: #f0b24a; }
-.dark-theme .bm-tag.hot  { background: #3a1714; color: #f1948a; }
-
-svg text { fill: #555; }
-.dark-theme svg text { fill: #bbb; }
-
-.bm-chartwrap { background: #fff; border: 1px solid #e6e6ee; border-radius: 8px; padding: 0.4rem; }
-.dark-theme .bm-chartwrap { background: #11111a; border-color: #2a2a3e; }
-
-.bm-segbtns { display: inline-flex; border-radius: 8px; overflow: hidden; border: 1px solid #8e44ad; }
+.bm-segbtns { display: inline-flex; border-radius: var(--sn-radius-sm); overflow: hidden; border: 1px solid var(--sn-accent-line); }
 .bm-segbtns button {
   background: transparent; border: none; padding: 0.45rem 0.9rem; cursor: pointer;
-  font-family: inherit; font-size: 0.85rem; font-weight: 600; color: #8e44ad;
+  font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--sn-accent);
+  transition: background 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
 }
-.bm-segbtns button.active { background: #8e44ad; color: #fff; }
-.dark-theme .bm-segbtns { border-color: #c8a2e8; }
-.dark-theme .bm-segbtns button { color: #c8a2e8; }
-.dark-theme .bm-segbtns button.active { background: #8e44ad; color: #fff; }
+.bm-segbtns button.active { background: var(--sn-accent); color: var(--sn-on-accent); }
 
 .bm-legend { font-size: 0.78rem; opacity: 0.75; display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.4rem; }
 .bm-legend span::before { content: "■ "; }
@@ -325,7 +496,7 @@ svg text { fill: #555; }
       <div class="bm-chartwrap">
         <svg id="bmA-chart" width="100%" height="120" viewBox="0 0 400 120" preserveAspectRatio="none" style="display:block"></svg>
       </div>
-      <div class="bm-legend"><span style="color:#8e44ad">energy over time</span></div>
+      <div class="bm-legend"><span style="color:var(--sn-accent)">energy over time</span></div>
     </div>
   </div>
 
@@ -402,8 +573,8 @@ svg text { fill: #555; }
     <svg id="bmC-svg" width="100%" height="240" viewBox="0 0 720 240"></svg>
   </div>
   <div class="bm-legend">
-    <span style="color:#1a5276">low energy (likely)</span>
-    <span style="color:#c0392b">high energy (rare)</span>
+    <span style="color:var(--sn-accent)">low energy (likely)</span>
+    <span style="color:var(--sn-bad)">high energy (rare)</span>
   </div>
 
   <div class="bm-flexwrap" style="margin-top:1rem">
@@ -449,8 +620,8 @@ svg text { fill: #555; }
         <svg id="bmD-svg" width="100%" height="180" viewBox="0 0 420 180"></svg>
       </div>
       <div class="bm-legend">
-        <span style="color:#8e44ad">energy</span>
-        <span style="color:#e67e22">temperature</span>
+        <span style="color:var(--sn-accent)">energy</span>
+        <span style="color:var(--sn-warn)">temperature</span>
       </div>
     </div>
   </div>
@@ -521,8 +692,8 @@ svg text { fill: #555; }
       <h4 style="margin-top:0">Hidden-unit receptive fields</h4>
       <div id="bmE-fields" style="display:flex;gap:0.8rem;flex-wrap:wrap"></div>
       <div class="bm-legend">
-        <span style="color:#c0392b">negative weight</span>
-        <span style="color:#2471a3">positive weight</span>
+        <span style="color:var(--sn-bad)">negative weight</span>
+        <span style="color:var(--sn-accent)">positive weight</span>
       </div>
     </div>
   </div>
@@ -573,6 +744,23 @@ svg text { fill: #555; }
 <script>
 (function () {
   "use strict";
+  // theme-aware colors: read CSS tokens, re-read + redraw on light/dark toggle
+  const SN = document.querySelector(".study-note");
+  const hex2rgb = h => { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(x => x + x).join(""); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; };
+  const mix = (a, b, t) => { const A = hex2rgb(a), B = hex2rgb(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(",")})`; };
+  const readCols = () => {
+    const cs = getComputedStyle(SN);
+    const c = n => cs.getPropertyValue(n).trim();
+    return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
+             warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
+             inset: c("--sn-panel-inset"), line: c("--sn-accent-line") };
+  };
+  let COL = readCols();
+  const redrawFns = [];
+  const onTheme = fn => { redrawFns.push(fn); return fn; };
+  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
   const sigmoid = x => 1 / (1 + Math.exp(-x));
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 
@@ -674,9 +862,9 @@ svg text { fill: #555; }
       hist.forEach((e, k) => { d += (k === 0 ? "M" : "L") + (pad + k * xs).toFixed(1) + " " + y(e).toFixed(1) + " "; });
       const zeroY = y(0);
       svg.innerHTML =
-        `<line x1="${pad}" y1="${zeroY}" x2="${W_-pad}" y2="${zeroY}" stroke="#ccc" stroke-dasharray="3 3"/>` +
+        `<line x1="${pad}" y1="${zeroY}" x2="${W_-pad}" y2="${zeroY}" stroke="${COL.grid}" stroke-dasharray="3 3"/>` +
         `<text x="${pad+2}" y="${zeroY-3}" font-size="9" opacity="0.6">E=0</text>` +
-        `<path d="${d}" fill="none" stroke="#8e44ad" stroke-width="2"/>`;
+        `<path d="${d}" fill="none" stroke="${COL.accent}" stroke-width="2"/>`;
     }
 
     function pushHist(e) { hist.push(e); if (hist.length > 120) hist.shift(); }
@@ -735,6 +923,7 @@ svg text { fill: #555; }
 
     tval.textContent = tempOf().toFixed(2);
     pushHist(energy(s, HEB.W, HEB.b));
+    onTheme(paint);
     paint();
   })();
 
@@ -772,21 +961,21 @@ svg text { fill: #555; }
       // gridlines + axes
       let grid = "";
       [0, 0.25, 0.5, 0.75, 1].forEach(p2 => {
-        grid += `<line x1="${padL}" y1="${Y(p2)}" x2="${W_-padR}" y2="${Y(p2)}" stroke="#ddd" stroke-width="1"/>`;
+        grid += `<line x1="${padL}" y1="${Y(p2)}" x2="${W_-padR}" y2="${Y(p2)}" stroke="${COL.grid}" stroke-width="1"/>`;
         grid += `<text x="${padL-6}" y="${Y(p2)+3}" font-size="10" text-anchor="end">${p2}</text>`;
       });
       [-6,-3,0,3,6].forEach(x => {
-        grid += `<line x1="${X(x)}" y1="${padT}" x2="${X(x)}" y2="${H_-padB}" stroke="#eee" stroke-width="1"/>`;
+        grid += `<line x1="${X(x)}" y1="${padT}" x2="${X(x)}" y2="${H_-padB}" stroke="${COL.grid}" stroke-width="1"/>`;
         grid += `<text x="${X(x)}" y="${H_-padB+16}" font-size="10" text-anchor="middle">${x>0?"+":""}${x}</text>`;
       });
-      const half = `<line x1="${padL}" y1="${Y(0.5)}" x2="${W_-padR}" y2="${Y(0.5)}" stroke="#bbb" stroke-dasharray="4 4"/>`;
+      const half = `<line x1="${padL}" y1="${Y(0.5)}" x2="${W_-padR}" y2="${Y(0.5)}" stroke="${COL.muted}" stroke-dasharray="4 4"/>`;
       const marker =
-        `<line x1="${X(dE)}" y1="${padT}" x2="${X(dE)}" y2="${H_-padB}" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3 3"/>` +
-        `<circle cx="${X(dE)}" cy="${Y(p)}" r="6" fill="#e74c3c"/>` +
-        `<text x="${X(dE)+9}" y="${Y(p)-6}" font-size="12" fill="#e74c3c" font-weight="700">p=${p.toFixed(2)}</text>`;
+        `<line x1="${X(dE)}" y1="${padT}" x2="${X(dE)}" y2="${H_-padB}" stroke="${COL.bad}" stroke-width="1.5" stroke-dasharray="3 3"/>` +
+        `<circle cx="${X(dE)}" cy="${Y(p)}" r="6" fill="${COL.bad}"/>` +
+        `<text x="${X(dE)+9}" y="${Y(p)-6}" font-size="12" fill="${COL.bad}" font-weight="700">p=${p.toFixed(2)}</text>`;
       svg.innerHTML =
         grid + half +
-        `<path d="${path}" fill="none" stroke="#8e44ad" stroke-width="2.5"/>` +
+        `<path d="${path}" fill="none" stroke="${COL.accent}" stroke-width="2.5"/>` +
         marker +
         `<text x="${X(0)}" y="${H_-4}" font-size="11" text-anchor="middle">energy saved by turning on  (&Delta;E)</text>` +
         `<text x="14" y="${padT+90}" font-size="11" transform="rotate(-90 14 ${padT+90})" text-anchor="middle">p(unit on)</text>`;
@@ -797,6 +986,7 @@ svg text { fill: #555; }
     }
     tempSlider.addEventListener("input", draw);
     deSlider.addEventListener("input", draw);
+    onTheme(draw);
     draw();
   })();
 
@@ -831,11 +1021,8 @@ svg text { fill: #555; }
 
     function energyColor(e) {
       const t = (e - eLo) / (eHi - eLo + 1e-9); // 0 low ... 1 high
-      // interpolate blue(low) -> red(high)
-      const r = Math.round(26 + t * (192 - 26));
-      const g = Math.round(82 + t * (57 - 82));
-      const bl = Math.round(118 + t * (43 - 118));
-      return `rgb(${r},${g},${bl})`;
+      // interpolate accent (low energy) -> muted slate (high energy)
+      return mix(COL.accent, COL.muted, t);
     }
 
     function draw() {
@@ -859,14 +1046,15 @@ svg text { fill: #555; }
         const gx = k * slot + slot/2, gy = H_ - padB + 8, cs = 7;
         for (let i = 0; i < n; i++) {
           const cx = gx - cs + (i % 2) * cs, cy = gy + Math.floor(i / 2) * cs;
-          out += `<rect x="${cx}" y="${cy}" width="${cs-1.5}" height="${cs-1.5}" rx="1" fill="${s.st[i]===1?'#8e44ad':'#d8dde3'}"/>`;
+          out += `<rect x="${cx}" y="${cy}" width="${cs-1.5}" height="${cs-1.5}" rx="1" fill="${s.st[i]===1?COL.accent:COL.inset}"/>`;
         }
       });
       // label global min
-      out += `<text x="${(0*slot+slot/2).toFixed(1)}" y="${H_-2}" font-size="9" text-anchor="middle" fill="#1a5276" font-weight="700">min E</text>`;
+      out += `<text x="${(0*slot+slot/2).toFixed(1)}" y="${H_-2}" font-size="9" text-anchor="middle" fill="${COL.accent}" font-weight="700">min E</text>`;
       svg.innerHTML = out;
     }
     tempSlider.addEventListener("input", draw);
+    onTheme(draw);
     draw();
   })();
 
@@ -910,7 +1098,9 @@ svg text { fill: #555; }
 
     function paintGrid(s) { for (let i = 0; i < N; i++) cells[i].classList.toggle("on", s[i] === 1); }
 
+    let lastE = [], lastT = [];
     function drawTraces(eTrace, tTrace) {
+      lastE = eTrace; lastT = tTrace;
       const W_ = 420, H_ = 180, pad = 8;
       const K = eTrace.length;
       const eLo = -5.2, eHi = 3.2, tHi = 3.2;
@@ -921,8 +1111,8 @@ svg text { fill: #555; }
       eTrace.forEach((e, k) => { de += (k===0?"M":"L") + (pad+k*xs).toFixed(1) + " " + yE(e).toFixed(1) + " "; });
       tTrace.forEach((t, k) => { dt += (k===0?"M":"L") + (pad+k*xs).toFixed(1) + " " + yT(t).toFixed(1) + " "; });
       svg.innerHTML =
-        `<path d="${dt}" fill="none" stroke="#e67e22" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>` +
-        `<path d="${de}" fill="none" stroke="#8e44ad" stroke-width="2.5"/>` +
+        `<path d="${dt}" fill="none" stroke="${COL.warn}" stroke-width="1.5" stroke-dasharray="4 3" opacity="0.8"/>` +
+        `<path d="${de}" fill="none" stroke="${COL.accent}" stroke-width="2.5"/>` +
         `<text x="${W_-pad}" y="${yE(-5)}" font-size="9" text-anchor="end" opacity="0.6">deep memory</text>`;
     }
 
@@ -949,7 +1139,7 @@ svg text { fill: #555; }
     document.getElementById("bmD-race").addEventListener("click", () => {
       const modes = ["greedy", "hot", "anneal"];
       const labels = { greedy: "Greedy (cold)", hot: "Always hot", anneal: "Annealed ❄️" };
-      const colors = { greedy: "#e74c3c", hot: "#e67e22", anneal: "#27ae60" };
+      const colors = { greedy: COL.bad, hot: COL.warn, anneal: COL.good };
       const res = {};
       modes.forEach(m => {
         let solved = 0;
@@ -966,7 +1156,7 @@ svg text { fill: #555; }
         const pct = Math.round(res[m] * 100);
         return `<div style="display:flex;align-items:center;gap:0.6rem;margin:0.4rem 0">
           <span style="width:130px;font-size:0.85rem">${labels[m]}</span>
-          <div style="flex:1;background:#e8e8ef;border-radius:6px;overflow:hidden;height:22px;max-width:360px">
+          <div style="flex:1;background:${COL.inset};border-radius:6px;overflow:hidden;height:22px;max-width:360px">
             <div class="bm-pop" style="width:${pct}%;height:100%;background:${colors[m]};border-radius:6px"></div>
           </div>
           <strong style="width:3rem">${pct}%</strong>
@@ -977,6 +1167,7 @@ svg text { fill: #555; }
     // initial
     const init = runOnce("anneal", true);
     paintGrid(init.s); drawTraces(init.eTrace, init.tTrace); setResult(init.s);
+    onTheme(() => drawTraces(lastE, lastT));
   })();
 
   // ============================================================
@@ -1037,8 +1228,8 @@ svg text { fill: #555; }
           const c = document.createElement("div");
           const w = Wt[i][j] / maxAbs; // -1..1
           let col;
-          if (w >= 0) { const t = w; col = `rgb(${Math.round(255-150*t)},${Math.round(255-100*t)},255)`; }
-          else { const t = -w; col = `rgb(255,${Math.round(255-150*t)},${Math.round(255-150*t)})`; }
+          if (w >= 0) { col = mix(COL.inset, COL.accent, w); }
+          else { col = mix(COL.inset, COL.bad, -w); }
           c.style.background = col;
           c.style.borderRadius = "2px";
           g.appendChild(c);
@@ -1063,8 +1254,8 @@ svg text { fill: #555; }
       let d="";
       errHist.forEach((e,k)=>{ d += (k===0?"M":"L")+(pad+k*xs).toFixed(1)+" "+y(e).toFixed(1)+" "; });
       errSvg.innerHTML =
-        `<path d="${d}" fill="none" stroke="#8e44ad" stroke-width="2"/>` +
-        `<text x="${W_-pad}" y="${y(errHist[errHist.length-1])-6}" font-size="10" text-anchor="end" fill="#8e44ad">${errHist[errHist.length-1].toFixed(2)}</text>` +
+        `<path d="${d}" fill="none" stroke="${COL.accent}" stroke-width="2"/>` +
+        `<text x="${W_-pad}" y="${y(errHist[errHist.length-1])-6}" font-size="10" text-anchor="end" fill="${COL.accent}">${errHist[errHist.length-1].toFixed(2)}</text>` +
         `<text x="${pad}" y="${H_-2}" font-size="9" opacity="0.6">epochs &rarr;</text>`;
     }
 
@@ -1104,7 +1295,7 @@ svg text { fill: #555; }
     function paintVis() { for (let i=0;i<V;i++) visCells[i].classList.toggle("on", vState[i]===1); }
     function clearHidden() {
       hidEl.innerHTML = "";
-      for (let j=0;j<H;j++){ const b=document.createElement("div"); b.style.cssText="width:70px;height:14px;border-radius:7px;background:#e8e8ef"; hidEl.appendChild(b); }
+      for (let j=0;j<H;j++){ const b=document.createElement("div"); b.style.cssText=`width:70px;height:14px;border-radius:7px;background:${COL.inset}`; hidEl.appendChild(b); }
       recCells.forEach(c=>{ c.classList.remove("on"); c.style.background=""; });
     }
     function reconstruct() {
@@ -1112,9 +1303,9 @@ svg text { fill: #555; }
       hidEl.innerHTML = "";
       for (let j=0;j<H;j++) {
         const outer = document.createElement("div");
-        outer.style.cssText = "width:70px;height:14px;border-radius:7px;background:#e8e8ef;overflow:hidden";
+        outer.style.cssText = `width:70px;height:14px;border-radius:7px;background:${COL.inset};overflow:hidden`;
         const inner = document.createElement("div");
-        inner.style.cssText = `width:${Math.round(hp[j]*100)}%;height:100%;background:#8e44ad;border-radius:7px`;
+        inner.style.cssText = `width:${Math.round(hp[j]*100)}%;height:100%;background:${COL.accent};border-radius:7px`;
         outer.appendChild(inner); hidEl.appendChild(outer);
       }
       const h = hp.map(bern);
@@ -1134,7 +1325,7 @@ svg text { fill: #555; }
     document.getElementById("bmE-clear").addEventListener("click", () => { vState = new Array(V).fill(0); paintVis(); clearHidden(); });
 
     // ---- architecture diagram ----
-    (function () {
+    function drawArch() {
       const svg = document.getElementById("bmE-arch");
       const W_=460,H_=170;
       const vx = 120, hx = 340;
@@ -1143,20 +1334,24 @@ svg text { fill: #555; }
       for (let j=0;j<H;j++) hys.push(40 + j*(H_-80)/(H-1));
       let s = "";
       for (let i=0;i<V;i++) for (let j=0;j<H;j++)
-        s += `<line x1="${vx}" y1="${vys[i]}" x2="${hx}" y2="${hys[j]}" stroke="#cdb4e0" stroke-width="0.6" opacity="0.7"/>`;
-      vys.forEach(y => s += `<circle cx="${vx}" cy="${y}" r="7" fill="#8e44ad"/>`);
-      hys.forEach(y => s += `<circle cx="${hx}" cy="${y}" r="9" fill="#e67e22"/>`);
+        s += `<line x1="${vx}" y1="${vys[i]}" x2="${hx}" y2="${hys[j]}" stroke="${COL.line}" stroke-width="0.6" opacity="0.7"/>`;
+      vys.forEach(y => s += `<circle cx="${vx}" cy="${y}" r="7" fill="${COL.accent}"/>`);
+      hys.forEach(y => s += `<circle cx="${hx}" cy="${y}" r="9" fill="${COL.warn}"/>`);
       s += `<text x="${vx}" y="12" font-size="12" text-anchor="middle" font-weight="700">visible (data)</text>`;
       s += `<text x="${hx}" y="22" font-size="12" text-anchor="middle" font-weight="700">hidden (features)</text>`;
       s += `<text x="${vx}" y="${H_-2}" font-size="10" text-anchor="middle" opacity="0.7">9 units</text>`;
       s += `<text x="${hx}" y="${H_-2}" font-size="10" text-anchor="middle" opacity="0.7">4 units · no in-layer links</text>`;
       svg.innerHTML = s;
-    })();
+    }
+    drawArch();
 
     drawErr(); drawFields(); paintVis(); clearHidden();
+    onTheme(() => { drawErr(); drawFields(); drawArch(); });
   })();
 })();
 </script>
+
+</div>
 
   </div>
 
