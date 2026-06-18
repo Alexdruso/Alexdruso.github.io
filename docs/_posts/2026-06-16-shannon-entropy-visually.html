@@ -6,124 +6,31 @@ categories: [Information Theory, Interactive]
 excerpt: "Entropy gets introduced as a formula — −Σ p log p — and the intuition evaporates on contact. This is the refresher I wish I'd had: entropy is just average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy, live in your browser."
 ---
 
+{% include study-note-styles.html %}
+
+<div class="study-note">
+
 <style>
-/* ===== layout ===== */
-.se-section {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  border-radius: 12px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-}
-.dark-theme .se-section { background: #1e1e2e; border-color: #313244; }
-.se-section h3 { margin-top: 0; color: #8e44ad; }
-.dark-theme .se-section h3 { color: #c8a2e8; }
+/* Note-specific layout. Shared components (sections, buttons, sliders,
+   tags, equations, notes, charts, numerals) live in study-note-styles.html. */
 .se-section h4 { margin-bottom: 0.5rem; }
 
-.se-equation {
-  padding: 1rem 1.5rem;
-  background: #fff;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  font-size: 1.1rem;
-  text-align: center;
-  margin: 1rem 0;
-  overflow-x: auto;
-}
-.dark-theme .se-equation { background: #14141e; border-color: #313244; }
-.se-equation .big { font-size: 1.25rem; }
-
-.se-note {
-  background: #f3e9fb;
-  border-radius: 8px;
-  padding: 0.9rem 1.1rem;
-  border-left: 4px solid #8e44ad;
-  font-size: 0.9rem;
-  margin: 1rem 0;
-}
-.dark-theme .se-note { background: #251a30; border-left-color: #c8a2e8; }
-
-.se-example {
-  background: #fff8e1;
-  border-radius: 8px;
-  padding: 1rem;
-  border: 1px solid #ffe082;
-  font-size: 0.9rem;
-  margin: 1rem 0;
-}
-.dark-theme .se-example { background: #2a2500; border-color: #554400; }
-
-/* ===== controls ===== */
 .se-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
-.se-btn {
-  padding: 0.5rem 1.1rem;
-  border-radius: 8px;
-  border: none;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s;
-  background: #8e44ad;
-  color: white;
-  font-family: inherit;
-}
-.se-btn.sec { background: #5d6d7e; }
-.se-btn:hover:not(:disabled) { filter: brightness(0.9); }
-.se-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.se-reset {
-  background: none;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  padding: 0.4rem 0.85rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
-}
-.se-reset:hover { background: #eee; }
-.dark-theme .se-reset { border-color: #444; color: #ccc; }
-.dark-theme .se-reset:hover { background: #252535; }
-
-.se-slider { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px;
-  background: linear-gradient(90deg,#3498db,#8e44ad,#e74c3c); outline: none; cursor: pointer; }
-.se-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px;
-  border-radius: 50%; background: #fff; border: 2px solid #8e44ad; cursor: pointer; }
-.se-slider::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff;
-  border: 2px solid #8e44ad; cursor: pointer; }
-.se-readout { font-weight: 700; font-size: 1.05rem; min-width: 4.5rem; display: inline-block; }
+.se-readout { font-size: 1.05rem; min-width: 4.5rem; display: inline-block; }
 
 .se-flexwrap { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
 .se-panel { flex: 1; min-width: 240px; }
 
 .se-stat { text-align: center; }
 .se-stat .lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; }
-.se-stat .val { font-size: 1.7rem; font-weight: 700; color: #8e44ad; line-height: 1.1; }
-.dark-theme .se-stat .val { color: #c8a2e8; }
+.se-stat .val { font-size: 1.7rem; }
 .se-statrow { display: flex; gap: 2rem; justify-content: center; margin: 0.5rem 0; }
-
-.se-tag {
-  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px;
-  font-size: 0.8rem; font-weight: 600;
-}
-.se-tag.good { background: #d5f5e3; color: #1e8449; }
-.se-tag.warn { background: #fdebd0; color: #b9770e; }
-.se-tag.hot  { background: #fadbd8; color: #c0392b; }
-.dark-theme .se-tag.good { background: #14331f; color: #6fcf97; }
-.dark-theme .se-tag.warn { background: #3a2c10; color: #f0b24a; }
-.dark-theme .se-tag.hot  { background: #3a1714; color: #f1948a; }
-
-svg text { fill: #555; }
-.dark-theme svg text { fill: #bbb; }
-
-.se-chartwrap { background: #fff; border: 1px solid #e6e6ee; border-radius: 8px; padding: 0.4rem; }
-.dark-theme .se-chartwrap { background: #11111a; border-color: #2a2a3e; }
 
 .se-legend { font-size: 0.78rem; opacity: 0.75; display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.4rem; }
 .se-legend span::before { content: "■ "; }
 
 /* surprise meter */
-.se-meter { background: #e8e8ef; border-radius: 8px; height: 26px; overflow: hidden; position: relative; }
-.dark-theme .se-meter { background: #1d1d2c; }
+.se-meter { background: var(--sn-panel-inset); border: 1px solid var(--sn-border); border-radius: 8px; height: 26px; overflow: hidden; position: relative; }
 .se-meter > div { height: 100%; border-radius: 8px; transition: width 0.12s ease, background 0.12s ease; }
 
 /* distribution sliders */
@@ -185,7 +92,7 @@ svg text { fill: #555; }
       <div class="se-statrow">
         <div class="se-stat"><div class="lab">surprise</div><div class="val" id="se1-bits">3.00</div><div class="lab" style="opacity:0.4">bits</div></div>
       </div>
-      <div class="se-meter" style="margin:0.6rem 0"><div id="se1-meter" style="width:30%;background:#8e44ad"></div></div>
+      <div class="se-meter" style="margin:0.6rem 0"><div id="se1-meter" style="width:30%;background:var(--sn-accent)"></div></div>
       <div id="se1-msg" style="font-size:0.85rem;opacity:0.85;text-align:center;min-height:3.2em"></div>
     </div>
   </div>
@@ -280,7 +187,7 @@ svg text { fill: #555; }
       </div>
       <div class="se-statrow" style="margin-top:0.6rem">
         <div class="se-stat"><div class="lab">entropy H</div><div class="val" id="se3-h">—</div><div class="lab" style="opacity:0.4">bits</div></div>
-        <div class="se-stat"><div class="lab">max (log<sub>2</sub>N)</div><div class="val" id="se3-max" style="color:#5d6d7e">—</div><div class="lab" style="opacity:0.4">bits</div></div>
+        <div class="se-stat"><div class="lab">max (log<sub>2</sub>N)</div><div class="val" id="se3-max" style="color:var(--sn-muted)">—</div><div class="lab" style="opacity:0.4">bits</div></div>
       </div>
       <div style="text-align:center"><span id="se3-tag" class="se-tag warn">—</span></div>
     </div>
@@ -320,14 +227,14 @@ svg text { fill: #555; }
     <svg id="se4-svg" width="100%" height="200" viewBox="0 0 720 200" preserveAspectRatio="none" style="display:block"></svg>
   </div>
   <div class="se-legend">
-    <span style="color:#8e44ad">running average surprise</span>
-    <span style="color:#27ae60">entropy H (target)</span>
+    <span style="color:var(--sn-accent)">running average surprise</span>
+    <span style="color:var(--sn-good)">entropy H (target)</span>
   </div>
 
   <div class="se-statrow" style="margin-top:0.6rem">
     <div class="se-stat"><div class="lab">draws</div><div class="val" id="se4-n">0</div></div>
     <div class="se-stat"><div class="lab">avg surprise</div><div class="val" id="se4-avg">—</div></div>
-    <div class="se-stat"><div class="lab">entropy H</div><div class="val" id="se4-h" style="color:#27ae60">—</div></div>
+    <div class="se-stat"><div class="lab">entropy H</div><div class="val" id="se4-h" style="color:var(--sn-good)">—</div></div>
   </div>
   <div class="se-note" style="margin-bottom:0">
     <strong>Try this:</strong> shape a lopsided distribution above, then run the sampler — the average
@@ -357,6 +264,20 @@ svg text { fill: #555; }
 <script>
 (function () {
   "use strict";
+  // theme-aware colors: read CSS tokens, re-read + redraw on light/dark toggle
+  const SN = document.querySelector(".study-note");
+  const readCols = () => {
+    const cs = getComputedStyle(SN);
+    const c = n => cs.getPropertyValue(n).trim();
+    return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
+             muted: c("--sn-muted"), grid: c("--sn-grid") };
+  };
+  let COL = readCols();
+  const redrawFns = [];
+  const onTheme = fn => { redrawFns.push(fn); return fn; };
+  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
   const log2 = x => Math.log(x) / Math.LN2;
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
   // surprise of an event, guarded against p<=0
@@ -389,7 +310,7 @@ svg text { fill: #555; }
       pval.textContent = p.toFixed(3);
       bitsEl.textContent = h.toFixed(2);
       meter.style.width = clamp(h / hMax * 100, 2, 100).toFixed(1) + "%";
-      meter.style.background = h < 1 ? "#27ae60" : h < 3 ? "#8e44ad" : "#e74c3c";
+      meter.style.background = h < 1 ? COL.good : h < 3 ? COL.accent : COL.bad;
 
       // curve h = -log2 p
       let path = "";
@@ -401,20 +322,20 @@ svg text { fill: #555; }
       let grid = "";
       [0, 1, 2, 3, 4, 5].forEach(b => {
         if (b > hMax) return;
-        grid += `<line x1="${padL}" y1="${Y(b)}" x2="${W - padR}" y2="${Y(b)}" stroke="#eee" stroke-width="1"/>`;
+        grid += `<line x1="${padL}" y1="${Y(b)}" x2="${W - padR}" y2="${Y(b)}" stroke="${COL.grid}" stroke-width="1"/>`;
         grid += `<text x="${padL - 6}" y="${Y(b) + 3}" font-size="10" text-anchor="end">${b}</text>`;
       });
       [0, 0.25, 0.5, 0.75, 1].forEach(px => {
-        grid += `<line x1="${X(px)}" y1="${padT}" x2="${X(px)}" y2="${H - padB}" stroke="#f1f1f1" stroke-width="1"/>`;
+        grid += `<line x1="${X(px)}" y1="${padT}" x2="${X(px)}" y2="${H - padB}" stroke="${COL.grid}" stroke-width="1"/>`;
         grid += `<text x="${X(px)}" y="${H - padB + 16}" font-size="10" text-anchor="middle">${px}</text>`;
       });
       const marker =
-        `<line x1="${X(p)}" y1="${Y(h)}" x2="${X(p)}" y2="${H - padB}" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3 3"/>` +
-        `<circle cx="${X(p)}" cy="${Y(h)}" r="6" fill="#e74c3c"/>` +
-        `<text x="${clamp(X(p) + 9, padL, W - padR - 60)}" y="${clamp(Y(h) - 6, padT + 12, H - padB)}" font-size="12" fill="#e74c3c" font-weight="700">${h.toFixed(2)} bits</text>`;
+        `<line x1="${X(p)}" y1="${Y(h)}" x2="${X(p)}" y2="${H - padB}" stroke="${COL.bad}" stroke-width="1.5" stroke-dasharray="3 3"/>` +
+        `<circle cx="${X(p)}" cy="${Y(h)}" r="6" fill="${COL.bad}"/>` +
+        `<text x="${clamp(X(p) + 9, padL, W - padR - 60)}" y="${clamp(Y(h) - 6, padT + 12, H - padB)}" font-size="12" fill="${COL.bad}" font-weight="700">${h.toFixed(2)} bits</text>`;
       svg.innerHTML =
         grid +
-        `<path d="${path}" fill="none" stroke="#8e44ad" stroke-width="2.5"/>` +
+        `<path d="${path}" fill="none" stroke="${COL.accent}" stroke-width="2.5"/>` +
         marker +
         `<text x="${X(0.5)}" y="${H - 4}" font-size="11" text-anchor="middle">probability of the outcome  p(x)</text>` +
         `<text x="13" y="${padT + 84}" font-size="11" transform="rotate(-90 13 ${padT + 84})" text-anchor="middle">surprise (bits)</text>`;
@@ -425,6 +346,7 @@ svg text { fill: #555; }
       else msg.innerHTML = "Halve the probability and the surprise goes up by exactly one bit.";
     }
     pSlider.addEventListener("input", draw);
+    onTheme(draw);
     draw();
   })();
 
@@ -459,21 +381,21 @@ svg text { fill: #555; }
       }
       let grid = "";
       [0, 0.25, 0.5, 0.75, 1].forEach(b => {
-        grid += `<line x1="${padL}" y1="${Y(b)}" x2="${W - padR}" y2="${Y(b)}" stroke="#eee" stroke-width="1"/>`;
+        grid += `<line x1="${padL}" y1="${Y(b)}" x2="${W - padR}" y2="${Y(b)}" stroke="${COL.grid}" stroke-width="1"/>`;
         grid += `<text x="${padL - 6}" y="${Y(b) + 3}" font-size="10" text-anchor="end">${b.toFixed(2)}</text>`;
       });
       [0, 0.25, 0.5, 0.75, 1].forEach(px => {
-        grid += `<line x1="${X(px)}" y1="${padT}" x2="${X(px)}" y2="${H - padB}" stroke="#f1f1f1" stroke-width="1"/>`;
+        grid += `<line x1="${X(px)}" y1="${padT}" x2="${X(px)}" y2="${H - padB}" stroke="${COL.grid}" stroke-width="1"/>`;
         grid += `<text x="${X(px)}" y="${H - padB + 16}" font-size="10" text-anchor="middle">${px}</text>`;
       });
       const peak = `<line x1="${X(0.5)}" y1="${Y(1)}" x2="${X(0.5)}" y2="${H - padB}" stroke="#bbb" stroke-dasharray="4 4"/>` +
         `<text x="${X(0.5)}" y="${Y(1) - 4}" font-size="10" text-anchor="middle" opacity="0.7">1 bit max</text>`;
       const marker =
-        `<line x1="${X(p)}" y1="${Y(h)}" x2="${X(p)}" y2="${H - padB}" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="3 3"/>` +
-        `<circle cx="${X(p)}" cy="${Y(h)}" r="6" fill="#e74c3c"/>`;
+        `<line x1="${X(p)}" y1="${Y(h)}" x2="${X(p)}" y2="${H - padB}" stroke="${COL.bad}" stroke-width="1.5" stroke-dasharray="3 3"/>` +
+        `<circle cx="${X(p)}" cy="${Y(h)}" r="6" fill="${COL.bad}"/>`;
       svg.innerHTML =
         grid + peak +
-        `<path d="${path}" fill="none" stroke="#8e44ad" stroke-width="2.5"/>` +
+        `<path d="${path}" fill="none" stroke="${COL.accent}" stroke-width="2.5"/>` +
         marker +
         `<text x="${X(0.5)}" y="${H - 4}" font-size="11" text-anchor="middle">p(heads)</text>` +
         `<text x="13" y="${padT + 92}" font-size="11" transform="rotate(-90 13 ${padT + 92})" text-anchor="middle">entropy H (bits)</text>`;
@@ -487,6 +409,7 @@ svg text { fill: #555; }
       else msg.innerHTML = "Bias the coin and entropy falls: outcomes are easier to guess, so each carries fewer bits on average.";
     }
     pSlider.addEventListener("input", draw);
+    onTheme(draw);
     draw();
   })();
 
@@ -495,7 +418,7 @@ svg text { fill: #555; }
   // ============================================================
   const dist = {
     names: ["☀️ Sunny", "⛅ Cloudy", "🌧️ Rain", "⛈️ Storm", "❄️ Snow"],
-    colors: ["#f39c12", "#7f8c8d", "#2980b9", "#8e44ad", "#16a3c9"],
+    colors: ["#0891b2", "#0ea5b8", "#22b8c9", "#67cdd9", "#a5e3ea"],
     raw: [5, 3, 2, 1, 0.6],   // unnormalised slider weights
     probs() { const s = this.raw.reduce((a, b) => a + b, 0); return this.raw.map(w => w / s); },
     listeners: [],
@@ -551,7 +474,7 @@ svg text { fill: #555; }
       let out = "";
       [0.25, 0.5, 0.75, 1].forEach(f => {
         const y = H - padB - f * top;
-        out += `<line x1="${padL}" y1="${y}" x2="${W}" y2="${y}" stroke="#eee" stroke-width="1"/>`;
+        out += `<line x1="${padL}" y1="${y}" x2="${W}" y2="${y}" stroke="${COL.grid}" stroke-width="1"/>`;
       });
       probs.forEach((p, i) => {
         const x = padL + i * slot + (slot - barW) / 2;
@@ -578,6 +501,7 @@ svg text { fill: #555; }
     });
 
     dist.listeners.push(draw);
+    onTheme(draw);
     draw();
   })();
 
@@ -633,18 +557,18 @@ svg text { fill: #555; }
       let grid = "";
       const ticks = [0, 0.5, 1, 1.5, 2, 2.5].filter(t => t <= yMax);
       ticks.forEach(t => {
-        grid += `<line x1="${padL}" y1="${Y(t)}" x2="${W - padR}" y2="${Y(t)}" stroke="#f0f0f0" stroke-width="1"/>`;
+        grid += `<line x1="${padL}" y1="${Y(t)}" x2="${W - padR}" y2="${Y(t)}" stroke="${COL.grid}" stroke-width="1"/>`;
         grid += `<text x="${padL - 6}" y="${Y(t) + 3}" font-size="9" text-anchor="end">${t}</text>`;
       });
       // target entropy line
       const targetLine =
-        `<line x1="${padL}" y1="${Y(Htarget)}" x2="${W - padR}" y2="${Y(Htarget)}" stroke="#27ae60" stroke-width="2" stroke-dasharray="6 4"/>` +
-        `<text x="${W - padR}" y="${Y(Htarget) - 5}" font-size="10" text-anchor="end" fill="#27ae60">H = ${Htarget.toFixed(2)}</text>`;
+        `<line x1="${padL}" y1="${Y(Htarget)}" x2="${W - padR}" y2="${Y(Htarget)}" stroke="${COL.good}" stroke-width="2" stroke-dasharray="6 4"/>` +
+        `<text x="${W - padR}" y="${Y(Htarget) - 5}" font-size="10" text-anchor="end" fill="${COL.good}">H = ${Htarget.toFixed(2)}</text>`;
       // running-average path
       let d = "";
       hist.forEach((v, k) => { d += (k === 0 ? "M" : "L") + X(k).toFixed(1) + " " + Y(v).toFixed(1) + " "; });
-      const trace = hist.length ? `<path d="${d}" fill="none" stroke="#8e44ad" stroke-width="2"/>` : "";
-      const dot = hist.length ? `<circle cx="${X(hist.length - 1).toFixed(1)}" cy="${Y(hist[hist.length - 1]).toFixed(1)}" r="3.5" fill="#8e44ad"/>` : "";
+      const trace = hist.length ? `<path d="${d}" fill="none" stroke="${COL.accent}" stroke-width="2"/>` : "";
+      const dot = hist.length ? `<circle cx="${X(hist.length - 1).toFixed(1)}" cy="${Y(hist[hist.length - 1]).toFixed(1)}" r="3.5" fill="${COL.accent}"/>` : "";
       svg.innerHTML = grid + targetLine + trace + dot +
         `<text x="${padL}" y="${H - 4}" font-size="9" opacity="0.6">draws →</text>`;
     }
@@ -667,7 +591,10 @@ svg text { fill: #555; }
 
     // when the distribution changes, the target line moves; redraw (keeps history for contrast)
     dist.listeners.push(draw);
+    onTheme(draw);
     draw();
   })();
 })();
 </script>
+
+</div>
