@@ -32,14 +32,7 @@ footer-links:
   googleplus: # anything in your profile username that comes after plus.google.com/
 
 
-# Enter your Disqus shortname (not your username) to enable commenting on posts
-# You can find your shortname on the Settings page of your Disqus account
-disqus:
-
-# Enter your Google Analytics web tracking code (e.g. UA-2110908-2) to activate tracking
-google_analytics: UA-174483391-1
-
-# Your website URL 
+# Your website URL
 # Used for Sitemap.xml and your RSS feed
 url: https://alexdruso.github.io
 
@@ -54,9 +47,6 @@ baseurl: ""
 #
 
 permalink: /:title/
-
-# The release of Jekyll Now that you're using
-version: v1.2.0
 
 # Jekyll 3 now only supports Kramdown for Markdown
 kramdown:
@@ -73,7 +63,7 @@ sass:
   style: :expanded # You might prefer to minify using :compressed
 
 # Use the following plug-ins
-gems:
+plugins:
   - jekyll-sitemap # Create a sitemap using the official Jekyll sitemap gem
   - jekyll-feed # Create an Atom feed using the official Jekyll feed gem
 
