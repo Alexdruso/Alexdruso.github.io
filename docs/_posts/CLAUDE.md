@@ -5,6 +5,28 @@ inline `<style>` block and embedded vanilla JS. They share one **sleek / futuris
 design system so they look cohesive and never drift back toward the old "gamey,
 blue-and-violet" look. Follow these rules when creating or editing a note.
 
+## Writing voice
+
+These are **self-study notes**: the job of the prose is to teach the concept to me, not to
+pitch it to an audience. Write to be informative first.
+
+- **Open concept-first.** The first sentence states what the concept *is* and the question the
+  note answers — a direct definition, not a personal anecdote, character intro, or hook. Then
+  give the one-sentence summary (the `se-note`/`bm-note` device) and start unpacking it.
+- **Banned openers and packaging.** No "when I first met X at university", "I copied it down /
+  passed the exam", "the refresher I wish I'd had", "by the end of this post you'll have built
+  intuition", "things you can poke, drag, and run", or "…live in your browser". These address a
+  reader and promise an experience; just teach the thing instead.
+- **Neutral register, no narrator.** Don't tell a personal learning story or use "I" as a
+  narrator. State the idea directly.
+- **"you" is for demo instructions only** — imperative how-to like "drag the slider" or "start
+  flipping". Don't use it for audience promises ("you'll see…", "you already know…").
+- **Keep what already teaches well.** The one-sentence summary box, emoji section headers,
+  equations, and the interactive demos all stay. A running worked example (e.g. Luca for MDPs,
+  the coin for hypothesis testing) is welcome **when it genuinely carries the math** — introduce
+  it right after the concept, not as a story that opens the note.
+- **Excerpts** (front-matter) follow the same voice: a crisp concept summary, not a hook.
+
 ## Required scaffold
 
 Right under the front matter, pull in the shared styles and wrap the whole body in
