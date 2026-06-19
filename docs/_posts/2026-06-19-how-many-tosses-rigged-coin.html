@@ -3,7 +3,7 @@ layout: post
 title: "How Many Coin Tosses to Catch a Rigged Coin?"
 date: 2026-06-19
 categories: [Statistics, Interactive]
-excerpt: "A friend swears the coin is fair; you suspect it leans heads. How many flips would actually settle it? Flip a coin live and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read off the exact number from one clean formula — and confirm it with a thousand simulated experiments. The punchline: near-fair coins are brutally expensive to expose, and the cost scales like 1/(p−½)²."
+excerpt: "How many flips does it take to confidently tell a rigged coin from a fair one? Flip a coin and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read the exact number off one clean formula — and confirm it with a thousand simulated experiments. The punchline: near-fair coins are expensive to expose, and the cost scales like 1/(p−½)²."
 ---
 
 {% include study-note-styles.html %}
@@ -47,9 +47,10 @@ excerpt: "A friend swears the coin is fair; you suspect it leans heads. How many
 </style>
 
 <p>
-  A friend slaps a coin on the table and swears it's fair. You've watched it land heads a little too
-  often and you're not so sure. Here's the deceptively simple question this note is about:
-  <strong>how many times would you have to flip it before you could honestly say it's rigged?</strong>
+  Suppose a coin might be biased toward heads, and the bias — if there is one — is slight. The
+  question this note works through sounds simple but isn't:
+  <strong>how many times do you have to flip a coin before you can confidently say it's rigged rather
+  than merely unlucky?</strong>
 </p>
 
 <p>The answer is not a single number — it depends on two things — but it <em>is</em> a clean formula:</p>
@@ -57,8 +58,8 @@ excerpt: "A friend swears the coin is fair; you suspect it leans heads. How many
 <div class="ct-note se-note">
   <strong>It depends on how rigged the coin is and how sure you want to be.</strong> A wildly biased
   60/40 coin gives itself away in a couple hundred flips. A barely-rigged 51/49 coin can hide for
-  <em>tens of thousands</em>. The cost of catching it explodes as the bias shrinks — and by the end
-  you'll be able to read the exact number off one equation, then watch a simulation confirm it.
+  <em>tens of thousands</em>. The cost of catching it explodes as the bias shrinks — and the exact
+  number falls out of a single equation, which a simulation then confirms.
 </div>
 
 <!-- ============================================================ -->

@@ -3,7 +3,7 @@ layout: post
 title: "Shannon Entropy, Visually: Surprise, Uncertainty, and Bits"
 date: 2026-06-16
 categories: [Information Theory, Interactive]
-excerpt: "Entropy gets introduced as a formula — −Σ p log p — and the intuition evaporates on contact. This is the refresher I wish I'd had: entropy is just average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy, live in your browser."
+excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with the meaning left implicit. Rebuilt from the ground up: entropy is average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy."
 ---
 
 {% include study-note-styles.html %}
@@ -43,10 +43,11 @@ excerpt: "Entropy gets introduced as a formula — −Σ p log p — and the int
 </style>
 
 <p>
-  When I first met <strong>Shannon entropy</strong> at university it arrived the way it usually does —
-  as a formula, <em>H = −&Sigma; p log p</em>, scribbled on a board, followed by "and this measures
-  information." I copied it down, passed the exam, and lost every shred of intuition by the following
-  week. This post is the refresher I wish I'd had: built around one idea you can poke, drag, and run.
+  <strong>Shannon entropy</strong> is usually introduced as a formula —
+  <em>H = −&Sigma; p log p</em> — labelled "the amount of information" and left there. That label is
+  correct but inert: it doesn't say what the quantity actually counts, or why the logarithm shows up.
+  The point of this note is to rebuild the meaning from the ground up, one piece at a time, with a
+  demo attached to each step so the formula becomes something to reason about rather than recite.
 </p>
 
 <p>Here's the whole story in one sentence, and everything below just unpacks it:</p>

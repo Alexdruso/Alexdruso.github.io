@@ -3,7 +3,7 @@ layout: post
 title: "Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons"
 date: 2026-05-30
 categories: [Machine Learning, Interactive]
-excerpt: "You already know Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual refresher with live energy landscapes, annealing, and a trainable RBM."
+excerpt: "Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM."
 ---
 
 {% include study-note-styles.html %}
@@ -60,7 +60,7 @@ excerpt: "You already know Hopfield networks slide downhill into the nearest mem
 </style>
 
 <p>
-  When I first met Boltzmann machines at university, they arrived as a footnote to <strong>Hopfield networks</strong>: "now make the neurons flip a coin instead of following the rule deterministically." I nodded, passed the exam, and promptly lost the intuition. This post is the refresher I wish I'd had — built around things you can poke, drag, and run.
+  <strong>Boltzmann machines</strong> are often presented as a one-line tweak to <strong>Hopfield networks</strong>: "make the neurons flip a coin instead of following the update rule deterministically." Stated that way the change sounds trivial, but that single stochastic step is what turns a memory that gets stuck into a model that samples, escapes local minima, and learns. This note works through why that one ingredient — temperature — changes everything, building each idea on a demo.
 </p>
 
 <p>
@@ -75,7 +75,7 @@ excerpt: "You already know Hopfield networks slide downhill into the nearest mem
 <!-- 1. RECAP: HOPFIELD / ENERGY                                  -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>⛰️ The setup you already know: energy</h3>
+  <h3>⛰️ The starting point: energy</h3>
   <p style="margin-top:0">
     Take <em>N</em> units, each either <strong>on (+1)</strong> or <strong>off (−1)</strong>. Connect them symmetrically with weights <em>w<sub>ij</sub></em> (and give each a bias <em>b<sub>i</sub></em>). The whole configuration <strong>s</strong> has a single scalar <strong>energy</strong>:
   </p>
@@ -318,7 +318,7 @@ excerpt: "You already know Hopfield networks slide downhill into the nearest mem
     Because no two hidden units talk to each other, <strong>given the visible layer every hidden unit is independent</strong> — you can sample the whole hidden layer in one shot, and vice versa. That makes a single round-trip <strong>v → h → v′</strong> (the heart of <em>Contrastive Divergence</em>) trivially fast, and it's all you need for a good gradient estimate.
   </p>
   <p style="margin-top:0">
-    Below, an RBM with 9 visible units (a 3×3 image) and 4 hidden units learns three little shapes — <strong>T, L, and a square-ish O</strong> — via CD-1, live in your browser. Watch reconstruction error drop and the hidden units grow into feature detectors.
+    Below, an RBM with 9 visible units (a 3×3 image) and 4 hidden units learns three little shapes — <strong>T, L, and a square-ish O</strong> — via CD-1. As it trains, reconstruction error drops and the hidden units grow into feature detectors.
     <em style="opacity:0.7">(RBMs conventionally use 0/1 units, so this section switches from ±1 to {0,1}.)</em>
   </p>
 
