@@ -858,6 +858,51 @@ footer {
   border-radius: 8px;
   background-color: $white;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  // Let the game handle swipes instead of the browser scrolling/zooming
+  touch-action: none;
+}
+
+// On-screen directional pad — hidden on desktop, shown on touch devices
+.dpad {
+  display: none;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 0.4rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.dpad-btn {
+  font-size: 1.3rem;
+  line-height: 1;
+  border: none;
+  border-radius: 8px;
+  background-color: $lightBlue;
+  color: $darkGray;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dpad-btn:active {
+  background-color: $accentBlue;
+  color: $white;
+}
+
+.dpad-up    { grid-column: 2; grid-row: 1; }
+.dpad-left  { grid-column: 1; grid-row: 2; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-down  { grid-column: 2; grid-row: 3; }
+
+// Show the pad on touch-primary devices
+@media (hover: none) and (pointer: coarse) {
+  .dpad {
+    display: grid;
+  }
 }
 
 .game-controls {
@@ -921,6 +966,16 @@ footer {
   #resetButton {
     background-color: $dark-border;
     color: $dark-text;
+  }
+
+  .dpad-btn {
+    background-color: $dark-border;
+    color: $dark-text;
+
+    &:active {
+      background-color: $dark-accent;
+      color: $white;
+    }
   }
 }
 
