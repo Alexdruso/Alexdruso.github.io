@@ -5,7 +5,7 @@ Guidance for AI assistants (and humans) working in this repository.
 ## What this is
 
 The personal website and CV of Alessandro Sanvito, served at
-**alessandrosanvito.me** (see `CNAME`) via GitHub Pages. It is a
+**alexdruso.github.io** via GitHub Pages. It is a
 **Jekyll 4** site whose source lives entirely under `docs/`, plus a
 **LaTeX (Awesome CV)** pipeline that compiles a CV PDF and drops it into the
 site. The site's signature content is a set of **interactive "Study Notes"** —
@@ -21,8 +21,6 @@ There is no application backend, test suite, or package manager beyond Bundler
 .
 ├── Makefile                 # `make dev`, `make cv`, `make clean` — primary entry points
 ├── README.md                # human-facing project overview
-├── CNAME                    # custom domain: alessandrosanvito.me
-├── _config.yml              # ROOT config — NOT the Jekyll config (see note below)
 ├── .github/workflows/cv-build.yml   # CI: build CV + Jekyll, deploy to gh-pages
 └── docs/                    # *** the Jekyll site root ***
     ├── _config.yml          # the real Jekyll config
@@ -52,10 +50,9 @@ There is no application backend, test suite, or package manager beyond Bundler
     └── public/              # generated assets — Alessandro_Sanvito_CV.pdf lives here
 ```
 
-### Two `_config.yml` files — don't confuse them
-- `./_config.yml` (repo root) is small and **not** used to build the site.
-- `docs/_config.yml` is the **authoritative Jekyll config** (site name, nav
-  rendering, kramdown/rouge, sass, `exclude`/`include`, analytics, base URL).
+### One `_config.yml` — don't add another
+- `docs/_config.yml` is the **sole Jekyll config** (site name, nav rendering,
+  kramdown/rouge, sass, `exclude`/`include`, base URL).
   When changing site behavior, edit `docs/_config.yml`.
 
 ## How the site is built and deployed
@@ -168,11 +165,11 @@ points, summarized (read the file for the full rules):
   and no JS framework. Keep additions dependency-free unless there's a reason
   not to.
 - This repo is a `<user>.github.io` user site: `baseurl` is empty and the live
-  domain is the custom `CNAME`.
+  domain is `alexdruso.github.io` (no custom domain).
 
 ## Git / workflow
 
-- Active development branch for this work: `claude/claude-md-docs-3n7p2p`.
+- Active development branch for this work: `claude/repo-cleanup-domain-migration-u2ilma`.
   Commit and push there; do not push to `master` without explicit permission.
 - Production deploys happen automatically from `master` via the workflow above;
   do not commit to the `gh-pages` branch by hand (CI owns it).
