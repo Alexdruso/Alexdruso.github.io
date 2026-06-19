@@ -24,7 +24,6 @@ There is no application backend, test suite, or package manager beyond Bundler
 ├── CNAME                    # custom domain: alessandrosanvito.me
 ├── _config.yml              # ROOT config — NOT the Jekyll config (see note below)
 ├── .github/workflows/cv-build.yml   # CI: build CV + Jekyll, deploy to gh-pages
-├── .cursor/rules/           # editor rules (note: LaTeX rule is partly stale, see below)
 └── docs/                    # *** the Jekyll site root ***
     ├── _config.yml          # the real Jekyll config
     ├── Gemfile              # jekyll 4.3, webrick, jekyll-feed, jekyll-seo-tag
@@ -76,10 +75,8 @@ CI lives in `.github/workflows/cv-build.yml` and runs on push to `master`
 So: the **committed CV PDF is a build artifact** — CI regenerates it from
 `cv-src/`. To change the CV, edit the `.tex` sources, not the PDF.
 
-> ⚠️ `.cursor/rules/github_actions_latex_cv.md` describes the pipeline using
-> `pdflatex`. The real pipeline (Makefile + workflow) uses **xelatex**, which is
-> required for the Roboto/FontAwesome OpenType fonts. Trust the Makefile and the
-> workflow over that rule.
+> ⚠️ The pipeline requires **xelatex** (not `pdflatex`) because the CV uses the
+> Roboto/FontAwesome OpenType fonts. Trust the Makefile and the workflow.
 
 ## Local development
 
