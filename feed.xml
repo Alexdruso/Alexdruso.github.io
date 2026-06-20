@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-06-19T20:43:03+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">How Many Coin Tosses to Catch a Rigged Coin?</title><link href="https://alexdruso.github.io/how-many-tosses-rigged-coin/" rel="alternate" type="text/html" title="How Many Coin Tosses to Catch a Rigged Coin?" /><published>2026-06-19T00:00:00+00:00</published><updated>2026-06-19T00:00:00+00:00</updated><id>https://alexdruso.github.io/how-many-tosses-rigged-coin</id><content type="html" xml:base="https://alexdruso.github.io/how-many-tosses-rigged-coin/"><![CDATA[<style>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-06-20T10:52:36+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">How Many Coin Tosses to Catch a Rigged Coin?</title><link href="https://alexdruso.github.io/how-many-tosses-rigged-coin/" rel="alternate" type="text/html" title="How Many Coin Tosses to Catch a Rigged Coin?" /><published>2026-06-19T00:00:00+00:00</published><updated>2026-06-19T00:00:00+00:00</updated><id>https://alexdruso.github.io/how-many-tosses-rigged-coin</id><content type="html" xml:base="https://alexdruso.github.io/how-many-tosses-rigged-coin/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
@@ -306,9 +306,10 @@
 </style>
 
 <p>
-  A friend slaps a coin on the table and swears it's fair. You've watched it land heads a little too
-  often and you're not so sure. Here's the deceptively simple question this note is about:
-  <strong>how many times would you have to flip it before you could honestly say it's rigged?</strong>
+  Suppose a coin might be biased toward heads, and the bias — if there is one — is slight. The
+  question this note works through sounds simple but isn't:
+  <strong>how many times do you have to flip a coin before you can confidently say it's rigged rather
+  than merely unlucky?</strong>
 </p>
 
 <p>The answer is not a single number — it depends on two things — but it <em>is</em> a clean formula:</p>
@@ -316,8 +317,8 @@
 <div class="ct-note se-note">
   <strong>It depends on how rigged the coin is and how sure you want to be.</strong> A wildly biased
   60/40 coin gives itself away in a couple hundred flips. A barely-rigged 51/49 coin can hide for
-  <em>tens of thousands</em>. The cost of catching it explodes as the bias shrinks — and by the end
-  you'll be able to read the exact number off one equation, then watch a simulation confirm it.
+  <em>tens of thousands</em>. The cost of catching it explodes as the bias shrinks — and the exact
+  number falls out of a single equation, which a simulation then confirms.
 </div>
 
 <!-- ============================================================ -->
@@ -1036,7 +1037,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Statistics" /><category term="Interactive" /><summary type="html"><![CDATA[A friend swears the coin is fair; you suspect it leans heads. How many flips would actually settle it? Flip a coin live and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read off the exact number from one clean formula — and confirm it with a thousand simulated experiments. The punchline: near-fair coins are brutally expensive to expose, and the cost scales like 1/(p−½)².]]></summary></entry><entry><title type="html">Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks</title><link href="https://alexdruso.github.io/options-theory-visually/" rel="alternate" type="text/html" title="Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks" /><published>2026-06-19T00:00:00+00:00</published><updated>2026-06-19T00:00:00+00:00</updated><id>https://alexdruso.github.io/options-theory-visually</id><content type="html" xml:base="https://alexdruso.github.io/options-theory-visually/"><![CDATA[<style>
+</div>]]></content><author><name></name></author><category term="Statistics" /><category term="Interactive" /><summary type="html"><![CDATA[How many flips does it take to confidently tell a rigged coin from a fair one? Flip a coin and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read the exact number off one clean formula — and confirm it with a thousand simulated experiments. The punchline: near-fair coins are expensive to expose, and the cost scales like 1/(p−½)².]]></summary></entry><entry><title type="html">Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks</title><link href="https://alexdruso.github.io/options-theory-visually/" rel="alternate" type="text/html" title="Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks" /><published>2026-06-19T00:00:00+00:00</published><updated>2026-06-19T00:00:00+00:00</updated><id>https://alexdruso.github.io/options-theory-visually</id><content type="html" xml:base="https://alexdruso.github.io/options-theory-visually/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
@@ -1333,11 +1334,11 @@
 </style>
 
 <p>
-  When I first met the <strong>Black–Scholes formula</strong> it arrived the way it usually does —
-  <em>C = S·N(d₁) − K e<sup>−rT</sup>·N(d₂)</em>, scrawled on a board, with a promise that the two
-  cumulative normals "fall out of the math." I memorised it, passed the exam, and could not have told
-  you a week later <em>why</em> there were two of them. This post is the refresher I wish I'd had:
-  every piece attached to something you can drag, widen, and run.
+  The <strong>Black–Scholes formula</strong>, <em>C = S·N(d₁) − K e<sup>−rT</sup>·N(d₂)</em>, is the
+  kind of result that's easy to memorise and hard to reconstruct: two cumulative normals that
+  "fall out of the math" with no obvious reason for there being two. This note rebuilds the formula
+  from the payoff upward, attaching every piece to a concrete mechanism — so the two terms have a
+  meaning, not just a place in the equation.
 </p>
 
 <p>Here's the whole story in one sentence, and everything below just unpacks it:</p>
@@ -1647,7 +1648,7 @@
   the discounted, risk-neutral <em>expectation</em> of that bet → because the bet is convex, volatility
   is what you're really buying → a hedging argument turns that expectation into the Black–Scholes PDE and
   its two-normal solution → the Greeks are how that solution moves → and a few thousand random draws
-  reproduce the price from scratch. No act of faith required.
+  reproduce the price from scratch, confirming the closed form numerically rather than taking it on trust.
 </div>
 
 <script>
@@ -2115,7 +2116,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Finance" /><category term="Interactive" /><summary type="html"><![CDATA[An option price looks like an act of faith — N(d₁), N(d₂), a formula nobody re-derives twice. This is the refresher I wish I'd had: an option's price is just the discounted, risk-neutral expectation of its payoff, and volatility is the whole game. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and feel the Greeks move as slopes and curvature — live in your browser.]]></summary></entry><entry><title type="html">Shannon Entropy, Visually: Surprise, Uncertainty, and Bits</title><link href="https://alexdruso.github.io/shannon-entropy-visually/" rel="alternate" type="text/html" title="Shannon Entropy, Visually: Surprise, Uncertainty, and Bits" /><published>2026-06-16T00:00:00+00:00</published><updated>2026-06-16T00:00:00+00:00</updated><id>https://alexdruso.github.io/shannon-entropy-visually</id><content type="html" xml:base="https://alexdruso.github.io/shannon-entropy-visually/"><![CDATA[<style>
+</div>]]></content><author><name></name></author><category term="Finance" /><category term="Interactive" /><summary type="html"><![CDATA[The Black–Scholes formula — N(d₁), N(d₂) — is easy to memorise and hard to reconstruct. Rebuilt from the payoff up: an option's price is the discounted, risk-neutral expectation of its payoff, and volatility is what gives it value. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and read the Greeks as slopes and curvature.]]></summary></entry><entry><title type="html">Shannon Entropy, Visually: Surprise, Uncertainty, and Bits</title><link href="https://alexdruso.github.io/shannon-entropy-visually/" rel="alternate" type="text/html" title="Shannon Entropy, Visually: Surprise, Uncertainty, and Bits" /><published>2026-06-16T00:00:00+00:00</published><updated>2026-06-16T00:00:00+00:00</updated><id>https://alexdruso.github.io/shannon-entropy-visually</id><content type="html" xml:base="https://alexdruso.github.io/shannon-entropy-visually/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
@@ -2419,10 +2420,11 @@
 </style>
 
 <p>
-  When I first met <strong>Shannon entropy</strong> at university it arrived the way it usually does —
-  as a formula, <em>H = −&Sigma; p log p</em>, scribbled on a board, followed by "and this measures
-  information." I copied it down, passed the exam, and lost every shred of intuition by the following
-  week. This post is the refresher I wish I'd had: built around one idea you can poke, drag, and run.
+  <strong>Shannon entropy</strong> is usually introduced as a formula —
+  <em>H = −&Sigma; p log p</em> — labelled "the amount of information" and left there. That label is
+  correct but inert: it doesn't say what the quantity actually counts, or why the logarithm shows up.
+  The point of this note is to rebuild the meaning from the ground up, one piece at a time, with a
+  demo attached to each step so the formula becomes something to reason about rather than recite.
 </p>
 
 <p>Here's the whole story in one sentence, and everything below just unpacks it:</p>
@@ -2973,7 +2975,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Information Theory" /><category term="Interactive" /><summary type="html"><![CDATA[Entropy gets introduced as a formula — −Σ p log p — and the intuition evaporates on contact. This is the refresher I wish I'd had: entropy is just average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy, live in your browser.]]></summary></entry><entry><title type="html">Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons</title><link href="https://alexdruso.github.io/boltzmann-machines-visually/" rel="alternate" type="text/html" title="Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons" /><published>2026-05-30T00:00:00+00:00</published><updated>2026-05-30T00:00:00+00:00</updated><id>https://alexdruso.github.io/boltzmann-machines-visually</id><content type="html" xml:base="https://alexdruso.github.io/boltzmann-machines-visually/"><![CDATA[<style>
+</div>]]></content><author><name></name></author><category term="Information Theory" /><category term="Interactive" /><summary type="html"><![CDATA[Entropy is usually introduced as a formula — −Σ p log p — with the meaning left implicit. Rebuilt from the ground up: entropy is average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy.]]></summary></entry><entry><title type="html">Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons</title><link href="https://alexdruso.github.io/boltzmann-machines-visually/" rel="alternate" type="text/html" title="Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons" /><published>2026-05-30T00:00:00+00:00</published><updated>2026-05-30T00:00:00+00:00</updated><id>https://alexdruso.github.io/boltzmann-machines-visually</id><content type="html" xml:base="https://alexdruso.github.io/boltzmann-machines-visually/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
@@ -3294,7 +3296,7 @@
 </style>
 
 <p>
-  When I first met Boltzmann machines at university, they arrived as a footnote to <strong>Hopfield networks</strong>: "now make the neurons flip a coin instead of following the rule deterministically." I nodded, passed the exam, and promptly lost the intuition. This post is the refresher I wish I'd had — built around things you can poke, drag, and run.
+  <strong>Boltzmann machines</strong> are often presented as a one-line tweak to <strong>Hopfield networks</strong>: "make the neurons flip a coin instead of following the update rule deterministically." Stated that way the change sounds trivial, but that single stochastic step is what turns a memory that gets stuck into a model that samples, escapes local minima, and learns. This note works through why that one ingredient — temperature — changes everything, building each idea on a demo.
 </p>
 
 <p>
@@ -3309,7 +3311,7 @@
 <!-- 1. RECAP: HOPFIELD / ENERGY                                  -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>⛰️ The setup you already know: energy</h3>
+  <h3>⛰️ The starting point: energy</h3>
   <p style="margin-top:0">
     Take <em>N</em> units, each either <strong>on (+1)</strong> or <strong>off (−1)</strong>. Connect them symmetrically with weights <em>w<sub>ij</sub></em> (and give each a bias <em>b<sub>i</sub></em>). The whole configuration <strong>s</strong> has a single scalar <strong>energy</strong>:
   </p>
@@ -3552,7 +3554,7 @@
     Because no two hidden units talk to each other, <strong>given the visible layer every hidden unit is independent</strong> — you can sample the whole hidden layer in one shot, and vice versa. That makes a single round-trip <strong>v → h → v′</strong> (the heart of <em>Contrastive Divergence</em>) trivially fast, and it's all you need for a good gradient estimate.
   </p>
   <p style="margin-top:0">
-    Below, an RBM with 9 visible units (a 3×3 image) and 4 hidden units learns three little shapes — <strong>T, L, and a square-ish O</strong> — via CD-1, live in your browser. Watch reconstruction error drop and the hidden units grow into feature detectors.
+    Below, an RBM with 9 visible units (a 3×3 image) and 4 hidden units learns three little shapes — <strong>T, L, and a square-ish O</strong> — via CD-1. As it trains, reconstruction error drops and the hidden units grow into feature detectors.
     <em style="opacity:0.7">(RBMs conventionally use 0/1 units, so this section switches from ±1 to {0,1}.)</em>
   </p>
 
@@ -4232,7 +4234,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[You already know Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual refresher with live energy landscapes, annealing, and a trainable RBM.]]></summary></entry><entry><title type="html">A Day in Luca’s Life: Finding Optimal Decisions with MDPs</title><link href="https://alexdruso.github.io/finding-optimal-policies-mdp/" rel="alternate" type="text/html" title="A Day in Luca’s Life: Finding Optimal Decisions with MDPs" /><published>2026-05-21T00:00:00+00:00</published><updated>2026-05-21T00:00:00+00:00</updated><id>https://alexdruso.github.io/finding-optimal-policies-mdp</id><content type="html" xml:base="https://alexdruso.github.io/finding-optimal-policies-mdp/"><![CDATA[<style>
+</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM.]]></summary></entry><entry><title type="html">A Day in Luca’s Life: Finding Optimal Decisions with MDPs</title><link href="https://alexdruso.github.io/finding-optimal-policies-mdp/" rel="alternate" type="text/html" title="A Day in Luca’s Life: Finding Optimal Decisions with MDPs" /><published>2026-05-21T00:00:00+00:00</published><updated>2026-05-21T00:00:00+00:00</updated><id>https://alexdruso.github.io/finding-optimal-policies-mdp</id><content type="html" xml:base="https://alexdruso.github.io/finding-optimal-policies-mdp/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
@@ -4670,15 +4672,15 @@
 </style>
 
 <p>
-  Meet Luca. He's 9 years old, loves dinosaurs, and has exactly one decision to make each afternoon when he gets home from school: <strong>should he study, play video games, or take a nap?</strong>
+  A <strong>Markov Decision Process (MDP)</strong> is the standard model for sequential decision-making under uncertainty: an agent in some <em>state</em> chooses an <em>action</em>, collects a <em>reward</em>, and lands in a new state — and the objective is to pick actions that maximize reward accumulated over the long run, not just the reward available right now. The hard part is precisely that tension: a choice that pays off today can leave the agent worse off tomorrow.
 </p>
 
 <p>
-  This feels like a simple question — and for any single afternoon, it kind of is. But what if Luca wants to <em>maximize his happiness over the whole school year?</em> Suddenly it's not obvious at all. Today's fun (🎮) costs energy that hurts tomorrow's performance. Today's studying (📚) feels boring but could mean great test scores next week. Napping (💤) skips both.
+  To keep that abstract definition concrete, the whole note runs on one small example. Luca is 9 and has exactly one decision each afternoon after school: <strong>study, play video games, or take a nap?</strong> For any single afternoon the choice barely matters, but over a whole school year it does. Playing (🎮) costs energy that hurts tomorrow's performance; studying (📚) is boring now but can mean better test scores next week; napping (💤) skips both. Maximizing happiness across the year is exactly the long-run trade-off an MDP captures.
 </p>
 
 <p>
-  This is exactly the kind of problem that <strong>Markov Decision Processes (MDPs)</strong> were designed to solve — and the algorithm for solving them is <em>surprisingly elegant</em>. By the end of this post you'll have built intuition for how AI agents learn to make optimal decisions under uncertainty, using nothing more than Luca's homework dilemma as a guide.
+  The algorithm that solves it — <strong>value iteration</strong> — is short and worth understanding in full. The sections below build up the pieces one at a time, using Luca's afternoon as the running example, and end with a working solver.
 </p>
 
 <!-- ==================== MDP CONCEPT ==================== -->
@@ -5356,4 +5358,4 @@ function tryShowComparison() {
 }
 </script>
 
-</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Interactive" /><summary type="html"><![CDATA[What should a 3rd grader do after school — study, play, or rest? Turns out this is a Markov Decision Process, and we can solve it optimally. An interactive introduction to MDPs and value iteration.]]></summary></entry></feed>
+</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Interactive" /><summary type="html"><![CDATA[A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?]]></summary></entry></feed>

@@ -90,7 +90,7 @@
     <div id="main" role="main" class="container">
       <div class="game-container">
   <h1>Snake Game</h1>
-  <p class="game-description">Take a break and play a classic game of Snake! Use arrow keys to control the snake and eat the food to grow longer.</p>
+  <p class="game-description">Take a break and play a classic game of Snake! On desktop use the arrow keys; on a phone, swipe on the board or use the on-screen pad below. Eat the food to grow longer.</p>
   
   <div class="game-wrapper">
     <canvas id="gameCanvas" width="400" height="400"></canvas>
@@ -98,6 +98,13 @@
       <div class="score">Score: <span id="score">0</span></div>
       <button id="startButton">Start Game</button>
       <button id="resetButton">Reset Game</button>
+    </div>
+
+    <div class="dpad" id="dpad" aria-label="Directional controls">
+      <button class="dpad-btn dpad-up" data-dir="up" aria-label="Move up">&#9650;</button>
+      <button class="dpad-btn dpad-left" data-dir="left" aria-label="Move left">&#9664;</button>
+      <button class="dpad-btn dpad-right" data-dir="right" aria-label="Move right">&#9654;</button>
+      <button class="dpad-btn dpad-down" data-dir="down" aria-label="Move down">&#9660;</button>
     </div>
   </div>
 </div>
@@ -117,6 +124,7 @@ let nextDirection = 'right';
 let gameInterval;
 let score = 0;
 let gameStarted = false;
+let listenersBound = false;
 
 // Initialize game
 function initGame() {
@@ -142,18 +150,34 @@ function initGame() {
   // Initialize food
   generateFood();
   
-  // Set up event listeners
-  document.addEventListener('keydown', handleKeyPress);
-  
-  const startButton = document.getElementById('startButton');
-  const resetButton = document.getElementById('resetButton');
-  
-  if (startButton) {
-    startButton.addEventListener('click', startGame);
-  }
-  
-  if (resetButton) {
-    resetButton.addEventListener('click', resetGame);
+  // Set up event listeners once (initGame also runs on reset)
+  if (!listenersBound) {
+    document.addEventListener('keydown', handleKeyPress);
+
+    canvas.addEventListener('touchstart', handleTouchStart, {passive: false});
+    canvas.addEventListener('touchmove', handleTouchMove, {passive: false});
+    canvas.addEventListener('touchend', handleTouchEnd, {passive: false});
+
+    // On-screen directional pad (taps and presses)
+    document.querySelectorAll('.dpad-btn').forEach(btn => {
+      const dir = btn.getAttribute('data-dir');
+      const press = (e) => { e.preventDefault(); setDirection(dir); };
+      btn.addEventListener('click', press);
+      btn.addEventListener('touchstart', press, {passive: false});
+    });
+
+    const startButton = document.getElementById('startButton');
+    const resetButton = document.getElementById('resetButton');
+
+    if (startButton) {
+      startButton.addEventListener('click', startGame);
+    }
+
+    if (resetButton) {
+      resetButton.addEventListener('click', resetGame);
+    }
+
+    listenersBound = true;
   }
   
   // Draw initial state
@@ -176,24 +200,78 @@ function generateFood() {
   }
 }
 
+// Opposite directions can't be entered (no 180° turns)
+const OPPOSITE = {up: 'down', down: 'up', left: 'right', right: 'left'};
+
+// Apply a direction change from any input source (keyboard, swipe, d-pad)
+function setDirection(dir) {
+  if (!gameStarted) return;
+  if (OPPOSITE[dir] !== direction) {
+    nextDirection = dir;
+  }
+}
+
 // Handle keyboard input
 function handleKeyPress(e) {
   if (!gameStarted) return;
   
   switch(e.key) {
     case 'ArrowUp':
-      if (direction !== 'down') nextDirection = 'up';
+      setDirection('up');
+      e.preventDefault();
       break;
     case 'ArrowDown':
-      if (direction !== 'up') nextDirection = 'down';
+      setDirection('down');
+      e.preventDefault();
       break;
     case 'ArrowLeft':
-      if (direction !== 'right') nextDirection = 'left';
+      setDirection('left');
+      e.preventDefault();
       break;
     case 'ArrowRight':
-      if (direction !== 'left') nextDirection = 'right';
+      setDirection('right');
+      e.preventDefault();
       break;
   }
+}
+
+// Handle swipe gestures on the canvas (touch devices)
+let touchStartX = 0;
+let touchStartY = 0;
+let touchActive = false;
+
+function handleTouchStart(e) {
+  const t = e.changedTouches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+  touchActive = true;
+  // Prevent the page from scrolling while swiping on the board
+  e.preventDefault();
+}
+
+function handleTouchMove(e) {
+  if (touchActive) e.preventDefault();
+}
+
+function handleTouchEnd(e) {
+  if (!touchActive) return;
+  touchActive = false;
+
+  const t = e.changedTouches[0];
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
+
+  // Ignore tiny movements (treat as a tap, not a swipe)
+  if (Math.max(absX, absY) < 20) return;
+
+  if (absX > absY) {
+    setDirection(dx > 0 ? 'right' : 'left');
+  } else {
+    setDirection(dy > 0 ? 'down' : 'up');
+  }
+  e.preventDefault();
 }
 
 // Move snake
@@ -398,20 +476,8 @@ window.addEventListener('load', initGame);
     </script>
 
     
-	<!-- Google Analytics -->
-	<script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-		ga('create', 'UA-174483391-1', 'auto');
-		ga('send', 'pageview', {
-		  'page': '/game/',
-		  'title': 'Snake Game | Alessandro Sanvito'
-		});
-	</script>
-	<!-- End Google Analytics -->
+<script data-goatcounter="https://alexdruso.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 
 
   </body>

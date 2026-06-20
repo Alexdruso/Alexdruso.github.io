@@ -15,8 +15,8 @@
     <meta name="twitter:card" content="summary" />
 
     
-    <meta name="description" content="What should a 3rd grader do after school — study, play, or rest? Turns out this is a Markov Decision Process, and we can solve it optimally. An interactive introduction to MDPs and value iteration." />
-    <meta property="og:description" content="What should a 3rd grader do after school — study, play, or rest? Turns out this is a Markov Decision Process, and we can solve it optimally. An interactive introduction to MDPs and value iteration." />
+    <meta name="description" content="A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?" />
+    <meta property="og:description" content="A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?" />
     
     <meta name="author" content="Alessandro Sanvito" />
 
@@ -530,15 +530,15 @@
 </style>
 
 <p>
-  Meet Luca. He's 9 years old, loves dinosaurs, and has exactly one decision to make each afternoon when he gets home from school: <strong>should he study, play video games, or take a nap?</strong>
+  A <strong>Markov Decision Process (MDP)</strong> is the standard model for sequential decision-making under uncertainty: an agent in some <em>state</em> chooses an <em>action</em>, collects a <em>reward</em>, and lands in a new state — and the objective is to pick actions that maximize reward accumulated over the long run, not just the reward available right now. The hard part is precisely that tension: a choice that pays off today can leave the agent worse off tomorrow.
 </p>
 
 <p>
-  This feels like a simple question — and for any single afternoon, it kind of is. But what if Luca wants to <em>maximize his happiness over the whole school year?</em> Suddenly it's not obvious at all. Today's fun (🎮) costs energy that hurts tomorrow's performance. Today's studying (📚) feels boring but could mean great test scores next week. Napping (💤) skips both.
+  To keep that abstract definition concrete, the whole note runs on one small example. Luca is 9 and has exactly one decision each afternoon after school: <strong>study, play video games, or take a nap?</strong> For any single afternoon the choice barely matters, but over a whole school year it does. Playing (🎮) costs energy that hurts tomorrow's performance; studying (📚) is boring now but can mean better test scores next week; napping (💤) skips both. Maximizing happiness across the year is exactly the long-run trade-off an MDP captures.
 </p>
 
 <p>
-  This is exactly the kind of problem that <strong>Markov Decision Processes (MDPs)</strong> were designed to solve — and the algorithm for solving them is <em>surprisingly elegant</em>. By the end of this post you'll have built intuition for how AI agents learn to make optimal decisions under uncertainty, using nothing more than Luca's homework dilemma as a guide.
+  The algorithm that solves it — <strong>value iteration</strong> — is short and worth understanding in full. The sections below build up the pieces one at a time, using Luca's afternoon as the running example, and end with a working solver.
 </p>
 
 <!-- ==================== MDP CONCEPT ==================== -->
@@ -1284,20 +1284,8 @@ function tryShowComparison() {
     </script>
 
     
-	<!-- Google Analytics -->
-	<script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-		ga('create', 'UA-174483391-1', 'auto');
-		ga('send', 'pageview', {
-		  'page': '/finding-optimal-policies-mdp/',
-		  'title': 'A Day in Luca\'s Life: Finding Optimal Decisions with MDPs'
-		});
-	</script>
-	<!-- End Google Analytics -->
+<script data-goatcounter="https://alexdruso.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 
 
   </body>

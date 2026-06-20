@@ -15,8 +15,8 @@
     <meta name="twitter:card" content="summary" />
 
     
-    <meta name="description" content="An option price looks like an act of faith — N(d₁), N(d₂), a formula nobody re-derives twice. This is the refresher I wish I'd had: an option's price is just the discounted, risk-neutral expectation of its payoff, and volatility is the whole game. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and feel the Greeks move as slopes and curvature — live in your browser." />
-    <meta property="og:description" content="An option price looks like an act of faith — N(d₁), N(d₂), a formula nobody re-derives twice. This is the refresher I wish I'd had: an option's price is just the discounted, risk-neutral expectation of its payoff, and volatility is the whole game. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and feel the Greeks move as slopes and curvature — live in your browser." />
+    <meta name="description" content="The Black–Scholes formula — N(d₁), N(d₂) — is easy to memorise and hard to reconstruct. Rebuilt from the payoff up: an option's price is the discounted, risk-neutral expectation of its payoff, and volatility is what gives it value. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and read the Greeks as slopes and curvature." />
+    <meta property="og:description" content="The Black–Scholes formula — N(d₁), N(d₂) — is easy to memorise and hard to reconstruct. Rebuilt from the payoff up: an option's price is the discounted, risk-neutral expectation of its payoff, and volatility is what gives it value. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and read the Greeks as slopes and curvature." />
     
     <meta name="author" content="Alessandro Sanvito" />
 
@@ -389,11 +389,11 @@
 </style>
 
 <p>
-  When I first met the <strong>Black–Scholes formula</strong> it arrived the way it usually does —
-  <em>C = S·N(d₁) − K e<sup>−rT</sup>·N(d₂)</em>, scrawled on a board, with a promise that the two
-  cumulative normals "fall out of the math." I memorised it, passed the exam, and could not have told
-  you a week later <em>why</em> there were two of them. This post is the refresher I wish I'd had:
-  every piece attached to something you can drag, widen, and run.
+  The <strong>Black–Scholes formula</strong>, <em>C = S·N(d₁) − K e<sup>−rT</sup>·N(d₂)</em>, is the
+  kind of result that's easy to memorise and hard to reconstruct: two cumulative normals that
+  "fall out of the math" with no obvious reason for there being two. This note rebuilds the formula
+  from the payoff upward, attaching every piece to a concrete mechanism — so the two terms have a
+  meaning, not just a place in the equation.
 </p>
 
 <p>Here's the whole story in one sentence, and everything below just unpacks it:</p>
@@ -703,7 +703,7 @@
   the discounted, risk-neutral <em>expectation</em> of that bet → because the bet is convex, volatility
   is what you're really buying → a hedging argument turns that expectation into the Black–Scholes PDE and
   its two-normal solution → the Greeks are how that solution moves → and a few thousand random draws
-  reproduce the price from scratch. No act of faith required.
+  reproduce the price from scratch, confirming the closed form numerically rather than taking it on trust.
 </div>
 
 <script>
@@ -1239,20 +1239,8 @@
     </script>
 
     
-	<!-- Google Analytics -->
-	<script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-		ga('create', 'UA-174483391-1', 'auto');
-		ga('send', 'pageview', {
-		  'page': '/options-theory-visually/',
-		  'title': 'Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks'
-		});
-	</script>
-	<!-- End Google Analytics -->
+<script data-goatcounter="https://alexdruso.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 
 
   </body>

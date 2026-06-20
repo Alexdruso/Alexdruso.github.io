@@ -1040,8 +1040,64 @@ code {
   border-radius: 8px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  touch-action: none;
 }
 
+.dpad {
+  display: none;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 0.4rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.dpad-btn {
+  font-size: 1.3rem;
+  line-height: 1;
+  border: none;
+  border-radius: 8px;
+  background-color: #e8f0fe;
+  color: #333;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dpad-btn:active {
+  background-color: #2258a5;
+  color: #fff;
+}
+
+.dpad-up {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.dpad-left {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.dpad-right {
+  grid-column: 3;
+  grid-row: 2;
+}
+
+.dpad-down {
+  grid-column: 2;
+  grid-row: 3;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .dpad {
+    display: grid;
+  }
+}
 .game-controls {
   display: flex;
   gap: 1rem;
@@ -1097,6 +1153,14 @@ code {
 .dark-theme #resetButton {
   background-color: #333;
   color: #e0e0e0;
+}
+.dark-theme .dpad-btn {
+  background-color: #333;
+  color: #e0e0e0;
+}
+.dark-theme .dpad-btn:active {
+  background-color: #64b5f6;
+  color: #fff;
 }
 
 @media (max-width: 768px) {

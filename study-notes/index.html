@@ -112,7 +112,7 @@
       <h2><a href="/options-theory-visually/">Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks</a></h2>
 
       <div class="entry">
-        An option price looks like an act of faith — N(d₁), N(d₂), a formula nobody re-derives twice. This is the refresher I wish I'd had: an option's price is just the discounted, risk-neutral expectation of its payoff, and volatility is the whole game. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and feel the Greeks move as slopes and curvature — live in your browser.
+        The Black–Scholes formula — N(d₁), N(d₂) — is easy to memorise and hard to reconstruct. Rebuilt from the payoff up: an option's price is the discounted, risk-neutral expectation of its payoff, and volatility is what gives it value. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and read the Greeks as slopes and curvature.
       </div>
 
       <a href="/options-theory-visually/" class="read-more">Read More →</a>
@@ -135,7 +135,7 @@
       <h2><a href="/how-many-tosses-rigged-coin/">How Many Coin Tosses to Catch a Rigged Coin?</a></h2>
 
       <div class="entry">
-        A friend swears the coin is fair; you suspect it leans heads. How many flips would actually settle it? Flip a coin live and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read off the exact number from one clean formula — and confirm it with a thousand simulated experiments. The punchline: near-fair coins are brutally expensive to expose, and the cost scales like 1/(p−½)².
+        How many flips does it take to confidently tell a rigged coin from a fair one? Flip a coin and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read the exact number off one clean formula — and confirm it with a thousand simulated experiments. The punchline: near-fair coins are expensive to expose, and the cost scales like 1/(p−½)².
       </div>
 
       <a href="/how-many-tosses-rigged-coin/" class="read-more">Read More →</a>
@@ -158,7 +158,7 @@
       <h2><a href="/shannon-entropy-visually/">Shannon Entropy, Visually: Surprise, Uncertainty, and Bits</a></h2>
 
       <div class="entry">
-        Entropy gets introduced as a formula — −Σ p log p — and the intuition evaporates on contact. This is the refresher I wish I'd had: entropy is just average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy, live in your browser.
+        Entropy is usually introduced as a formula — −Σ p log p — with the meaning left implicit. Rebuilt from the ground up: entropy is average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy.
       </div>
 
       <a href="/shannon-entropy-visually/" class="read-more">Read More →</a>
@@ -181,7 +181,7 @@
       <h2><a href="/boltzmann-machines-visually/">Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons</a></h2>
 
       <div class="entry">
-        You already know Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual refresher with live energy landscapes, annealing, and a trainable RBM.
+        Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM.
       </div>
 
       <a href="/boltzmann-machines-visually/" class="read-more">Read More →</a>
@@ -204,7 +204,7 @@
       <h2><a href="/finding-optimal-policies-mdp/">A Day in Luca's Life: Finding Optimal Decisions with MDPs</a></h2>
 
       <div class="entry">
-        What should a 3rd grader do after school — study, play, or rest? Turns out this is a Markov Decision Process, and we can solve it optimally. An interactive introduction to MDPs and value iteration.
+        A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?
       </div>
 
       <a href="/finding-optimal-policies-mdp/" class="read-more">Read More →</a>
@@ -271,20 +271,8 @@
     </script>
 
     
-	<!-- Google Analytics -->
-	<script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-		ga('create', 'UA-174483391-1', 'auto');
-		ga('send', 'pageview', {
-		  'page': '/study-notes/',
-		  'title': 'Study Notes | Interactive Explainers'
-		});
-	</script>
-	<!-- End Google Analytics -->
+<script data-goatcounter="https://alexdruso.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 
 
   </body>

@@ -15,8 +15,8 @@
     <meta name="twitter:card" content="summary" />
 
     
-    <meta name="description" content="You already know Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual refresher with live energy landscapes, annealing, and a trainable RBM." />
-    <meta property="og:description" content="You already know Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual refresher with live energy landscapes, annealing, and a trainable RBM." />
+    <meta name="description" content="Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM." />
+    <meta property="og:description" content="Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM." />
     
     <meta name="author" content="Alessandro Sanvito" />
 
@@ -413,7 +413,7 @@
 </style>
 
 <p>
-  When I first met Boltzmann machines at university, they arrived as a footnote to <strong>Hopfield networks</strong>: "now make the neurons flip a coin instead of following the rule deterministically." I nodded, passed the exam, and promptly lost the intuition. This post is the refresher I wish I'd had — built around things you can poke, drag, and run.
+  <strong>Boltzmann machines</strong> are often presented as a one-line tweak to <strong>Hopfield networks</strong>: "make the neurons flip a coin instead of following the update rule deterministically." Stated that way the change sounds trivial, but that single stochastic step is what turns a memory that gets stuck into a model that samples, escapes local minima, and learns. This note works through why that one ingredient — temperature — changes everything, building each idea on a demo.
 </p>
 
 <p>
@@ -428,7 +428,7 @@
 <!-- 1. RECAP: HOPFIELD / ENERGY                                  -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>⛰️ The setup you already know: energy</h3>
+  <h3>⛰️ The starting point: energy</h3>
   <p style="margin-top:0">
     Take <em>N</em> units, each either <strong>on (+1)</strong> or <strong>off (−1)</strong>. Connect them symmetrically with weights <em>w<sub>ij</sub></em> (and give each a bias <em>b<sub>i</sub></em>). The whole configuration <strong>s</strong> has a single scalar <strong>energy</strong>:
   </p>
@@ -671,7 +671,7 @@
     Because no two hidden units talk to each other, <strong>given the visible layer every hidden unit is independent</strong> — you can sample the whole hidden layer in one shot, and vice versa. That makes a single round-trip <strong>v → h → v′</strong> (the heart of <em>Contrastive Divergence</em>) trivially fast, and it's all you need for a good gradient estimate.
   </p>
   <p style="margin-top:0">
-    Below, an RBM with 9 visible units (a 3×3 image) and 4 hidden units learns three little shapes — <strong>T, L, and a square-ish O</strong> — via CD-1, live in your browser. Watch reconstruction error drop and the hidden units grow into feature detectors.
+    Below, an RBM with 9 visible units (a 3×3 image) and 4 hidden units learns three little shapes — <strong>T, L, and a square-ish O</strong> — via CD-1. As it trains, reconstruction error drops and the hidden units grow into feature detectors.
     <em style="opacity:0.7">(RBMs conventionally use 0/1 units, so this section switches from ±1 to {0,1}.)</em>
   </p>
 
@@ -1419,20 +1419,8 @@
     </script>
 
     
-	<!-- Google Analytics -->
-	<script>
-		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-		ga('create', 'UA-174483391-1', 'auto');
-		ga('send', 'pageview', {
-		  'page': '/boltzmann-machines-visually/',
-		  'title': 'Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons'
-		});
-	</script>
-	<!-- End Google Analytics -->
+<script data-goatcounter="https://alexdruso.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 
 
   </body>
