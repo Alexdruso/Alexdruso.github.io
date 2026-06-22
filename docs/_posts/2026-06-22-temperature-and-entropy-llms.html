@@ -1,0 +1,675 @@
+---
+layout: post
+title: "Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines"
+date: 2026-06-22
+categories: [Information Theory, Machine Learning, Interactive]
+excerpt: "The temperature parameter in an LLM divides the logits before the softmax. Raise it and the output distribution flattens, so its entropy rises — and that is not a loose analogy but the literal statistical-mechanics relationship: a softmax is a Boltzmann distribution with energy = −logit, and temperature trades expected energy against entropy, monotonically, from a deterministic argmax to the uniform distribution."
+---
+
+{% include study-note-styles.html %}
+
+<div class="study-note">
+
+<style>
+/* Note-specific layout only. Shared components (sections, buttons, sliders,
+   tags, equations, notes, charts, numerals) come from study-note-styles.html. */
+.te-flexwrap { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
+.te-panel { flex: 1; min-width: 240px; }
+
+.te-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
+.te-readout { font-size: 1.05rem; min-width: 3.5rem; display: inline-block; text-align: right; }
+
+.te-stat { text-align: center; }
+.te-stat .lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; }
+.te-stat .val { font-size: 1.6rem; }
+.te-statrow { display: flex; gap: 1.6rem; justify-content: center; margin: 0.5rem 0; flex-wrap: wrap; }
+
+.te-legend { font-size: 0.78rem; opacity: 0.8; display: flex; gap: 1.1rem; flex-wrap: wrap; margin-top: 0.4rem; }
+.te-legend span::before { content: "■ "; }
+
+.te-presets { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-top: 0.6rem; }
+</style>
+
+<p>
+  <strong>Temperature</strong> is the scalar <em>T</em> that a model divides its logits by before the
+  softmax turns them into probabilities: <em>p<sub>i</sub> &prop; e<sup>z<sub>i</sub>/T</sup></em>.
+  Turn it down and the distribution sharpens onto the single most likely token; turn it up and the
+  distribution flattens out. The flatter a distribution, the higher its
+  <a href="/shannon-entropy-visually/">Shannon entropy</a> — so the everyday intuition "higher
+  temperature, higher entropy" is correct. What is worth seeing is that this is not an analogy at all:
+  it is the same temperature, and the same entropy, that appear in statistical mechanics and in the
+  <a href="/boltzmann-machines-visually/">Boltzmann machine</a>.
+</p>
+
+<p>Here is the whole note in one sentence; everything below unpacks it:</p>
+
+<div class="se-note">
+  <strong>A softmax is a Boltzmann distribution with energy = −logit.</strong> Temperature is the
+  dial that trades <em>expected energy</em> against <em>entropy</em>. It sweeps monotonically from a
+  deterministic <em>argmax</em> at <em>T &rarr; 0</em> (zero entropy) to the <em>uniform</em>
+  distribution at <em>T &rarr; &infin;</em> (entropy <em>log&nbsp;N</em>, the maximum) — and the
+  speed of that climb is governed by the variance of the logits, which produces a specific-heat-like
+  "sweet spot" in between.
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. SOFTMAX WITH TEMPERATURE = BOLTZMANN DISTRIBUTION         -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🌡️ The same distribution, two names</h3>
+  <p style="margin-top:0">
+    A model scores each candidate token with a real number called a <strong>logit</strong>
+    <em>z<sub>i</sub></em>. Temperature sampling rescales those logits by <em>T</em> and runs them
+    through the softmax:
+  </p>
+  <div class="se-equation">
+    <span class="big">p<sub>i</sub>(T) = e<sup>z<sub>i</sub>/T</sup> &frasl; &Sigma;<sub>j</sub> e<sup>z<sub>j</sub>/T</sup></span>
+  </div>
+  <p style="margin-top:0">
+    Now set the <strong>energy</strong> of token <em>i</em> to be its negative logit,
+    <em>E<sub>i</sub> = −z<sub>i</sub></em>, and write <em>&beta; = 1/T</em>. The exact same formula
+    becomes the <strong>Boltzmann (Gibbs) distribution</strong> of physics — the one the
+    <a href="/boltzmann-machines-visually/">Boltzmann machine</a> samples from:
+  </p>
+  <div class="se-equation">
+    <span class="big">p<sub>i</sub> = e<sup>−E<sub>i</sub>/T</sup> &frasl; Z</span> ,
+    &nbsp; Z = &Sigma;<sub>j</sub> e<sup>−E<sub>j</sub>/T</sup>
+  </div>
+  <p style="margin-top:0">
+    High logit ⇄ low energy ⇄ high probability. The denominator <em>Z</em> is the
+    <strong>partition function</strong>. Drag the temperature and watch the next-token distribution for
+    the toy prompt <em>"the cat sat on the ___"</em> reshape, with its entropy tracked underneath.
+  </p>
+
+  <div class="te-flexwrap">
+    <div class="te-panel" style="flex:2">
+      <div class="se-chartwrap">
+        <svg id="te1-bars" width="100%" height="240" viewBox="0 0 460 240"></svg>
+      </div>
+    </div>
+    <div class="te-panel">
+      <div class="te-controls" style="margin-top:0">
+        <span style="font-size:0.85rem">🌡️ T</span>
+        <input type="range" id="te1-T" min="0" max="1000" value="651" style="flex:1">
+        <span class="te-readout" id="te1-Tval">1.00</span>
+      </div>
+      <div class="te-statrow">
+        <div class="te-stat"><div class="lab">entropy H</div><div class="val" id="te1-h">—</div><div class="lab" style="opacity:0.4">bits</div></div>
+        <div class="te-stat"><div class="lab">perplexity 2<sup>H</sup></div><div class="val" id="te1-ppl">—</div><div class="lab" style="opacity:0.4">eff. choices</div></div>
+      </div>
+      <div style="text-align:center;margin:0.3rem 0"><span id="te1-tag" class="se-tag">—</span></div>
+      <div class="te-presets">
+        <button class="se-btn sec" id="te1-cold">🧊 Greedy (T→0)</button>
+        <button class="se-btn sec" id="te1-warm">🌡️ T = 1</button>
+        <button class="se-btn sec" id="te1-hot">🔥 Uniform (T→∞)</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:0.8rem">
+    <p style="margin:0 0 0.3rem 0;font-size:0.9rem;opacity:0.85">
+      The entropy as a function of temperature — a single monotone climb from 0 to
+      <em>log<sub>2</sub>N</em>:
+    </p>
+    <div class="se-chartwrap">
+      <svg id="te1-curve" width="100%" height="200" viewBox="0 0 720 200"></svg>
+    </div>
+  </div>
+
+  <div class="se-note" style="margin-bottom:0">
+    <strong>Why "logits divided by T" is exactly "energy times β":</strong> dividing the exponent's
+    numerator by <em>T</em> is the same as multiplying the energies by <em>&beta; = 1/T</em>. Cold
+    (small <em>T</em>, large <em>&beta;</em>) makes energy differences loom large, so probability piles
+    onto the single lowest-energy state. Hot (large <em>T</em>, small <em>&beta;</em>) washes those
+    differences out, so every state looks alike.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. THE TWO LIMITS                                            -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🧊🔥 The two ends of the dial</h3>
+  <p style="margin-top:0">
+    Both extremes are worth naming because both are used in practice, and both pin down the entropy
+    exactly. Slide the temperature in the demo above to either edge to see them.
+  </p>
+  <div class="te-flexwrap">
+    <div class="se-example" style="flex:1;margin:0">
+      <strong>T &rarr; 0 — freezing / greedy decoding.</strong> The softmax becomes an
+      <em>argmax</em>: all probability collapses onto the single largest logit. Entropy &rarr;
+      <strong>0 bits</strong> — the output is deterministic. (If two logits tie for the top, you get a
+      uniform split over just those, i.e. <em>log</em> of the degeneracy — the residual entropy of a
+      ground state in physics.) This is the same "freeze into the nearest memory" behaviour a Hopfield
+      network shows at zero temperature in the <a href="/boltzmann-machines-visually/">Boltzmann note</a>.
+    </div>
+    <div class="se-example" style="flex:1;margin:0">
+      <strong>T &rarr; &infin; — boiling / uniform.</strong> Dividing by a huge number makes every
+      rescaled logit ≈ 0, so <em>e<sup>0</sup></em> is equal for all tokens. The distribution becomes
+      <strong>uniform</strong> and entropy hits its ceiling <strong>log<sub>2</sub>N</strong> — maximum
+      ignorance, the same ceiling the <a href="/shannon-entropy-visually/">entropy note</a> hits when
+      you make a distribution uniform. The logits are completely ignored.
+    </div>
+  </div>
+  <div class="se-note" style="margin-bottom:0">
+    Everything useful happens between these poles. <em>T = 1</em> is "use the model's own
+    probabilities, untouched." Below 1 sharpens (more confident, less diverse); above 1 flattens (more
+    diverse, less coherent). That is the entire creativity-vs-coherence trade-off in one scalar.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. MAXIMUM ENTROPY / FREE ENERGY                            -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>⚖️ One dial, two appetites: energy vs entropy</h3>
+  <p style="margin-top:0">
+    There is a deeper reason temperature controls entropy, and it is the reason the Boltzmann
+    distribution turns up everywhere. Among <em>all</em> distributions with a given expected energy
+    <em>&lang;E&rang;</em>, the one with the <strong>highest entropy</strong> is precisely the Boltzmann
+    distribution — and <em>&beta; = 1/T</em> is the Lagrange multiplier enforcing that energy budget
+    (this is <strong>Jaynes' maximum-entropy principle</strong>). So picking a temperature is the same
+    as picking how much you care about entropy relative to energy. That trade-off is bundled into one
+    quantity, the <strong>free energy</strong>:
+  </p>
+  <div class="se-equation">
+    <span class="big">F(T) = &lang;E&rang; − T &middot; S = −T &middot; ln Z</span>
+  </div>
+  <p style="margin-top:0">
+    The Boltzmann distribution is exactly the distribution that <em>minimises</em> <em>F</em>. Read the
+    two terms as competing appetites: minimising <em>&lang;E&rang;</em> wants to concentrate on the best
+    token; maximising <em>S</em> wants to spread out; <em>T</em> sets the exchange rate between them.
+    Cold ⇒ energy wins (sharp, low entropy); hot ⇒ entropy wins (spread, high entropy). Drag the
+    temperature and watch the three quantities trade off. <em>(Units: <strong>&lang;E&rang;</strong> and
+    <strong>F</strong> are in <strong>logit</strong> (score) units — energy is just −logit — while
+    <strong>S</strong> is in <strong>nats</strong> (natural log, where <em>F = −T&nbsp;ln&nbsp;Z</em>
+    holds exactly; nats are bits &times; ln&nbsp;2). The factor <em>T</em> in <em>T&middot;S</em> is what
+    converts nats into the same logit units, so the subtraction is well-posed.)</em>
+  </p>
+
+  <div class="te-controls">
+    <span style="font-size:0.85rem">🌡️ T</span>
+    <input type="range" id="te2-T" min="0" max="1000" value="651" style="flex:1;max-width:340px">
+    <span class="te-readout" id="te2-Tval">1.00</span>
+  </div>
+
+  <div class="te-flexwrap">
+    <div class="te-panel">
+      <div class="se-chartwrap">
+        <svg id="te2-thermo" width="100%" height="230" viewBox="0 0 460 230"></svg>
+      </div>
+      <div class="te-legend">
+        <span style="color:var(--sn-bad)">⟨E⟩ energy</span>
+        <span style="color:var(--sn-accent)">S entropy</span>
+        <span style="color:var(--sn-good)">F free energy</span>
+      </div>
+    </div>
+    <div class="te-panel">
+      <div class="se-chartwrap">
+        <svg id="te2-heat" width="100%" height="230" viewBox="0 0 460 230"></svg>
+      </div>
+      <div class="te-legend">
+        <span style="color:var(--sn-warn)">dS/dT — entropy gained per degree</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="te-statrow">
+    <div class="te-stat"><div class="lab">⟨E⟩</div><div class="val" id="te2-u" style="color:var(--sn-bad)">—</div><div class="lab" style="opacity:0.4">logits</div></div>
+    <div class="te-stat"><div class="lab">S</div><div class="val" id="te2-s">—</div><div class="lab" style="opacity:0.4">nats</div></div>
+    <div class="te-stat"><div class="lab">F = ⟨E⟩−TS</div><div class="val" id="te2-f" style="color:var(--sn-good)">—</div><div class="lab" style="opacity:0.4">logits</div></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. THE HEAT-CAPACITY PEAK                                    -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>📈 The sweet spot: where entropy rises fastest</h3>
+  <p style="margin-top:0">
+    "Entropy increases with temperature" is true, but it does not increase <em>evenly</em>. The right
+    chart above is the rate <em>dS/dT</em>, and it has a hump. There is a characteristic temperature
+    where the distribution is <strong>most sensitive</strong> — where a small turn of the dial buys the
+    most new entropy. Below it the model is nearly frozen on its top token; above it the gains taper as
+    it approaches uniform. That peak is <em>reminiscent of</em> a <strong>phase transition</strong> — though
+    with a finite vocabulary there is no true transition (the curve is perfectly smooth, never
+    non-analytic); it is the smeared-out, finite-size echo of one. The rate is exactly the
+    statistical-mechanics <em>specific heat</em> (with <em>S</em> in nats; for bits, divide by ln&nbsp;2):
+  </p>
+  <div class="se-equation">
+    <span class="big">dS/dT = C/T = Var(E) &frasl; T<sup>3</sup></span>
+  </div>
+  <p style="margin-top:0">
+    The whole shape is driven by <strong>Var(E)</strong>, the variance of the logits. Two consequences
+    fall straight out of this:
+  </p>
+  <ul style="line-height:1.7">
+    <li>Because <em>Var(E) &ge; 0</em>, the rate is never negative — so entropy is
+      <strong>monotonically non-decreasing</strong> in <em>T</em>. The intuition is now a theorem, not a
+      hunch: more temperature can never mean less entropy.</li>
+    <li>The peak sits near the scale of the logit gaps. Models with <strong>spread-out logits</strong>
+      (a confident model) need more heating before they loosen up; models with <strong>bunched
+      logits</strong> are already near-uniform and have little entropy left to gain. This is the
+      mechanical reason a single global temperature behaves so differently across prompts, and a rough
+      reason the scale of the model's typical logit spread is a useful <em>starting point</em> for the
+      sampling temperature (the best value is ultimately an empirical, quality-driven choice, not the
+      <em>dS/dT</em> peak itself).</li>
+  </ul>
+  <div class="se-note" style="margin-bottom:0">
+    <strong>The annealing connection.</strong> <a href="/boltzmann-machines-visually/">Simulated
+    annealing</a> starts hot (high entropy, free to explore), then cools through this sensitive region
+    so the system can settle into a deep low-energy state instead of freezing into the first one it
+    meets. Same dial, used as a <em>schedule</em> rather than a fixed setting.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. SAMPLER                                                   -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🎲 Sampling at temperature: the entropy you actually get</h3>
+  <p style="margin-top:0">
+    Entropy is an expectation, so take the average. This is the same sampler from the
+    <a href="/shannon-entropy-visually/">Shannon entropy note</a>, but now temperature sets the target:
+    we draw tokens from <em>p(T)</em>, score each by its surprise <em>−log<sub>2</sub>p</em>, and track
+    the running average. By the law of large numbers it homes in on <em>H(T)</em> — the dashed line —
+    which the slider moves up and down.
+  </p>
+
+  <div class="te-controls">
+    <span style="font-size:0.85rem">🌡️ T</span>
+    <input type="range" id="te3-T" min="0" max="1000" value="651" style="flex:1;max-width:300px">
+    <span class="te-readout" id="te3-Tval">1.00</span>
+  </div>
+  <div class="te-controls">
+    <button class="se-btn" id="te3-run">▶ Run sampler</button>
+    <button class="se-btn sec" id="te3-step">Draw 25</button>
+    <button class="se-reset" id="te3-reset">↺ Reset</button>
+  </div>
+
+  <div class="se-chartwrap">
+    <svg id="te3-svg" width="100%" height="200" viewBox="0 0 720 200" preserveAspectRatio="none" style="display:block"></svg>
+  </div>
+  <div class="te-legend">
+    <span style="color:var(--sn-accent)">running average surprise</span>
+    <span style="color:var(--sn-good)">entropy H(T) — target</span>
+  </div>
+
+  <div class="te-statrow" style="margin-top:0.6rem">
+    <div class="te-stat"><div class="lab">draws</div><div class="val" id="te3-n">0</div></div>
+    <div class="te-stat"><div class="lab">avg surprise</div><div class="val" id="te3-avg">—</div></div>
+    <div class="te-stat"><div class="lab">entropy H(T)</div><div class="val" id="te3-h" style="color:var(--sn-good)">—</div></div>
+  </div>
+  <div class="se-note" style="margin-bottom:0">
+    <strong>Try this:</strong> run it cold and the average surprise hugs a low line near 0 (the model
+    keeps emitting "mat"); slide hot mid-run and the target jumps up toward <em>log<sub>2</sub>N</em>
+    while the running average chases it. The wiggle early on is small-sample noise; it always settles
+    onto <em>H(T)</em>.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. LITERATURE + CONSEQUENCES                                 -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>📚 Where this lives in the literature</h3>
+  <p style="margin-top:0">
+    The temperature–entropy link is not a folk heuristic; it is the bridge between information theory
+    and statistical mechanics, and it has been discussed for decades under several names.
+  </p>
+  <ul style="line-height:1.75">
+    <li><strong>Maximum entropy (Jaynes, 1957).</strong> The Boltzmann distribution is <em>derived</em>
+      as the maximum-entropy distribution at fixed expected energy; <em>&beta; = 1/T</em> is the
+      Lagrange multiplier. This is why temperature <em>is</em> the entropy dial — by construction.</li>
+    <li><strong>Gibbs / statistical mechanics.</strong> The partition function <em>Z</em>, free energy
+      <em>F = −T ln Z</em>, and specific heat <em>C = Var(E)/T<sup>2</sup></em> are the standard toolkit;
+      everything in this note is a one-line translation of it into "logits."</li>
+    <li><strong>Simulated annealing (Kirkpatrick, Gelatt &amp; Vecchi, 1983)</strong> and
+      <strong>Boltzmann machines (Ackley, Hinton &amp; Sejnowski, 1985).</strong> Temperature used as a
+      schedule to control how much the system explores — the subject of the
+      <a href="/boltzmann-machines-visually/">Boltzmann note</a>.</li>
+    <li><strong>Knowledge distillation (Hinton, Vinyals &amp; Dean, 2015).</strong> A high softmax
+      temperature deliberately raises the entropy of a teacher's outputs to expose its "dark knowledge"
+      — the relative probabilities of the wrong answers — so a student can learn from soft targets.</li>
+    <li><strong>Neural-text decoding.</strong> Temperature sampling sits alongside top-<em>k</em> and
+      nucleus / top-<em>p</em> sampling (Holtzman et&nbsp;al., 2020) as the standard knobs for trading
+      diversity against coherence; all of them are, in effect, entropy controls on the next-token
+      distribution.</li>
+  </ul>
+
+  <h3 style="margin-top:1.4rem">🎯 The consequences worth remembering</h3>
+  <ul style="line-height:1.75">
+    <li><strong>Monotone, and provably so.</strong> <em>dS/dT = Var(E)/T<sup>3</sup> &ge; 0</em>: heating
+      never lowers entropy.</li>
+    <li><strong>Two hard limits.</strong> <em>T&rarr;0</em> is deterministic argmax (entropy 0);
+      <em>T&rarr;&infin;</em> is uniform (entropy <em>log N</em>). Greedy decoding and "maximally random"
+      are the same dial at its two ends.</li>
+    <li><strong>Perplexity is the visible face of entropy.</strong> Perplexity <em>= 2<sup>H</sup></em> is
+      the effective number of choices the model is weighing; temperature tunes it directly. That is the
+      readout under the first demo.</li>
+    <li><strong>A specific-heat sweet spot.</strong> The most sensitive temperature is set by the spread
+      of the logits — which is why one global temperature is never optimal for every prompt, and why
+      adaptive / entropy-aware sampling is an active research direction.</li>
+    <li><strong>It is the same temperature.</strong> The <em>T</em> in your sampling settings, the
+      <em>T</em> in a Boltzmann machine, and the <em>T</em> in a gas are the one parameter, doing the one
+      job: setting the exchange rate between energy and entropy.</li>
+  </ul>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  // theme-aware colors: read CSS tokens, re-read + redraw on light/dark toggle
+  const SN = document.querySelector(".study-note");
+  const readCols = () => {
+    const cs = getComputedStyle(SN);
+    const c = n => cs.getPropertyValue(n).trim();
+    return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
+             warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid") };
+  };
+  let COL = readCols();
+  const redrawFns = [];
+  const onTheme = fn => { redrawFns.push(fn); return fn; };
+  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  const log2 = x => Math.log(x) / Math.LN2;
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+
+  // ---- the shared toy model: next-token logits for "the cat sat on the ___" ----
+  const TOKENS = ["mat", "floor", "sofa", "roof", "moon", "quark"];
+  const LOGITS = [4.0, 2.5, 2.0, 1.0, 0.0, -1.0];
+  const N = TOKENS.length;
+  const BAR_COLS = ["#0891b2", "#0ea5b8", "#22b8c9", "#3cc7d4", "#67cdd9", "#a5e3ea"];
+  const Hmax = log2(N);
+
+  // softmax(z / T) with the usual max-shift for numerical stability
+  function probs(T) {
+    const t = Math.max(T, 1e-3);
+    const m = Math.max.apply(null, LOGITS);
+    const ex = LOGITS.map(z => Math.exp((z - m) / t));
+    const Z = ex.reduce((a, b) => a + b, 0);
+    return ex.map(e => e / Z);
+  }
+  const entropyBits = ps => ps.reduce((h, p) => h + (p > 0 ? -p * log2(p) : 0), 0);
+  const entropyNats = ps => ps.reduce((h, p) => h + (p > 0 ? -p * Math.log(p) : 0), 0);
+  // thermodynamics with energy E_i = -logit
+  function thermo(T) {
+    const p = probs(T);
+    let U = 0, U2 = 0;
+    for (let i = 0; i < N; i++) { const E = -LOGITS[i]; U += p[i] * E; U2 += p[i] * E * E; }
+    const varE = Math.max(U2 - U * U, 0);
+    const S = entropyNats(p);
+    return { p, U, S, F: U - T * S, varE, dSdT: varE / (T * T * T) };
+  }
+
+  // slider position 0..1000  <->  T in [0.05, 5] on a log scale
+  const sliderToT = s => 0.05 * Math.pow(100, s / 1000);
+  const Tmin = sliderToT(0), Tmax = sliderToT(1000);
+  const tToFrac = T => (Math.log(T) - Math.log(Tmin)) / (Math.log(Tmax) - Math.log(Tmin));
+
+  // ============================================================
+  // DEMO 1 — bars + entropy + H(T) curve
+  // ============================================================
+  (function () {
+    const bars = document.getElementById("te1-bars");
+    const curve = document.getElementById("te1-curve");
+    const slider = document.getElementById("te1-T");
+    const Tval = document.getElementById("te1-Tval");
+    const hEl = document.getElementById("te1-h");
+    const pplEl = document.getElementById("te1-ppl");
+    const tag = document.getElementById("te1-tag");
+
+    function drawBars(T, p) {
+      const W = 460, H = 240, padT = 14, padB = 34, padL = 8;
+      const slot = (W - padL) / N, barW = slot * 0.6, top = H - padT - padB;
+      let out = "";
+      [0.25, 0.5, 0.75, 1].forEach(f => {
+        const y = H - padB - f * top;
+        out += `<line x1="${padL}" y1="${y}" x2="${W}" y2="${y}" stroke="${COL.grid}" stroke-width="1"/>`;
+        out += `<text x="${padL}" y="${y - 2}" font-size="9" opacity="0.6">${(f * 100).toFixed(0)}%</text>`;
+      });
+      p.forEach((pi, i) => {
+        const x = padL + i * slot + (slot - barW) / 2;
+        const bh = pi * top, yTop = H - padB - bh;
+        out += `<rect x="${x.toFixed(1)}" y="${yTop.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" rx="4" fill="${BAR_COLS[i]}"/>`;
+        out += `<text x="${(x + barW / 2).toFixed(1)}" y="${(yTop - 5).toFixed(1)}" font-size="10" text-anchor="middle" fill="${COL.muted}">${(pi * 100).toFixed(0)}%</text>`;
+        out += `<text x="${(x + barW / 2).toFixed(1)}" y="${H - padB + 14}" font-size="11" text-anchor="middle">${TOKENS[i]}</text>`;
+        out += `<text x="${(x + barW / 2).toFixed(1)}" y="${H - padB + 27}" font-size="9" text-anchor="middle" opacity="0.5">z=${LOGITS[i]}</text>`;
+      });
+      bars.innerHTML = out;
+    }
+
+    function drawCurve(T) {
+      const W = 720, H = 200, padL = 40, padR = 16, padT = 14, padB = 30;
+      const X = f => padL + f * (W - padL - padR);
+      const Y = h => H - padB - (h / Hmax) * (H - padT - padB);
+      let grid = "";
+      // y ticks in bits
+      const yticks = [0, 0.5, 1, 1.5, 2, 2.5].filter(t => t <= Hmax + 0.01);
+      yticks.forEach(t => {
+        grid += `<line x1="${padL}" y1="${Y(t)}" x2="${W - padR}" y2="${Y(t)}" stroke="${COL.grid}" stroke-width="1"/>`;
+        grid += `<text x="${padL - 6}" y="${Y(t) + 3}" font-size="9" text-anchor="end">${t}</text>`;
+      });
+      // x ticks at a few temperatures
+      [0.05, 0.1, 0.3, 1, 3, 5].forEach(tt => {
+        const f = tToFrac(tt);
+        grid += `<line x1="${X(f)}" y1="${padT}" x2="${X(f)}" y2="${H - padB}" stroke="${COL.grid}" stroke-width="1"/>`;
+        grid += `<text x="${X(f)}" y="${H - padB + 14}" font-size="9" text-anchor="middle">${tt}</text>`;
+      });
+      // max line
+      grid += `<line x1="${padL}" y1="${Y(Hmax)}" x2="${W - padR}" y2="${Y(Hmax)}" stroke="${COL.muted}" stroke-width="1" stroke-dasharray="4 4" opacity="0.6"/>`;
+      grid += `<text x="${W - padR}" y="${Y(Hmax) - 4}" font-size="9" text-anchor="end" opacity="0.7">log₂N = ${Hmax.toFixed(2)}</text>`;
+      // curve
+      let d = "";
+      for (let k = 0; k <= 240; k++) {
+        const f = k / 240, tt = sliderToT(f * 1000), h = entropyBits(probs(tt));
+        d += (k === 0 ? "M" : "L") + X(f).toFixed(1) + " " + Y(h).toFixed(1) + " ";
+      }
+      const f = tToFrac(T), h = entropyBits(probs(T));
+      const marker =
+        `<line x1="${X(f)}" y1="${Y(h)}" x2="${X(f)}" y2="${H - padB}" stroke="${COL.bad}" stroke-width="1.5" stroke-dasharray="3 3"/>` +
+        `<circle cx="${X(f)}" cy="${Y(h)}" r="5.5" fill="${COL.bad}"/>`;
+      curve.innerHTML = grid +
+        `<path d="${d}" fill="none" stroke="${COL.accent}" stroke-width="2.5"/>` + marker +
+        `<text x="${X(0.5)}" y="${H - 2}" font-size="10" text-anchor="middle">temperature T (log scale)</text>` +
+        `<text x="12" y="${padT + 70}" font-size="10" transform="rotate(-90 12 ${padT + 70})" text-anchor="middle">entropy H (bits)</text>`;
+    }
+
+    function draw() {
+      const T = sliderToT(+slider.value);
+      const p = probs(T);
+      const h = entropyBits(p);
+      Tval.textContent = T.toFixed(2);
+      hEl.textContent = h.toFixed(2);
+      pplEl.textContent = Math.pow(2, h).toFixed(2);
+      const frac = h / Hmax;
+      if (frac < 0.15) { tag.textContent = "near-greedy · sharp"; tag.className = "se-tag good"; }
+      else if (frac > 0.93) { tag.textContent = "near-uniform · flat"; tag.className = "se-tag hot"; }
+      else { tag.textContent = (frac * 100).toFixed(0) + "% of max entropy"; tag.className = "se-tag warn"; }
+      drawBars(T, p);
+      drawCurve(T);
+    }
+    slider.addEventListener("input", draw);
+    document.getElementById("te1-cold").addEventListener("click", () => { slider.value = 0; draw(); });
+    document.getElementById("te1-warm").addEventListener("click", () => { slider.value = Math.round(tToFrac(1) * 1000); draw(); });
+    document.getElementById("te1-hot").addEventListener("click", () => { slider.value = 1000; draw(); });
+    onTheme(draw);
+    draw();
+  })();
+
+  // ============================================================
+  // DEMO 2 — energy / entropy / free energy + heat capacity
+  // ============================================================
+  (function () {
+    const thermoSvg = document.getElementById("te2-thermo");
+    const heatSvg = document.getElementById("te2-heat");
+    const slider = document.getElementById("te2-T");
+    const Tval = document.getElementById("te2-Tval");
+    const uEl = document.getElementById("te2-u");
+    const sEl = document.getElementById("te2-s");
+    const fEl = document.getElementById("te2-f");
+
+    // precompute curves across the T range so we can auto-scale axes
+    const STEPS = 200;
+    const samples = [];
+    for (let k = 0; k <= STEPS; k++) {
+      const f = k / STEPS, T = sliderToT(f * 1000);
+      samples.push(Object.assign({ f, T }, thermo(T)));
+    }
+    const yLo = Math.min.apply(null, samples.flatMap(s => [s.U, s.S, s.F]));
+    const yHi = Math.max.apply(null, samples.flatMap(s => [s.U, s.S, s.F]));
+    const dMax = Math.max.apply(null, samples.map(s => s.dSdT));
+    const peak = samples.reduce((a, b) => (b.dSdT > a.dSdT ? b : a));
+
+    function frame(svg, W, H, padL, title, xlab) {
+      const padR = 14, padT = 14, padB = 30;
+      return { padR, padT, padB,
+        X: f => padL + f * (W - padL - padR),
+        plot: (inner) => {
+          let xg = "";
+          [0.05, 0.3, 1, 5].forEach(tt => {
+            const f = tToFrac(tt), x = padL + f * (W - padL - padR);
+            xg += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H - padB}" stroke="${COL.grid}" stroke-width="1"/>`;
+            xg += `<text x="${x}" y="${H - padB + 13}" font-size="9" text-anchor="middle">${tt}</text>`;
+          });
+          svg.innerHTML = xg + inner +
+            `<text x="${padL + (W - padL - padR) / 2}" y="${H - 1}" font-size="9" text-anchor="middle" opacity="0.7">${xlab}</text>` +
+            `<text x="${padL}" y="${padT - 2}" font-size="10" opacity="0.8">${title}</text>`;
+        } };
+    }
+
+    function drawThermo(curT) {
+      const W = 460, H = 230, padL = 34;
+      const fr = frame(thermoSvg, W, H, padL, "energy · entropy · free energy", "T (log scale)");
+      const Y = v => H - fr.padB - (v - yLo) / (yHi - yLo || 1) * (H - fr.padT - fr.padB);
+      const series = (key, col) => {
+        let d = "";
+        samples.forEach((s, k) => { d += (k === 0 ? "M" : "L") + fr.X(s.f).toFixed(1) + " " + Y(s[key]).toFixed(1) + " "; });
+        return `<path d="${d}" fill="none" stroke="${col}" stroke-width="2.2"/>`;
+      };
+      const f = tToFrac(curT), th = thermo(curT);
+      const mk = (v, col) => `<circle cx="${fr.X(f).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="4" fill="${col}"/>`;
+      fr.plot(
+        `<line x1="${fr.X(f)}" y1="${fr.padT}" x2="${fr.X(f)}" y2="${H - fr.padB}" stroke="${COL.muted}" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>` +
+        series("U", COL.bad) + series("S", COL.accent) + series("F", COL.good) +
+        mk(th.U, COL.bad) + mk(th.S, COL.accent) + mk(th.F, COL.good)
+      );
+    }
+
+    function drawHeat(curT) {
+      const W = 460, H = 230, padL = 34;
+      const fr = frame(heatSvg, W, H, padL, "dS/dT = Var(E)/T³", "T (log scale)");
+      const Y = v => H - fr.padB - clamp(v, 0, dMax) / (dMax || 1) * (H - fr.padT - fr.padB);
+      let d = "";
+      samples.forEach((s, k) => { d += (k === 0 ? "M" : "L") + fr.X(s.f).toFixed(1) + " " + Y(s.dSdT).toFixed(1) + " "; });
+      const f = tToFrac(curT), th = thermo(curT);
+      const pf = tToFrac(peak.T);
+      fr.plot(
+        `<line x1="${fr.X(pf)}" y1="${fr.padT}" x2="${fr.X(pf)}" y2="${H - fr.padB}" stroke="${COL.warn}" stroke-width="1" stroke-dasharray="4 4" opacity="0.7"/>` +
+        `<text x="${fr.X(pf)}" y="${fr.padT + 10}" font-size="9" text-anchor="middle" fill="${COL.warn}">peak T≈${peak.T.toFixed(2)}</text>` +
+        `<path d="${d}" fill="none" stroke="${COL.warn}" stroke-width="2.4"/>` +
+        `<line x1="${fr.X(f)}" y1="${fr.padT}" x2="${fr.X(f)}" y2="${H - fr.padB}" stroke="${COL.muted}" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"/>` +
+        `<circle cx="${fr.X(f).toFixed(1)}" cy="${Y(th.dSdT).toFixed(1)}" r="4.5" fill="${COL.warn}"/>`
+      );
+    }
+
+    function draw() {
+      const T = sliderToT(+slider.value);
+      const th = thermo(T);
+      Tval.textContent = T.toFixed(2);
+      uEl.textContent = th.U.toFixed(2);
+      sEl.textContent = th.S.toFixed(2);
+      fEl.textContent = th.F.toFixed(2);
+      drawThermo(T);
+      drawHeat(T);
+    }
+    slider.addEventListener("input", draw);
+    onTheme(draw);
+    draw();
+  })();
+
+  // ============================================================
+  // DEMO 3 — sampler: running average surprise -> H(T)
+  // ============================================================
+  (function () {
+    const svg = document.getElementById("te3-svg");
+    const slider = document.getElementById("te3-T");
+    const Tval = document.getElementById("te3-Tval");
+    const nEl = document.getElementById("te3-n");
+    const avgEl = document.getElementById("te3-avg");
+    const hEl = document.getElementById("te3-h");
+    const runBtn = document.getElementById("te3-run");
+
+    let n = 0, sumSurprise = 0;
+    const hist = [];
+    let running = false, raf = null;
+
+    function curProbs() { return probs(sliderToT(+slider.value)); }
+    function sampleIndex(p) {
+      let r = Math.random(), acc = 0;
+      for (let i = 0; i < p.length; i++) { acc += p[i]; if (r <= acc) return i; }
+      return p.length - 1;
+    }
+    function drawOne() {
+      const p = curProbs();
+      const i = sampleIndex(p);
+      sumSurprise += (p[i] > 0 ? -log2(p[i]) : 0);
+      n++;
+      hist.push(sumSurprise / n);
+      if (hist.length > 2000) hist.shift();
+    }
+    function reset() { n = 0; sumSurprise = 0; hist.length = 0; stop(); draw(); }
+
+    const W = 720, H = 200, padL = 38, padR = 12, padT = 12, padB = 26;
+    function draw() {
+      const T = sliderToT(+slider.value);
+      Tval.textContent = T.toFixed(2);
+      const Htarget = entropyBits(probs(T));
+      const yMax = Math.max(Hmax, 0.5) * 1.08;
+      const X = k => padL + (hist.length > 1 ? k / (hist.length - 1) : 0) * (W - padL - padR);
+      const Y = v => H - padB - clamp(v, 0, yMax) / yMax * (H - padT - padB);
+
+      nEl.textContent = n;
+      avgEl.textContent = n > 0 ? hist[hist.length - 1].toFixed(3) : "—";
+      hEl.textContent = Htarget.toFixed(3);
+
+      let grid = "";
+      [0, 0.5, 1, 1.5, 2, 2.5].filter(t => t <= yMax).forEach(t => {
+        grid += `<line x1="${padL}" y1="${Y(t)}" x2="${W - padR}" y2="${Y(t)}" stroke="${COL.grid}" stroke-width="1"/>`;
+        grid += `<text x="${padL - 6}" y="${Y(t) + 3}" font-size="9" text-anchor="end">${t}</text>`;
+      });
+      const targetLine =
+        `<line x1="${padL}" y1="${Y(Htarget)}" x2="${W - padR}" y2="${Y(Htarget)}" stroke="${COL.good}" stroke-width="2" stroke-dasharray="6 4"/>` +
+        `<text x="${W - padR}" y="${Y(Htarget) - 5}" font-size="10" text-anchor="end" fill="${COL.good}">H(T) = ${Htarget.toFixed(2)}</text>`;
+      let d = "";
+      hist.forEach((v, k) => { d += (k === 0 ? "M" : "L") + X(k).toFixed(1) + " " + Y(v).toFixed(1) + " "; });
+      const trace = hist.length ? `<path d="${d}" fill="none" stroke="${COL.accent}" stroke-width="2"/>` : "";
+      const dot = hist.length ? `<circle cx="${X(hist.length - 1).toFixed(1)}" cy="${Y(hist[hist.length - 1]).toFixed(1)}" r="3.5" fill="${COL.accent}"/>` : "";
+      svg.innerHTML = grid + targetLine + trace + dot +
+        `<text x="${padL}" y="${H - 4}" font-size="9" opacity="0.6">draws →</text>`;
+    }
+
+    let acc = 0, last = 0;
+    function loop(t) {
+      if (!running) return;
+      if (!last) last = t;
+      acc += t - last; last = t;
+      while (acc > 18) { drawOne(); acc -= 18; }
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+    function start() { running = true; runBtn.textContent = "⏸ Pause"; last = 0; acc = 0; raf = requestAnimationFrame(loop); }
+    function stop() { running = false; runBtn.textContent = "▶ Run sampler"; if (raf) cancelAnimationFrame(raf); }
+
+    runBtn.addEventListener("click", () => { running ? stop() : start(); });
+    document.getElementById("te3-step").addEventListener("click", () => { for (let i = 0; i < 25; i++) drawOne(); draw(); });
+    document.getElementById("te3-reset").addEventListener("click", reset);
+    slider.addEventListener("input", draw);
+    onTheme(draw);
+    draw();
+  })();
+})();
+</script>
+
+</div>
