@@ -180,9 +180,11 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
     two terms as competing appetites: minimising <em>&lang;E&rang;</em> wants to concentrate on the best
     token; maximising <em>S</em> wants to spread out; <em>T</em> sets the exchange rate between them.
     Cold ⇒ energy wins (sharp, low entropy); hot ⇒ entropy wins (spread, high entropy). Drag the
-    temperature and watch the three quantities trade off. <em>(Here entropy is in <strong>nats</strong> —
-    natural log — because that is the unit in which <em>F = −T&nbsp;ln&nbsp;Z</em> holds exactly; nats
-    are just bits &times; ln&nbsp;2.)</em>
+    temperature and watch the three quantities trade off. <em>(Units: <strong>&lang;E&rang;</strong> and
+    <strong>F</strong> are in <strong>logit</strong> (score) units — energy is just −logit — while
+    <strong>S</strong> is in <strong>nats</strong> (natural log, where <em>F = −T&nbsp;ln&nbsp;Z</em>
+    holds exactly; nats are bits &times; ln&nbsp;2). The factor <em>T</em> in <em>T&middot;S</em> is what
+    converts nats into the same logit units, so the subtraction is well-posed.)</em>
   </p>
 
   <div class="te-controls">
@@ -213,9 +215,9 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
   </div>
 
   <div class="te-statrow">
-    <div class="te-stat"><div class="lab">⟨E⟩</div><div class="val" id="te2-u" style="color:var(--sn-bad)">—</div><div class="lab" style="opacity:0.4">nats·</div></div>
+    <div class="te-stat"><div class="lab">⟨E⟩</div><div class="val" id="te2-u" style="color:var(--sn-bad)">—</div><div class="lab" style="opacity:0.4">logits</div></div>
     <div class="te-stat"><div class="lab">S</div><div class="val" id="te2-s">—</div><div class="lab" style="opacity:0.4">nats</div></div>
-    <div class="te-stat"><div class="lab">F = ⟨E⟩−TS</div><div class="val" id="te2-f" style="color:var(--sn-good)">—</div><div class="lab" style="opacity:0.4">nats·</div></div>
+    <div class="te-stat"><div class="lab">F = ⟨E⟩−TS</div><div class="val" id="te2-f" style="color:var(--sn-good)">—</div><div class="lab" style="opacity:0.4">logits</div></div>
   </div>
 </div>
 
@@ -229,8 +231,10 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
     chart above is the rate <em>dS/dT</em>, and it has a hump. There is a characteristic temperature
     where the distribution is <strong>most sensitive</strong> — where a small turn of the dial buys the
     most new entropy. Below it the model is nearly frozen on its top token; above it the gains taper as
-    it approaches uniform. That peak is a quiet, smeared-out version of a <strong>phase
-    transition</strong>, and the rate is exactly the statistical-mechanics <em>specific heat</em>:
+    it approaches uniform. That peak is <em>reminiscent of</em> a <strong>phase transition</strong> — though
+    with a finite vocabulary there is no true transition (the curve is perfectly smooth, never
+    non-analytic); it is the smeared-out, finite-size echo of one. The rate is exactly the
+    statistical-mechanics <em>specific heat</em> (with <em>S</em> in nats; for bits, divide by ln&nbsp;2):
   </p>
   <div class="se-equation">
     <span class="big">dS/dT = C/T = Var(E) &frasl; T<sup>3</sup></span>
@@ -246,8 +250,10 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
     <li>The peak sits near the scale of the logit gaps. Models with <strong>spread-out logits</strong>
       (a confident model) need more heating before they loosen up; models with <strong>bunched
       logits</strong> are already near-uniform and have little entropy left to gain. This is the
-      mechanical reason a single global temperature behaves so differently across prompts, and why a
-      "good" sampling temperature is roughly the scale of the model's typical logit spread.</li>
+      mechanical reason a single global temperature behaves so differently across prompts, and a rough
+      reason the scale of the model's typical logit spread is a useful <em>starting point</em> for the
+      sampling temperature (the best value is ultimately an empirical, quality-driven choice, not the
+      <em>dS/dT</em> peak itself).</li>
   </ul>
   <div class="se-note" style="margin-bottom:0">
     <strong>The annealing connection.</strong> <a href="/boltzmann-machines-visually/">Simulated
