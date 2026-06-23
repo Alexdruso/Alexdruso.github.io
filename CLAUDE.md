@@ -60,7 +60,7 @@ There is no application backend, test suite, or package manager beyond Bundler
 CI lives in `.github/workflows/cv-build.yml` and runs on push to `master`
 (when `docs/**`, the workflow, or `Makefile` change) or via manual dispatch:
 
-1. Set up Ruby 3.2 with `bundler-cache`.
+1. Set up Ruby 3.3 with `bundler-cache`.
 2. Install TeX Live + **xelatex** and fonts.
 3. `make clean && make cv` → compiles `docs/cv-src/cv.tex` **twice** with
    `xelatex` (for reference resolution) and copies the result to
@@ -169,8 +169,8 @@ points, summarized (read the file for the full rules):
 
 ## Git / workflow
 
-- Active development branch for this work: `claude/repo-cleanup-domain-migration-u2ilma`.
-  Commit and push there; do not push to `master` without explicit permission.
+- Do your work on a feature branch and commit/push there; never push to
+  `master` without explicit permission.
 - Production deploys happen automatically from `master` via the workflow above;
   do not commit to the `gh-pages` branch by hand (CI owns it).
 - Do not open a pull request unless explicitly asked.

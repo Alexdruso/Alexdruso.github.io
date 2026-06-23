@@ -1,112 +1,97 @@
 # Personal Website
 
-This repository contains my personal website and CV, built using Jekyll and LaTeX. The website features a clean, modern design with sections for my professional experience, education, technical skills, and blog posts.
+The personal website and CV of Alessandro Sanvito, served at
+[alexdruso.github.io](https://alexdruso.github.io) via GitHub Pages. It is a
+**Jekyll 4** site (source under `docs/`) plus a **LaTeX (Awesome CV)** pipeline
+that compiles a CV PDF into the site. The signature content is a set of
+interactive **Study Notes** — standalone HTML posts with embedded SVG/canvas
+visualizations and vanilla JS.
+
+There is no application backend or JS framework — the deliverable is a static
+site.
+
+> For detailed contributor guidance (content model, design tokens, gotchas), see
+> [`CLAUDE.md`](CLAUDE.md) and [`docs/_posts/CLAUDE.md`](docs/_posts/CLAUDE.md).
 
 ## Structure
 
-- `docs/`: Main website directory
-  - `_layouts/`: Jekyll layout templates
-    - `default.html`: Main layout template with navigation
-    - `post.html`: Blog post layout
-  - `_includes/`: Reusable Jekyll components
-    - `head.html`: Common head elements
-    - `header.html`: Navigation header
-    - `footer.html`: Site footer
-  - `cv-src/`: LaTeX source files for CV generation
-    - `cv.tex`: Main CV LaTeX file using Awesome CV template
-    - `awesome-cv.cls`: CV template class
-    - `cv/`: CV content sections
-      - `experience.tex`: Professional experience
-      - `education.tex`: Academic background
-      - `skills.tex`: Technical skills
-      - `publications.tex`: Research publications
-    - `fonts/`: Custom fonts (Roboto and FontAwesome)
-  - `public/`: Static assets and generated PDFs
-    - `Alessandro_Sanvito_CV.pdf`: Generated CV
-  - `style.scss`: Website styling with custom colors and layout
-  - `index.md`: Main page with professional summary
-  - `cv.md`: CV page with embedded PDF viewer
-  - `about.md`: Detailed about page
-  - `blog.md`: Blog posts and articles
+```
+.
+├── Makefile                       # make dev / make cv / make clean
+├── .github/workflows/cv-build.yml # CI: build CV + site, deploy to gh-pages
+└── docs/                          # *** the Jekyll site root ***
+    ├── _config.yml                # the sole Jekyll config
+    ├── Gemfile                    # jekyll 4.3, webrick, jekyll-feed, jekyll-sitemap
+    ├── index.md                   # "About Me" home page
+    ├── publications.md            # renders _data/publications.yml
+    ├── projects.md                # renders _data/projects.yml
+    ├── posts.html                 # "/study-notes/" index of all posts
+    ├── cv.md                      # embeds the generated CV PDF
+    ├── game.md                    # "/game/" — a vanilla-JS Snake game
+    ├── 404.md
+    ├── _data/                     # navigation.yml, projects.yml, publications.yml
+    ├── _layouts/                  # default.html → page.html / post.html
+    ├── _includes/                 # meta, analytics, svg-icons, study-note-styles
+    ├── _posts/                    # the interactive Study Notes (HTML)
+    ├── _sass/                     # reset, variables, themes/minimal, highlights
+    ├── style.scss                 # top-level stylesheet (@imports _sass partials)
+    ├── cv-src/                    # LaTeX source for the CV (Awesome CV)
+    │   ├── cv.tex                 # main file; \input's the cv/*.tex sections
+    │   ├── awesome-cv.cls
+    │   ├── cv/*.tex               # experience, education, skills, publications, ...
+    │   └── fonts/                 # Roboto + FontAwesome TTFs (xelatex)
+    ├── images/
+    └── public/                    # generated assets — the CV PDF lives here
+```
 
 ## Features
 
-- Responsive design that works on all devices
-- Dark/light mode support
-- Embedded PDF viewer for CV
-- Blog section with markdown support
-- Automated CV generation from LaTeX
-- GitHub Pages deployment
+- Responsive design with site-wide dark/light mode (persisted to `localStorage`)
+- Interactive Study Notes with theme-aware SVG/canvas visualizations
+- Embedded PDF viewer for the CV, generated from LaTeX
+- SEO meta tags, sitemap, and Atom feed
+- Automated build and deployment via GitHub Actions
 
-## CV Generation
+## Local development
 
-The CV is generated from LaTeX source files using XeLaTeX and the Awesome CV template. The generation process is automated through GitHub Actions:
+The `Makefile` is the front door; run targets from the repo root.
 
-1. When changes are pushed to the `docs/cv-src` directory, the workflow automatically:
-   - Compiles the LaTeX files using XeLaTeX
-   - Generates the PDF with proper font rendering
-   - Places it in `docs/public/Alessandro_Sanvito_CV.pdf`
-   - Rebuilds the Jekyll site
-   - Deploys to GitHub Pages
+```bash
+make dev      # install ruby/xelatex/node + bundle install (Debian/Ubuntu, uses sudo)
+make cv       # build the CV PDF from docs/cv-src into docs/public/
+make clean    # remove LaTeX intermediates
+```
 
-## Local Development
+Serve the site locally:
 
-### Prerequisites
+```bash
+cd docs
+bundle install                   # first time only
+bundle exec jekyll serve         # http://localhost:4000/
+# add --livereload while editing study notes
+```
 
-- Ruby 3.2 or later
-- Bundler
-- TeX Live (for local CV generation)
-- Git
+## CV generation
 
-### Setup
+The CV is built from `docs/cv-src/` with **xelatex** (required for the
+Roboto/FontAwesome OpenType fonts — not `pdflatex`). `make cv` compiles
+`cv.tex` twice (for reference resolution) and copies the result to
+`docs/public/Alessandro_Sanvito_CV.pdf`. The committed PDF is a build
+artifact — to change the CV, edit the `.tex` sources, not the PDF.
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/yourusername.github.io.git
-   cd yourusername.github.io
-   ```
+## CI / deployment
 
-2. Install dependencies:
-   ```bash
-   cd docs
-   bundle install
-   ```
+CI lives in `.github/workflows/cv-build.yml`:
 
-3. Run the development server:
-   ```bash
-   bundle exec jekyll serve
-   ```
+- **Pull requests** (touching `docs/**`, the workflow, or `Makefile`) run a fast
+  `verify` job: `jekyll build` plus `html-proofer` on internal links/images.
+- **Push to `master`** runs the full `build` job: build the CV with xelatex,
+  commit the regenerated PDF back to the branch, build the Jekyll site, and
+  deploy `docs/_site` to the `gh-pages` branch via `peaceiris/actions-gh-pages`.
 
-4. View the site at `http://localhost:4000`
-
-### Local CV Generation
-
-To generate the CV locally:
-
-1. Install TeX Live with XeLaTeX support:
-   ```bash
-   sudo apt-get install texlive-xetex texlive-fonts-extra texlive-latex-extra
-   ```
-
-2. Generate the PDF:
-   ```bash
-   cd docs/cv-src
-   xelatex cv.tex
-   xelatex cv.tex  # Run twice for proper reference resolution
-   ```
-
-## Deployment
-
-The site is automatically deployed to GitHub Pages when changes are pushed to the repository. The deployment process:
-
-1. Builds the CV from LaTeX source
-2. Generates the Jekyll site
-3. Deploys to the `gh-pages` branch
-
-## Contributing
-
-Feel free to fork this repository and use it as a template for your own website. If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
+Do not commit to `gh-pages` by hand — CI owns it.
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file
+for details.

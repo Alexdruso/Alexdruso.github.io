@@ -8,6 +8,11 @@ on:
       - 'docs/**'
       - '.github/workflows/cv-build.yml'
       - 'Makefile'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - '.github/workflows/cv-build.yml'
+      - 'Makefile'
   workflow_dispatch:
 
 # Serialize runs so two builds don't try to commit the regenerated CV to the
@@ -17,7 +22,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Fast pre-merge check: build the Jekyll site and proof internal links/images.
+  # No CV/LaTeX or deploy steps — those only run on master (see the build job).
+  verify:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: true
+          working-directory: docs
+
+      - name: Build Jekyll site
+        working-directory: docs
+        run: bundle exec jekyll build
+
+      - name: Proof internal links and images
+        working-directory: docs
+        # Force a UTF-8 locale so Nokogiri parses the posts' em dashes etc.
+        # instead of silently reading zero links under a US-ASCII locale.
+        env:
+          LANG: C.UTF-8
+          LC_ALL: C.UTF-8
+        run: bundle exec htmlproofer _site --disable-external --allow-hash-href
+
   build:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -30,7 +64,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.2'
+          ruby-version: '3.3'
           bundler-cache: true
           working-directory: docs
 
