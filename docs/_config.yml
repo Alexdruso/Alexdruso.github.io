@@ -17,19 +17,10 @@ avatar: /images/me.jpg
 
 # Includes an icon in the footer for each username you enter
 footer-links:
-  dribbble:
   email: alessandro.sanvito@gmail.com
-  facebook:
-  flickr:
   github: Alexdruso
-  instagram:
   linkedin: alessandro-sanvito-07706114b
-  pinterest:
-  rss: # just type anything here for a working RSS icon
-  twitter: 
-  stackoverflow: # your stackoverflow profile, e.g. "users/50476/bart-kiers"
-  youtube: # channel/<your_long_string> or user/<user-name>
-  googleplus: # anything in your profile username that comes after plus.google.com/
+  rss: true # set to enable the RSS/feed icon
 
 
 goatcounter: https://alexdruso.goatcounter.com/count
@@ -75,7 +66,6 @@ exclude:
   - Gemfile.lock
   - LICENSE
   - README.md
-  - CNAME
   - cv-src
 
 # Include these files in your production _site

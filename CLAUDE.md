@@ -169,8 +169,8 @@ points, summarized (read the file for the full rules):
 
 ## Git / workflow
 
-- Active development branch for this work: `claude/repo-cleanup-domain-migration-u2ilma`.
-  Commit and push there; do not push to `master` without explicit permission.
+- Do your work on a feature branch and commit/push there; never push to
+  `master` without explicit permission.
 - Production deploys happen automatically from `master` via the workflow above;
   do not commit to the `gh-pages` branch by hand (CI owns it).
 - Do not open a pull request unless explicitly asked.
