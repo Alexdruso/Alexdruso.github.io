@@ -183,7 +183,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
     temperature and watch the three quantities trade off. <em>(Units: <strong>&lang;E&rang;</strong> and
     <strong>F</strong> are in <strong>logit</strong> (score) units — energy is just −logit — while
     <strong>S</strong> is in <strong>nats</strong> (natural log, where <em>F = −T&nbsp;ln&nbsp;Z</em>
-    holds exactly; nats are bits &times; ln&nbsp;2). The factor <em>T</em> in <em>T&middot;S</em> is what
+    holds exactly; entropy in nats = entropy in bits &times; ln&nbsp;2, so 1&nbsp;nat &asymp; 1.44&nbsp;bits). The factor <em>T</em> in <em>T&middot;S</em> is what
     converts nats into the same logit units, so the subtraction is well-posed.)</em>
   </p>
 
