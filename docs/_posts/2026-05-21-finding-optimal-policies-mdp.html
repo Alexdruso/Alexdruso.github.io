@@ -257,11 +257,11 @@ excerpt: "A Markov Decision Process models sequential decisions under uncertaint
   <div class="example-box">
     <strong>Iteration 1</strong> (V = 0 everywhere): Q(Balanced, 📚 Study) = 5 + 0 = <strong>5</strong>, Q(Balanced, 🎮 Play) = 7 + 0 = <strong>7</strong>, Q(Balanced, 💤 Rest) = 3 + 0 = <strong>3</strong>. Play wins on pure immediate reward.
     <br><br>
-    <strong>After convergence</strong> (V approximately [70, 80, 94, 106, 113]):
+    <strong>After convergence</strong> (V approximately [74, 84, 96, 107, 114]):
     <br>
-    Q(Balanced, 📚 Study) = 5 + 0.9&times;(0.1&times;80 + 0.3&times;94 + 0.6&times;106) = 5 + 89.8 = <strong>94.8 ← winner</strong><br>
-    Q(Balanced, 🎮 Play)&nbsp; = 7 + 0.9&times;(0.4&times;80 + 0.4&times;94 + 0.2&times;106) = 7 + 81.7 = <strong>88.7</strong><br>
-    Q(Balanced, 💤 Rest)&nbsp; = 3 + 0.9&times;(0.5&times;94 + 0.4&times;106 + 0.1&times;113) = 3 + 90.6 = <strong>93.6</strong>
+    Q(Balanced, 📚 Study) = 5 + 0.9&times;(0.1&times;84 + 0.3&times;96 + 0.6&times;107) = 5 + 91.5 = <strong>96.5 ← winner</strong><br>
+    Q(Balanced, 🎮 Play)&nbsp; = 7 + 0.9&times;(0.4&times;84 + 0.4&times;96 + 0.2&times;107) = 7 + 84.4 = <strong>91.4</strong><br>
+    Q(Balanced, 💤 Rest)&nbsp; = 3 + 0.9&times;(0.5&times;96 + 0.4&times;107 + 0.1&times;114) = 3 + 92.2 = <strong>95.2</strong>
     <br><br>
     Play's +2 immediate lead is overwhelmed because Study transitions toward Focused and Star — states where the daily reward is 10–14, not 7. The long-term math is decisive.
   </div>

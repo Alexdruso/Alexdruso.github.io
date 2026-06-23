@@ -342,7 +342,7 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
         `<text x="13" y="${padT + 84}" font-size="11" transform="rotate(-90 13 ${padT + 84})" text-anchor="middle">surprise (bits)</text>`;
 
       if (p > 0.9) msg.innerHTML = "Almost certain — barely any surprise. A forecast like this tells you next to nothing.";
-      else if (p > 0.45 && p < 0.55) msg.innerHTML = "A coin-flip outcome: <strong>exactly 1 bit</strong> of surprise.";
+      else if (p > 0.49 && p < 0.51) msg.innerHTML = "A coin-flip outcome (p = 1/2): <strong>exactly 1 bit</strong> of surprise.";
       else if (p < 0.05) msg.innerHTML = "Rare and shocking — many bits. It'd take this many yes/no questions to single it out.";
       else msg.innerHTML = "Halve the probability and the surprise goes up by exactly one bit.";
     }

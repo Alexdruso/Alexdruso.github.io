@@ -720,7 +720,7 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
 
     let done = 0, caught = 0, running = false, raf = null;
 
-    function theoryPower() { return powerAt(nS.value / 100, +nS.value, aS.value / 1000); }
+    function theoryPower() { return powerAt(pS.value / 100, +nS.value, aS.value / 1000); }
     function reflectLabels() { pvv.textContent = (pS.value / 100).toFixed(2); nvv.textContent = nS.value; avv.textContent = (aS.value / 1000).toFixed(3); }
 
     function showTheory() {
