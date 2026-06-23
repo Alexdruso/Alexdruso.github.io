@@ -10,6 +10,12 @@ on:
       - 'Makefile'
   workflow_dispatch:
 
+# Serialize runs so two builds don't try to commit the regenerated CV to the
+# same branch at once (the second push would be rejected with "fetch first").
+concurrency:
+  group: build-site-and-cv-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -47,10 +53,25 @@ jobs:
           git add docs/public/Alessandro_Sanvito_CV.pdf
           if git diff --staged --quiet; then
             echo "No changes to commit"
-          else
-            git commit -m "Update CV"
-            git push origin HEAD:${{ github.ref_name }}
+            exit 0
           fi
+          git commit -m "Update CV"
+          # The remote branch may have advanced since checkout (e.g. concurrent
+          # pushes). Rebase onto the latest remote tip and retry the push a few
+          # times so the build artifact lands without failing the run.
+          branch='${{ github.ref_name }}'
+          for attempt in 1 2 3 4 5; do
+            if git push origin HEAD:"$branch"; then
+              echo "Push succeeded on attempt $attempt"
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt); rebasing onto origin/$branch and retrying"
+            git fetch origin "$branch"
+            git rebase "origin/$branch"
+            sleep $((attempt * 2))
+          done
+          echo "Failed to push CV update after multiple attempts"
+          exit 1
 
       - name: Build Jekyll site
         working-directory: docs
