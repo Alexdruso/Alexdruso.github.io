@@ -1,0 +1,80 @@
+---
+layout: post
+title: "TITLE: Subtitle that states the angle"
+date: 2026-01-01   # CHANGE ME: real YYYY-MM-DD, and match the filename's date prefix
+categories: [Topic, Interactive]
+excerpt: "One or two crisp sentences stating what the concept IS and the question this note answers. Concept-first, no hook, no 'by the end you'll…'. This text shows on the /study-notes/ index."
+---
+
+{% include study-note-styles.html %}
+
+<div class="study-note">
+
+<style>
+/* Note-specific LAYOUT only. Colors come from --sn-* tokens; shared
+   components (sections, buttons, sliders, tags, equations, notes, charts)
+   live in _includes/study-note-styles.html — reuse them, don't redefine. */
+.xx-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
+.xx-readout  { font: 1.05rem var(--sn-mono); color: var(--sn-accent); min-width: 4ch; }
+</style>
+
+<p>
+  <strong>Concept name</strong> is … (a direct definition). State the question this
+  note answers. Then give the one-sentence summary below and unpack it.
+</p>
+
+<div class="se-note">
+  <strong>One-sentence summary.</strong> The whole idea in a single line; the rest of
+  the note just unpacks this.
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. FIRST IDEA                                                 -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🔹 Section heading</h3>
+  <p style="margin-top:0">Explain. Introduce a worked example only if it carries the math.</p>
+
+  <div class="se-equation"><span class="big">f(x) = …</span></div>
+
+  <div class="xx-controls">
+    <label>x = <input type="range" id="xx-slider" min="-6" max="6" step="0.1" value="0"></label>
+    <span class="xx-readout" id="xx-out">0.50</span>
+  </div>
+
+  <div class="graph-wrap"><svg id="xx-chart" viewBox="0 0 420 220" width="100%"></svg></div>
+</div>
+
+<script>
+(function () {
+  const SN = document.querySelector(".study-note");
+  const readCols = () => { const cs = getComputedStyle(SN), c = n => cs.getPropertyValue(n).trim();
+    return { accent: c("--sn-accent"), grid: c("--sn-grid"), muted: c("--sn-muted") }; };
+  let COL = readCols();
+  const redraw = [];
+  new MutationObserver(() => { COL = readCols(); redraw.forEach(f => f()); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  const svg = document.getElementById("xx-chart");
+  const slider = document.getElementById("xx-slider");
+  const out = document.getElementById("xx-out");
+  const sig = x => 1 / (1 + Math.exp(-x));
+  const W = 420, H = 220, PX = x => 30 + (x + 6) / 12 * (W - 50), PY = y => H - 20 - y * (H - 40);
+
+  function draw() {
+    const x = +slider.value, y = sig(x);
+    out.textContent = y.toFixed(2);
+    let pts = "";
+    for (let i = -6; i <= 6; i += 0.1) pts += `${PX(i)},${PY(sig(i))} `;
+    svg.innerHTML =
+      `<line x1="30" y1="${PY(0)}" x2="${W-20}" y2="${PY(0)}" stroke="${COL.grid}"/>` +
+      `<polyline points="${pts}" fill="none" stroke="${COL.accent}" stroke-width="2"/>` +
+      `<circle cx="${PX(x)}" cy="${PY(y)}" r="5" fill="${COL.accent}"/>`;
+  }
+  redraw.push(draw);
+  slider.addEventListener("input", draw);
+  draw();
+})();
+</script>
+
+</div>

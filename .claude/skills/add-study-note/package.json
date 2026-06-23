@@ -1,0 +1,9 @@
+{
+  "name": "add-study-note-driver",
+  "private": true,
+  "type": "module",
+  "description": "Headless-Chrome preview harness for Jekyll study notes",
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}
