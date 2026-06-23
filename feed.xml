@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-06-23T22:10:12+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines</title><link href="https://alexdruso.github.io/temperature-and-entropy-llms/" rel="alternate" type="text/html" title="Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines" /><published>2026-06-22T00:00:00+00:00</published><updated>2026-06-22T00:00:00+00:00</updated><id>https://alexdruso.github.io/temperature-and-entropy-llms</id><content type="html" xml:base="https://alexdruso.github.io/temperature-and-entropy-llms/"><![CDATA[<style>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-06-23T22:31:05+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines</title><link href="https://alexdruso.github.io/temperature-and-entropy-llms/" rel="alternate" type="text/html" title="Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines" /><published>2026-06-22T00:00:00+00:00</published><updated>2026-06-22T00:00:00+00:00</updated><id>https://alexdruso.github.io/temperature-and-entropy-llms</id><content type="html" xml:base="https://alexdruso.github.io/temperature-and-entropy-llms/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
@@ -442,7 +442,7 @@
     temperature and watch the three quantities trade off. <em>(Units: <strong>&lang;E&rang;</strong> and
     <strong>F</strong> are in <strong>logit</strong> (score) units — energy is just −logit — while
     <strong>S</strong> is in <strong>nats</strong> (natural log, where <em>F = −T&nbsp;ln&nbsp;Z</em>
-    holds exactly; nats are bits &times; ln&nbsp;2). The factor <em>T</em> in <em>T&middot;S</em> is what
+    holds exactly; entropy in nats = entropy in bits &times; ln&nbsp;2, so 1&nbsp;nat &asymp; 1.44&nbsp;bits). The factor <em>T</em> in <em>T&middot;S</em> is what
     converts nats into the same logit units, so the subtraction is well-posed.)</em>
   </p>
 
@@ -1912,7 +1912,7 @@
 
     let done = 0, caught = 0, running = false, raf = null;
 
-    function theoryPower() { return powerAt(nS.value / 100, +nS.value, aS.value / 1000); }
+    function theoryPower() { return powerAt(pS.value / 100, +nS.value, aS.value / 1000); }
     function reflectLabels() { pvv.textContent = (pS.value / 100).toFixed(2); nvv.textContent = nS.value; avv.textContent = (aS.value / 1000).toFixed(3); }
 
     function showTheory() {
@@ -2819,9 +2819,13 @@
       const mu = Math.log(S0) + (r - 0.5 * sig * sig) * T;       // lognormal params of S_T
       const dens = x => x <= 0 ? 0 : Math.exp(-Math.pow(Math.log(x) - mu, 2) / (2 * vt * vt)) / (x * vt * SQRT2PI);
 
-      // numeric discounted E[payoff]
-      let acc = 0; const dx = 0.5;
-      for (let x = dx / 2; x < 600; x += dx) acc += Math.max(x - K, 0) * dens(x) * dx;
+      // numeric discounted E[payoff] — integrate over a domain that tracks the
+      // lognormal (6 sigma above E[log S_T]) so the heavy right tail is captured
+      // at high vol, with a fixed sample count to keep redraw cost constant
+      let acc = 0; const N = 2000;
+      const upper = Math.exp(mu + 6 * vt);
+      const dx = upper / N;
+      for (let i = 0; i < N; i++) { const x = (i + 0.5) * dx; acc += Math.max(x - K, 0) * dens(x) * dx; }
       const numV = Math.exp(-r * T) * acc;
       numEl.textContent = numV.toFixed(2);
       bsEl.textContent = bs(S0, K, r, sig, T, "call").price.toFixed(2);
@@ -3652,7 +3656,7 @@
         `<text x="13" y="${padT + 84}" font-size="11" transform="rotate(-90 13 ${padT + 84})" text-anchor="middle">surprise (bits)</text>`;
 
       if (p > 0.9) msg.innerHTML = "Almost certain — barely any surprise. A forecast like this tells you next to nothing.";
-      else if (p > 0.45 && p < 0.55) msg.innerHTML = "A coin-flip outcome: <strong>exactly 1 bit</strong> of surprise.";
+      else if (p > 0.49 && p < 0.51) msg.innerHTML = "A coin-flip outcome (p = 1/2): <strong>exactly 1 bit</strong> of surprise.";
       else if (p < 0.05) msg.innerHTML = "Rare and shocking — many bits. It'd take this many yes/no questions to single it out.";
       else msg.innerHTML = "Halve the probability and the surprise goes up by exactly one bit.";
     }
@@ -4390,7 +4394,7 @@
   </div>
   <div class="bm-legend">
     <span style="color:var(--sn-accent)">low energy (likely)</span>
-    <span style="color:var(--sn-bad)">high energy (rare)</span>
+    <span style="color:var(--sn-muted)">high energy (rare)</span>
   </div>
 
   <div class="bm-flexwrap" style="margin-top:1rem">
@@ -5685,11 +5689,11 @@
   <div class="example-box">
     <strong>Iteration 1</strong> (V = 0 everywhere): Q(Balanced, 📚 Study) = 5 + 0 = <strong>5</strong>, Q(Balanced, 🎮 Play) = 7 + 0 = <strong>7</strong>, Q(Balanced, 💤 Rest) = 3 + 0 = <strong>3</strong>. Play wins on pure immediate reward.
     <br><br>
-    <strong>After convergence</strong> (V approximately [70, 80, 94, 106, 113]):
+    <strong>After convergence</strong> (V approximately [74, 84, 96, 107, 114]):
     <br>
-    Q(Balanced, 📚 Study) = 5 + 0.9&times;(0.1&times;80 + 0.3&times;94 + 0.6&times;106) = 5 + 89.8 = <strong>94.8 ← winner</strong><br>
-    Q(Balanced, 🎮 Play)&nbsp; = 7 + 0.9&times;(0.4&times;80 + 0.4&times;94 + 0.2&times;106) = 7 + 81.7 = <strong>88.7</strong><br>
-    Q(Balanced, 💤 Rest)&nbsp; = 3 + 0.9&times;(0.5&times;94 + 0.4&times;106 + 0.1&times;113) = 3 + 90.6 = <strong>93.6</strong>
+    Q(Balanced, 📚 Study) = 5 + 0.9&times;(0.1&times;84 + 0.3&times;96 + 0.6&times;107) = 5 + 91.5 = <strong>96.5 ← winner</strong><br>
+    Q(Balanced, 🎮 Play)&nbsp; = 7 + 0.9&times;(0.4&times;84 + 0.4&times;96 + 0.2&times;107) = 7 + 84.4 = <strong>91.4</strong><br>
+    Q(Balanced, 💤 Rest)&nbsp; = 3 + 0.9&times;(0.5&times;96 + 0.4&times;107 + 0.1&times;114) = 3 + 92.2 = <strong>95.2</strong>
     <br><br>
     Play's +2 immediate lead is overwhelmed because Study transitions toward Focused and Star — states where the daily reward is 10–14, not 7. The long-term math is decisive.
   </div>

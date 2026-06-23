@@ -935,9 +935,13 @@
       const mu = Math.log(S0) + (r - 0.5 * sig * sig) * T;       // lognormal params of S_T
       const dens = x => x <= 0 ? 0 : Math.exp(-Math.pow(Math.log(x) - mu, 2) / (2 * vt * vt)) / (x * vt * SQRT2PI);
 
-      // numeric discounted E[payoff]
-      let acc = 0; const dx = 0.5;
-      for (let x = dx / 2; x < 600; x += dx) acc += Math.max(x - K, 0) * dens(x) * dx;
+      // numeric discounted E[payoff] — integrate over a domain that tracks the
+      // lognormal (6 sigma above E[log S_T]) so the heavy right tail is captured
+      // at high vol, with a fixed sample count to keep redraw cost constant
+      let acc = 0; const N = 2000;
+      const upper = Math.exp(mu + 6 * vt);
+      const dx = upper / N;
+      for (let i = 0; i < N; i++) { const x = (i + 0.5) * dx; acc += Math.max(x - K, 0) * dens(x) * dx; }
       const numV = Math.exp(-r * T) * acc;
       numEl.textContent = numV.toFixed(2);
       bsEl.textContent = bs(S0, K, r, sig, T, "call").price.toFixed(2);
