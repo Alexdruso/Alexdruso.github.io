@@ -1,4 +1,829 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-06-23T22:31:05+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines</title><link href="https://alexdruso.github.io/temperature-and-entropy-llms/" rel="alternate" type="text/html" title="Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines" /><published>2026-06-22T00:00:00+00:00</published><updated>2026-06-22T00:00:00+00:00</updated><id>https://alexdruso.github.io/temperature-and-entropy-llms</id><content type="html" xml:base="https://alexdruso.github.io/temperature-and-entropy-llms/"><![CDATA[<style>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-06-24T06:21:08+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">World Models: Learning to Dream, Then Act</title><link href="https://alexdruso.github.io/world-models/" rel="alternate" type="text/html" title="World Models: Learning to Dream, Then Act" /><published>2026-06-23T00:00:00+00:00</published><updated>2026-06-23T00:00:00+00:00</updated><id>https://alexdruso.github.io/world-models</id><content type="html" xml:base="https://alexdruso.github.io/world-models/"><![CDATA[<style>
+/* ============================================================
+   Study Notes — shared design system
+   Sleek/futuristic: cyan-teal accent, hairline borders, flat
+   single-accent controls, monospace numerals, glow in dark only.
+   Adaptive light + dark via tokens. Every selector is scoped
+   under .study-note so nothing leaks to the rest of the site.
+   ============================================================ */
+.study-note {
+  --sn-accent: #0891b2;
+  --sn-accent-strong: #06b6d4;
+  --sn-accent-soft: rgba(8, 145, 178, 0.10);
+  --sn-accent-line: rgba(8, 145, 178, 0.30);
+  --sn-on-accent: #ffffff;
+
+  --sn-panel: #ffffff;
+  --sn-panel-inset: #f6f8fa;
+  --sn-section: #f7f9fb;
+  --sn-border: rgba(15, 23, 42, 0.08);
+  --sn-grid: rgba(15, 23, 42, 0.10);
+
+  --sn-text: #1f2933;
+  --sn-muted: #64748b;
+
+  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
+  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
+  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
+
+  --sn-radius: 12px;
+  --sn-radius-sm: 8px;
+  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sn-glow: none;
+  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+.dark-theme .study-note {
+  --sn-accent: #22d3ee;
+  --sn-accent-strong: #67e8f9;
+  --sn-accent-soft: rgba(34, 211, 238, 0.12);
+  --sn-accent-line: rgba(34, 211, 238, 0.35);
+  --sn-on-accent: #06141a;
+
+  --sn-panel: #11131c;
+  --sn-panel-inset: #161a26;
+  --sn-section: #14161f;
+  --sn-border: rgba(148, 163, 184, 0.14);
+  --sn-grid: rgba(148, 163, 184, 0.16);
+
+  --sn-text: #e2e8f0;
+  --sn-muted: #94a3b8;
+
+  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
+  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
+  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
+
+  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+/* ---- sections / cards ---- */
+.study-note .se-section,
+.study-note .bm-section,
+.study-note .mdp-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: var(--sn-radius);
+  background: var(--sn-section);
+  border: 1px solid var(--sn-border);
+  box-shadow: var(--sn-shadow);
+}
+.study-note .se-section h3,
+.study-note .bm-section h3,
+.study-note .mdp-section h3 {
+  margin-top: 0;
+  color: var(--sn-accent);
+  letter-spacing: -0.01em;
+}
+
+/* ---- equation boxes ---- */
+.study-note .se-equation,
+.study-note .bm-equation,
+.study-note .equation-box {
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  font-size: 1.1rem;
+  text-align: center;
+  overflow-x: auto;
+}
+.study-note .se-equation .big,
+.study-note .bm-equation .big { font-size: 1.25rem; }
+
+/* ---- callout / note ---- */
+.study-note .se-note,
+.study-note .bm-note {
+  background: var(--sn-accent-soft);
+  border-radius: var(--sn-radius-sm);
+  border-left: 3px solid var(--sn-accent);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- example box ---- */
+.study-note .se-example,
+.study-note .bm-example,
+.study-note .example-box {
+  background: var(--sn-panel-inset);
+  border: 1px solid var(--sn-border);
+  border-left: 3px solid var(--sn-warn);
+  border-radius: var(--sn-radius-sm);
+  padding: 1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- chart containers ---- */
+.study-note .se-chartwrap,
+.study-note .bm-chartwrap,
+.study-note .graph-wrap {
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem;
+}
+.study-note .graph-wrap { overflow-x: auto; }
+
+/* ---- primary buttons ---- */
+.study-note .se-btn,
+.study-note .bm-btn,
+.study-note .vi-btn {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--sn-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-on-accent);
+  background: var(--sn-accent);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
+}
+.study-note .se-btn:hover:not(:disabled),
+.study-note .bm-btn:hover:not(:disabled),
+.study-note .vi-btn:hover:not(:disabled) {
+  background: var(--sn-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sn-glow);
+}
+.study-note .se-btn:disabled,
+.study-note .bm-btn:disabled,
+.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* secondary variant */
+.study-note .se-btn.sec,
+.study-note .bm-btn.sec,
+.study-note .vi-btn.sec {
+  background: transparent;
+  color: var(--sn-accent);
+  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
+}
+.study-note .se-btn.sec:hover:not(:disabled),
+.study-note .bm-btn.sec:hover:not(:disabled),
+.study-note .vi-btn.sec:hover:not(:disabled) {
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+}
+
+/* ---- ghost / reset buttons ---- */
+.study-note .se-reset,
+.study-note .bm-reset,
+.study-note .reset-link {
+  background: none;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-muted);
+  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
+}
+.study-note .se-reset:hover,
+.study-note .bm-reset:hover,
+.study-note .reset-link:hover {
+  background: var(--sn-accent-soft);
+  border-color: var(--sn-accent-line);
+  color: var(--sn-accent);
+}
+
+/* ---- range sliders: flat, single-accent ---- */
+.study-note input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+  outline: none;
+  cursor: pointer;
+}
+.study-note input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
+}
+.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.study-note input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+}
+.study-note input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+}
+
+/* ---- status pills ---- */
+.study-note .se-tag,
+.study-note .bm-tag {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
+}
+.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
+.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
+
+/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
+.study-note .se-stat .val,
+.study-note .bm-stat .val,
+.study-note .score-item .sval,
+.study-note .compare-score {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-accent);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.study-note .se-readout,
+.study-note .bm-temp-readout {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sn-accent);
+}
+
+/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
+.study-note svg text { fill: var(--sn-muted); }
+</style>
+
+
+<div class="study-note">
+
+<style>
+/* Note-specific LAYOUT only. Colors come from --sn-* tokens; shared components
+   (sections, buttons, sliders, tags, equations, notes, charts, numerals) live
+   in _includes/study-note-styles.html — reused here, not redefined. */
+.wm-flexwrap { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
+.wm-panel { flex: 1; min-width: 240px; }
+
+.wm-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
+.wm-readout { font-family: var(--sn-mono); font-variant-numeric: tabular-nums; color: var(--sn-accent); min-width: 3.4rem; display: inline-block; text-align: right; font-weight: 600; }
+.wm-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin: 0.6rem 0; }
+
+.wm-statrow { display: flex; gap: 1.6rem; justify-content: center; margin: 0.6rem 0; flex-wrap: wrap; }
+.wm-stat { text-align: center; }
+.wm-stat .lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; }
+.wm-stat .val { font-size: 1.55rem; }
+
+/* the two compression canvases */
+.wm-canvases { display: flex; gap: 1.4rem; flex-wrap: wrap; justify-content: center; align-items: flex-start; }
+.wm-canvas-cell { text-align: center; }
+.wm-canvas-cell .lab { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.6; margin-bottom: 0.3rem; }
+.wm-canvas-cell canvas {
+  width: 168px; height: 168px;
+  image-rendering: pixelated; image-rendering: crisp-edges;
+  border: 1px solid var(--sn-border); border-radius: var(--sn-radius-sm);
+  background: var(--sn-panel);
+}
+
+.wm-legend { font-size: 0.78rem; opacity: 0.85; display: flex; gap: 1.1rem; flex-wrap: wrap; margin-top: 0.5rem; justify-content: center; }
+.wm-legend span::before { content: "■ "; }
+</style>
+
+<p>
+  A <strong>world model</strong> is a learned, compressed simulator of an environment that an agent
+  carries in its head: feed it the current situation and an action, and it predicts what comes next.
+  The 2018 paper <em>World Models</em> (David Ha &amp; Jürgen Schmidhuber) asks what happens if you
+  build an agent almost entirely out of such a model. Its answer splits the agent into two very
+  unequal halves — a <strong>large world model</strong> that learns, without rewards, to <em>see</em>
+  and to <em>predict</em>, and a <strong>tiny controller</strong> that learns, by trial and error, to
+  <em>act</em> on the model's compressed view. The controller is so small you can train it inside the
+  world model's own hallucinations and still have it work in the real environment.
+</p>
+
+<div class="se-note">
+  <strong>One sentence.</strong> Compress each frame to a short latent vector (V), learn to predict the
+  next latent given the action (M), and let a minuscule controller (C) act on that compressed state —
+  then train C inside the model's <em>dreamed</em> rollouts, where a single <em>temperature</em> knob
+  decides whether the dream is a faithful teacher or an exploitable fake.
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. THE SPLIT                                                  -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🧩 A big world model and a tiny controller</h3>
+  <p style="margin-top:0">
+    The architecture has three parts, and almost all of the weights live in the first two. <strong>V</strong>
+    (Vision) is a <strong>variational autoencoder</strong>: it squeezes each raw <em>64&times;64&times;3</em>
+    frame down to a small latent vector <em>z</em> — <em>32</em> numbers for the CarRacing experiment —
+    keeping the gist and discarding the pixels.
+  </p>
+  <div class="se-equation">
+    <span class="big">z = V(o)</span> &nbsp;&nbsp; with &nbsp; o &isin; &#8477;<sup>64&times;64&times;3</sup> &nbsp;&rarr;&nbsp; z &isin; &#8477;<sup>32</sup>
+  </div>
+  <p>
+    <strong>M</strong> (Memory) is a recurrent network that predicts the <em>next</em> latent from the
+    current latent, the action, and its own hidden state <em>h</em> — the running memory of everything
+    seen so far. <strong>C</strong> (Controller) is then almost nothing: a single linear map from the
+    compressed state <em>[z, h]</em> to an action. It is exactly the
+    <a href="/finding-optimal-policies-mdp/">policy</a> of a reinforcement-learning agent, but reading a
+    learned 288-number summary of the world instead of raw pixels.
+  </p>
+  <div class="se-equation">
+    <span class="big">a<sub>t</sub> = W<sub>c</sub> [ z<sub>t</sub> ; h<sub>t</sub> ] + b<sub>c</sub></span>
+  </div>
+
+  <div class="graph-wrap"><svg id="wm-a-pipe" viewBox="0 0 720 200" width="100%"></svg></div>
+
+  <div class="se-example">
+    <strong>Why the controller is kept tiny.</strong> For CarRacing the parameter counts are lopsided:
+    V has <strong>~4.3M</strong>, M has <strong>~422K</strong>, and C has just <strong>867</strong>
+    (<em>288 inputs &times; 3 actions + 3 biases</em>). That smallness is the point: C is trained with
+    <strong>CMA-ES</strong>, an evolution strategy that perturbs whole parameter vectors and keeps what
+    scores well. Evolution shrugs off sparse, long-horizon rewards but does not scale to millions of
+    weights — so the heavy lifting is pushed into V and M, which learn <em>without</em> any reward at all.
+  </div>
+
+  <p style="margin-bottom:0">
+    V learns to compress. Drag the dial to see what a bottleneck does: shrink the latent budget and the
+    reconstruction turns blocky; widen it and detail returns. A real VAE chooses <em>which</em> structure
+    to keep far more cleverly than a uniform grid — this is just a stand-in for the trade-off.
+  </p>
+
+  <div class="wm-controls" style="justify-content:center;margin-top:1rem">
+    <label style="font-size:0.85rem">latent budget&nbsp; z dims =</label>
+    <input type="range" id="wm-a-dim" min="1" max="32" step="1" value="6" style="flex:1;max-width:280px">
+    <span class="wm-readout" id="wm-a-out">6</span>
+  </div>
+  <div class="wm-canvases">
+    <div class="wm-canvas-cell">
+      <div class="lab">observation o</div>
+      <canvas id="wm-a-orig" width="64" height="64"></canvas>
+    </div>
+    <div class="wm-canvas-cell">
+      <div class="lab">reconstruction D(z)</div>
+      <canvas id="wm-a-recon" width="64" height="64"></canvas>
+    </div>
+  </div>
+  <div style="text-align:center;margin-top:0.7rem">
+    <span id="wm-a-tag" class="se-tag">—</span>
+    <span style="font-size:0.82rem;opacity:0.7;margin-left:0.5rem">compression &approx; <span class="wm-readout" id="wm-a-ratio" style="min-width:0">—</span>&times; fewer numbers</span>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. M IS GENERATIVE                                            -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>💭 M is generative: rolling it forward is dreaming</h3>
+  <p style="margin-top:0">
+    M does not predict a single next latent — the future is uncertain, so it predicts a whole
+    <em>distribution</em> over the next latent. It is a <strong>Mixture Density Network</strong> on top of
+    the recurrent net (an "MDN-RNN"): its output is a mixture of <em>K</em> Gaussians (the paper uses
+    <em>K = 5</em>), each with its own weight, mean, and spread.
+  </p>
+  <div class="se-equation">
+    <span class="big">p(z<sub>t+1</sub> | a<sub>t</sub>, z<sub>t</sub>, h<sub>t</sub>) = &Sigma;<sub>k</sub> &pi;<sub>k</sub> <em>N</em>(z<sub>t+1</sub>; &mu;<sub>k</sub>, &sigma;<sub>k</sub><sup>2</sup>)</span>
+  </div>
+  <p>
+    Because M is a <em>distribution</em>, you can <strong>sample</strong> from it — and feeding each
+    sampled latent back in as the next input rolls the model forward on its own, with no real frames at
+    all. That self-generated rollout is the agent's <strong>dream</strong>. A single
+    <strong>temperature</strong> <em>&tau;</em> controls how wild the dream is, applied in exactly the
+    way the <a href="/temperature-and-entropy-llms/">temperature dial</a> reshapes any softmax — here it
+    flattens the mixing weights and stretches the component spreads:
+  </p>
+  <div class="se-equation">
+    <span class="big">&pi;<sub>k</sub> &prop; exp(&#8467;<sub>k</sub> / &tau;)</span> ,
+    &nbsp;&nbsp; <span class="big">&sigma;<sub>k</sub> &rarr; &sigma;<sub>k</sub> &middot; &radic;&tau;</span>
+  </div>
+  <p style="margin-bottom:0.6rem">
+    Below is a toy MDN-RNN rolled forward from a single starting latent. Each thin line is one sampled
+    future; the bold line is the most-likely (<em>&tau;&rarr;0</em>) path. Drag <em>&tau;</em>: near zero
+    the futures collapse onto one deterministic line; raise it and they fan out into the genuinely
+    different things the model thinks <em>could</em> happen. The sideways shapes are the spread of dreamed
+    futures at three checkpoints.
+  </p>
+
+  <div class="wm-controls">
+    <span style="font-size:0.85rem">🌡️ &tau;</span>
+    <input type="range" id="wm-b-tau" min="0" max="1000" value="680" style="flex:1">
+    <span class="wm-readout" id="wm-b-tauval">1.00</span>
+    <span id="wm-b-tag" class="se-tag">—</span>
+  </div>
+  <div class="se-chartwrap">
+    <svg id="wm-b-svg" width="100%" height="280" viewBox="0 0 720 280"></svg>
+  </div>
+  <div class="wm-btns" style="justify-content:center">
+    <button class="se-btn" id="wm-b-run">▶ Dream</button>
+    <button class="se-btn sec" id="wm-b-step">Step</button>
+    <button class="se-reset" id="wm-b-reset">↺ Resample</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. TRAINING IN THE DREAM + THE CHEATING PROBLEM              -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🎯 Training inside the dream — and the cheating problem</h3>
+  <p style="margin-top:0">
+    Here is the move that gives the paper its name. Since M is a self-contained simulator, you can train
+    the controller <strong>entirely inside the dream</strong>: never touch the real environment, just let
+    C act, let M hallucinate the consequences and the reward, and let CMA-ES optimize C against that
+    hallucination. For the VizDoom "Take Cover" task — dodge fireballs as long as possible — a controller
+    trained only in the dream and then dropped into the real game survived for <strong>1092</strong> time
+    steps on average, well past the task's <strong>750</strong>-step "solved" bar. (On CarRacing the same
+    recipe scored <strong>906&plusmn;21</strong> over 100 tracks — the first reported solution of that
+    benchmark.)
+  </p>
+  <p>
+    But a learned simulator has flaws, and an optimizer will <em>find</em> them. At low temperature the
+    Doom dream is nearly deterministic, and CMA-ES discovered an <strong>adversarial policy</strong>: a way
+    of moving that made the dreamed monsters <em>never fire a single fireball</em>. Inside the dream that
+    policy is immortal and scores enormously — and in the real game it dies almost at once. The fix is the
+    same temperature knob from above: crank <em>&tau;</em> up so the dream stays uncertain and noisy, and
+    the controller can no longer lean on any one exploitable quirk. Too low and it cheats; too high and the
+    dream is too chaotic to learn anything. There is a <strong>sweet spot</strong> in between.
+  </p>
+  <p style="margin-bottom:0.6rem">
+    The curves are the paper's actual Take Cover numbers: the <span style="color:var(--sn-warn);font-weight:600">dream score</span>
+    inside the model and the <span style="color:var(--sn-good);font-weight:600">real score</span> after
+    transfer, as &tau; varies. Drag the dial and watch the gap between them — the gap <em>is</em> the
+    cheating.
+  </p>
+
+  <div class="wm-controls">
+    <span style="font-size:0.85rem">🌡️ dream &tau;</span>
+    <input type="range" id="wm-c-tau" min="0" max="1000" value="640" style="flex:1">
+    <span class="wm-readout" id="wm-c-tauval">1.00</span>
+    <span id="wm-c-tag" class="se-tag">—</span>
+  </div>
+  <div class="wm-statrow">
+    <div class="wm-stat"><div class="lab">dream score</div><div class="val" id="wm-c-dream" style="color:var(--sn-warn)">—</div></div>
+    <div class="wm-stat"><div class="lab">real score</div><div class="val" id="wm-c-real" style="color:var(--sn-good)">—</div></div>
+  </div>
+  <div class="se-chartwrap">
+    <svg id="wm-c-svg" width="100%" height="260" viewBox="0 0 720 260"></svg>
+  </div>
+  <div class="wm-legend">
+    <span style="color:var(--sn-warn)">dream / virtual score</span>
+    <span style="color:var(--sn-good)">real / transfer score</span>
+    <span style="color:var(--sn-muted)">— — 750 = solved</span>
+  </div>
+  <div class="se-note" style="margin-bottom:0">
+    <strong>This is the same &tau; as the dream above.</strong> There it set how far the imagined futures
+    fanned out; here that very fanning is what stops the controller from memorizing a fake. A little
+    uncertainty in the teacher makes the student robust.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. WHERE THIS SITS                                            -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>📚 Where this sits</h3>
+  <ul style="margin:0.3rem 0 0 0;padding-left:1.2rem;line-height:1.7">
+    <li><strong>Unsupervised first, reward last.</strong> V and M learn from raw experience with no reward
+      signal; only the 867-parameter C ever sees the score. Most of the agent's competence is built before
+      the task is even specified.</li>
+    <li><strong>Planning by imagination.</strong> Training in the dream is cheap — no simulator, no
+      environment steps — and prefigures later "learning in imagination" agents (PlaNet, the Dreamer line),
+      which keep the V/M/C decomposition and replace CMA-ES with backpropagation through the learned model.</li>
+    <li><strong>Temperature as a robustness dial.</strong> The same <em>&tau;</em> that controls
+      <a href="/temperature-and-entropy-llms/">entropy in a softmax</a> here controls how much a learned
+      simulator can be gamed — a clean example of injecting uncertainty to prevent overfitting to a model's
+      own mistakes.</li>
+    <li><strong>The controller is a policy.</strong> Strip away V and M and C is an ordinary
+      <a href="/finding-optimal-policies-mdp/">policy maximizing return</a> — the world model just hands it
+      a state worth acting on.</li>
+  </ul>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  // theme-aware colors: read CSS tokens, re-read + redraw on light/dark toggle
+  const SN = document.querySelector(".study-note");
+  const readCols = () => {
+    const cs = getComputedStyle(SN);
+    const c = n => cs.getPropertyValue(n).trim();
+    return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
+             warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
+             panel: c("--sn-panel"), inset: c("--sn-panel-inset"), border: c("--sn-border") };
+  };
+  let COL = readCols();
+  const redrawFns = [];
+  const onTheme = fn => { redrawFns.push(fn); return fn; };
+  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
+  // slider 0..1000  <->  tau in [0.05, 1.5] on a log scale (shared by demos B and C)
+  const sliderToT = s => 0.05 * Math.pow(30, s / 1000);
+  const tToSlider = t => 1000 * Math.log(t / 0.05) / Math.log(30);
+  // standard-normal sample
+  const randn = () => { let u = 0, v = 0; while (u === 0) u = Math.random(); while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  // "#rrggbb" -> [r,g,b]; "#rrggbb" + alpha -> "rgba(...)"
+  const hex2rgb = h => { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(x => x + x).join("");
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; };
+  const rgba = (hex, a) => { const c = hex2rgb(hex); return `rgba(${c[0]},${c[1]},${c[2]},${a})`; };
+  const SVG = "http://www.w3.org/2000/svg";
+
+  // ============================================================
+  // DEMO A — pipeline diagram + latent-bottleneck canvases
+  // ============================================================
+  (function () {
+    // ---- decorative V -> M -> C pipeline ----
+    const pipe = document.getElementById("wm-a-pipe");
+    function node(x, label, sub) {
+      return `<rect x="${x}" y="64" width="120" height="72" rx="12" fill="${COL.panel}" stroke="${COL.accent}" stroke-width="1.5"/>` +
+             `<text x="${x + 60}" y="96" text-anchor="middle" font-size="22" font-weight="700" fill="${COL.accent}">${label}</text>` +
+             `<text x="${x + 60}" y="118" text-anchor="middle" font-size="11" fill="${COL.muted}">${sub}</text>`;
+    }
+    function arrow(x1, x2, label) {
+      const my = 100;
+      return `<line x1="${x1}" y1="${my}" x2="${x2 - 8}" y2="${my}" stroke="${COL.muted}" stroke-width="1.5"/>` +
+             `<path d="M ${x2 - 8} ${my - 5} L ${x2} ${my} L ${x2 - 8} ${my + 5} Z" fill="${COL.muted}"/>` +
+             `<text x="${(x1 + x2) / 2}" y="${my - 9}" text-anchor="middle" font-size="11" fill="${COL.muted}">${label}</text>`;
+    }
+    function drawPipe() {
+      let s = "";
+      // input frame glyph
+      s += `<rect x="14" y="74" width="52" height="52" rx="6" fill="${COL.inset}" stroke="${COL.border}"/>`;
+      s += `<text x="40" y="148" text-anchor="middle" font-size="11" fill="${COL.muted}">frame o</text>`;
+      s += arrow(70, 110, "");
+      s += node(110, "V", "encode → z");
+      s += arrow(230, 290, "z");
+      s += node(290, "M", "predict z′");
+      s += arrow(410, 470, "z, h");
+      s += node(470, "C", "z,h → a");
+      s += arrow(590, 650, "a");
+      // action glyph
+      s += `<rect x="650" y="84" width="56" height="32" rx="6" fill="${COL.accent}" />`;
+      s += `<text x="678" y="105" text-anchor="middle" font-size="13" font-weight="700" fill="${COL.panel}">a<tspan baseline-shift="sub" font-size="9">t</tspan></text>`;
+      // recurrent h loop on M
+      s += `<path d="M 350 64 C 350 32, 410 32, 410 60" fill="none" stroke="${COL.accent}" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+      s += `<path d="M 410 60 l -5 -7 l 9 1 Z" fill="${COL.accent}"/>`;
+      s += `<text x="380" y="28" text-anchor="middle" font-size="11" fill="${COL.accent}">hₜ memory</text>`;
+      // action feeds back into M (closing the dream loop)
+      s += `<path d="M 678 120 C 678 168, 350 168, 350 140" fill="none" stroke="${COL.muted}" stroke-width="1.2" stroke-dasharray="3 3"/>`;
+      s += `<path d="M 350 140 l -5 8 l 9 -2 Z" fill="${COL.muted}"/>`;
+      s += `<text x="500" y="184" text-anchor="middle" font-size="11" fill="${COL.muted}">action closes the loop — and lets M dream</text>`;
+      pipe.innerHTML = s;
+    }
+    onTheme(drawPipe); drawPipe();
+
+    // ---- latent bottleneck canvases ----
+    const RES = 64;
+    const orig = document.getElementById("wm-a-orig"), recon = document.getElementById("wm-a-recon");
+    const ctxO = orig.getContext("2d"), ctxR = recon.getContext("2d");
+    const dim = document.getElementById("wm-a-dim");
+    const out = document.getElementById("wm-a-out"), ratio = document.getElementById("wm-a-ratio");
+    const tag = document.getElementById("wm-a-tag");
+
+    // scene as an index grid: 0 bg, 1 track, 2 car, 3 marker
+    const idx = new Uint8Array(RES * RES);
+    for (let y = 0; y < RES; y++) for (let x = 0; x < RES; x++) {
+      let v = 0;
+      const ty = 32 + 14 * Math.sin((x / RES) * Math.PI * 1.7);
+      if (Math.abs(y - ty) < 6) v = 1;                       // winding track
+      if (x >= 27 && x <= 37 && y >= 48 && y <= 60) v = 2;    // the car
+      if (x >= 44 && x <= 52 && y >= 9 && y <= 17) v = 3;     // a marker
+      idx[y * RES + x] = v;
+    }
+    const palette = () => [hex2rgb(COL.inset), hex2rgb(COL.accent), hex2rgb(COL.warn), hex2rgb(COL.good)];
+
+    function draw() {
+      const PAL = palette();
+      // original at full resolution
+      for (let y = 0; y < RES; y++) for (let x = 0; x < RES; x++) {
+        const c = PAL[idx[y * RES + x]];
+        ctxO.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`;
+        ctxO.fillRect(x, y, 1, 1);
+      }
+      // reconstruction: block-average into g x g blocks (g grows with the latent budget)
+      const d = +dim.value;
+      const g = Math.max(2, Math.round(2 + (d - 1) / 31 * 30)); // 2..32 blocks per side
+      const acc = new Float32Array(g * g * 3), cnt = new Float32Array(g * g);
+      for (let y = 0; y < RES; y++) for (let x = 0; x < RES; x++) {
+        const bx = Math.min(g - 1, Math.floor(x / RES * g)), by = Math.min(g - 1, Math.floor(y / RES * g));
+        const b = by * g + bx, c = PAL[idx[y * RES + x]];
+        acc[b * 3] += c[0]; acc[b * 3 + 1] += c[1]; acc[b * 3 + 2] += c[2]; cnt[b]++;
+      }
+      for (let y = 0; y < RES; y++) for (let x = 0; x < RES; x++) {
+        const bx = Math.min(g - 1, Math.floor(x / RES * g)), by = Math.min(g - 1, Math.floor(y / RES * g));
+        const b = by * g + bx, n = cnt[b] || 1;
+        ctxR.fillStyle = `rgb(${Math.round(acc[b * 3] / n)},${Math.round(acc[b * 3 + 1] / n)},${Math.round(acc[b * 3 + 2] / n)})`;
+        ctxR.fillRect(x, y, 1, 1);
+      }
+      out.textContent = d;
+      ratio.textContent = (RES * RES / (g * g)).toFixed(0);
+      if (d <= 6) { tag.textContent = "lossy"; tag.className = "se-tag hot"; }
+      else if (d <= 18) { tag.textContent = "recognizable"; tag.className = "se-tag warn"; }
+      else { tag.textContent = "near-lossless"; tag.className = "se-tag good"; }
+    }
+    onTheme(draw);
+    dim.addEventListener("input", draw);
+    draw();
+  })();
+
+  // ============================================================
+  // DEMO B — MDN-RNN dream rollout with temperature
+  // ============================================================
+  (function () {
+    const svg = document.getElementById("wm-b-svg");
+    const tau = document.getElementById("wm-b-tau"), tauval = document.getElementById("wm-b-tauval");
+    const tag = document.getElementById("wm-b-tag");
+    const runBtn = document.getElementById("wm-b-run"), stepBtn = document.getElementById("wm-b-step"), resetBtn = document.getElementById("wm-b-reset");
+
+    const W = 720, H = 280, padL = 38, padR = 14, padT = 16, padB = 26;
+    const STEPS = 44, NTRAJ = 60, Z0 = 0;
+    const ZMIN = -2.4, ZMAX = 2.4;
+    const PX = t => padL + t / STEPS * (W - padL - padR);
+    const PY = z => H - padB - (clamp(z, ZMIN, ZMAX) - ZMIN) / (ZMAX - ZMIN) * (H - padT - padB);
+    const CKPTS = [11, 26, 41];
+
+    // toy MDN-RNN: 3 components — a dominant "stay" mode plus an up and a down mode.
+    // Low tau: weights concentrate on "stay" -> every trajectory tracks one path.
+    // High tau: weights flatten -> trajectories split across the three drifts -> a fan.
+    const BASE_L = [0.2, 0.2, 0.7];            // mixing logits (component 2 = "stay" dominates)
+    const BASE_S = 0.045;                        // base component spread
+    const drift = (k, z) => k === 0 ? 0.066 : k === 1 ? -0.066 : 0.0;
+    function weights(T) { const e = BASE_L.map(l => Math.exp(l / Math.max(T, 1e-3))); const Z = e[0] + e[1] + e[2]; return e.map(x => x / Z); }
+    function pickK(w) { const r = Math.random(); return r < w[0] ? 0 : r < w[0] + w[1] ? 1 : 2; }
+
+    let trajs = [], detPath = [], reveal = STEPS, running = false, raf = 0, last = 0, acc = 0;
+
+    function rollout(T) {
+      const w = weights(T), s = BASE_S * Math.sqrt(Math.max(T, 1e-3));
+      trajs = [];
+      for (let n = 0; n < NTRAJ; n++) {
+        const path = [Z0]; let z = Z0;
+        for (let t = 1; t <= STEPS; t++) { const k = pickK(w); z = clamp(z + drift(k, z) + s * randn(), ZMIN, ZMAX); path.push(z); }
+        trajs.push(path);
+      }
+      // deterministic (tau -> 0) path: take the highest-weight component each step
+      detPath = [Z0]; let dz = Z0; const kbest = w.indexOf(Math.max.apply(null, w));
+      for (let t = 1; t <= STEPS; t++) { dz = clamp(dz + drift(kbest, dz), ZMIN, ZMAX); detPath.push(dz); }
+    }
+
+    function violin(t) {
+      // histogram of trajectory z-values at time t, drawn as a sideways density at column PX(t)
+      const BINS = 26, h = new Float32Array(BINS);
+      for (const p of trajs) { const b = Math.min(BINS - 1, Math.floor((clamp(p[t], ZMIN, ZMAX) - ZMIN) / (ZMAX - ZMIN) * BINS)); h[b]++; }
+      let mx = 0; for (const v of h) mx = Math.max(mx, v);
+      if (mx === 0) return "";
+      const x0 = PX(t), wmax = 30;
+      let up = "", dn = "";
+      for (let b = 0; b < BINS; b++) {
+        const zc = ZMIN + (b + 0.5) / BINS * (ZMAX - ZMIN), y = PY(zc), wv = h[b] / mx * wmax;
+        up += `${x0 + wv},${y} `; dn = `${x0 - wv},${y} ` + dn;
+      }
+      return `<polygon points="${up}${dn}" fill="${rgba(COL.accent, 0.16)}" stroke="${rgba(COL.accent, 0.5)}" stroke-width="1"/>`;
+    }
+
+    function draw() {
+      const T = sliderToT(+tau.value);
+      tauval.textContent = T.toFixed(2);
+      let s = "";
+      // baseline + axis labels
+      s += `<line x1="${padL}" y1="${PY(0)}" x2="${W - padR}" y2="${PY(0)}" stroke="${COL.grid}" stroke-dasharray="3 3"/>`;
+      s += `<text x="6" y="${PY(0) + 4}" font-size="11" fill="${COL.muted}">z=0</text>`;
+      s += `<text x="${PX(STEPS) - 4}" y="${H - 8}" text-anchor="end" font-size="11" fill="${COL.muted}">time →</text>`;
+      // sampled futures
+      const r = Math.min(reveal, STEPS);
+      for (const p of trajs) {
+        let pts = "";
+        for (let t = 0; t <= r; t++) pts += `${PX(t)},${PY(p[t])} `;
+        s += `<polyline points="${pts}" fill="none" stroke="${rgba(COL.accent, 0.16)}" stroke-width="1"/>`;
+      }
+      // checkpoints (violins) once revealed
+      for (const t of CKPTS) if (r >= t) s += violin(t);
+      // deterministic path
+      let dp = "";
+      for (let t = 0; t <= r; t++) dp += `${PX(t)},${PY(detPath[t])} `;
+      s += `<polyline points="${dp}" fill="none" stroke="${COL.accent}" stroke-width="2.5"/>`;
+      s += `<circle cx="${PX(0)}" cy="${PY(Z0)}" r="4" fill="${COL.accent}"/>`;
+      svg.innerHTML = s;
+      // tag
+      if (T < 0.3) { tag.textContent = "near-deterministic"; tag.className = "se-tag good"; }
+      else if (T < 1.0) { tag.textContent = "branching futures"; tag.className = "se-tag warn"; }
+      else { tag.textContent = "noisy · multimodal"; tag.className = "se-tag hot"; }
+    }
+    onTheme(draw);
+
+    function resample() { rollout(sliderToT(+tau.value)); reveal = STEPS; draw(); }
+    function loop(ts) {
+      if (!last) last = ts; acc += ts - last; last = ts;
+      while (acc > 26) { reveal = reveal >= STEPS ? 0 : reveal + 1; acc -= 26; }
+      draw();
+      raf = requestAnimationFrame(loop);
+    }
+    function start() { running = true; runBtn.textContent = "⏸ Pause"; last = 0; acc = 0; if (reveal >= STEPS) reveal = 0; raf = requestAnimationFrame(loop); }
+    function stop() { running = false; runBtn.textContent = "▶ Dream"; if (raf) cancelAnimationFrame(raf); }
+
+    runBtn.addEventListener("click", () => running ? stop() : start());
+    stepBtn.addEventListener("click", () => { if (running) stop(); reveal = reveal >= STEPS ? STEPS : Math.min(STEPS, reveal + 4); draw(); });
+    resetBtn.addEventListener("click", () => { if (running) stop(); resample(); });
+    tau.addEventListener("input", resample);
+
+    rollout(sliderToT(+tau.value)); draw();
+  })();
+
+  // ============================================================
+  // DEMO C — dream vs real transfer score over temperature
+  // (the paper's VizDoom "Take Cover" temperature sweep)
+  // ============================================================
+  (function () {
+    const svg = document.getElementById("wm-c-svg");
+    const tau = document.getElementById("wm-c-tau"), tauval = document.getElementById("wm-c-tauval");
+    const tag = document.getElementById("wm-c-tag");
+    const dreamOut = document.getElementById("wm-c-dream"), realOut = document.getElementById("wm-c-real");
+
+    // paper's reported numbers: tau -> (virtual/dream score, actual/real score)
+    const DATA = [
+      { t: 0.10, dream: 2086, real: 193 },
+      { t: 0.50, dream: 2060, real: 196 },
+      { t: 1.00, dream: 1145, real: 868 },
+      { t: 1.15, dream: 918,  real: 1092 },
+      { t: 1.30, dream: 732,  real: 753 }
+    ];
+    const YMAX = 2200, SOLVED = 750;
+    const W = 720, H = 260, padL = 46, padR = 16, padT = 16, padB = 30;
+    const TMIN = 0.05, TMAX = 1.5;
+    const lx = Math.log(TMIN), lxr = Math.log(TMAX) - lx;
+    const PX = t => padL + (Math.log(clamp(t, TMIN, TMAX)) - lx) / lxr * (W - padL - padR);
+    const PY = v => H - padB - clamp(v, 0, YMAX) / YMAX * (H - padT - padB);
+
+    // piecewise-linear interpolation of the table in log-tau space (clamped at the ends)
+    function interp(t, key) {
+      if (t <= DATA[0].t) return DATA[0][key];
+      if (t >= DATA[DATA.length - 1].t) return DATA[DATA.length - 1][key];
+      for (let i = 0; i < DATA.length - 1; i++) {
+        const a = DATA[i], b = DATA[i + 1];
+        if (t >= a.t && t <= b.t) { const f = (Math.log(t) - Math.log(a.t)) / (Math.log(b.t) - Math.log(a.t)); return a[key] + f * (b[key] - a[key]); }
+      }
+      return DATA[DATA.length - 1][key];
+    }
+    function curve(key) { let p = ""; for (let i = 0; i <= 120; i++) { const t = TMIN * Math.pow(TMAX / TMIN, i / 120); p += `${PX(t)},${PY(interp(t, key))} `; } return p; }
+
+    function draw() {
+      const T = sliderToT(+tau.value);
+      tauval.textContent = T.toFixed(2);
+      let s = "";
+      // axes
+      s += `<line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H - padB}" stroke="${COL.grid}"/>`;
+      s += `<line x1="${padL}" y1="${H - padB}" x2="${W - padR}" y2="${H - padB}" stroke="${COL.grid}"/>`;
+      s += `<text x="${padL - 6}" y="${PY(YMAX) + 4}" text-anchor="end" font-size="10" fill="${COL.muted}">${YMAX}</text>`;
+      s += `<text x="${(padL + W - padR) / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="${COL.muted}">dream temperature τ →</text>`;
+      // solved threshold
+      s += `<line x1="${padL}" y1="${PY(SOLVED)}" x2="${W - padR}" y2="${PY(SOLVED)}" stroke="${COL.muted}" stroke-dasharray="4 4" opacity="0.6"/>`;
+      s += `<text x="${W - padR}" y="${PY(SOLVED) - 4}" text-anchor="end" font-size="10" fill="${COL.muted}">solved = ${SOLVED}</text>`;
+      // shade the cheating gap (dream above real)
+      let gap = "";
+      for (let i = 0; i <= 80; i++) { const t = TMIN * Math.pow(TMAX / TMIN, i / 80); gap += `${PX(t)},${PY(interp(t, "dream"))} `; }
+      for (let i = 80; i >= 0; i--) { const t = TMIN * Math.pow(TMAX / TMIN, i / 80); gap += `${PX(t)},${PY(interp(t, "real"))} `; }
+      s += `<polygon points="${gap}" fill="${rgba(COL.bad, 0.10)}" stroke="none"/>`;
+      // curves
+      s += `<polyline points="${curve("dream")}" fill="none" stroke="${COL.warn}" stroke-width="2.5"/>`;
+      s += `<polyline points="${curve("real")}" fill="none" stroke="${COL.good}" stroke-width="2.5"/>`;
+      // data points
+      for (const d of DATA) {
+        s += `<circle cx="${PX(d.t)}" cy="${PY(d.dream)}" r="3" fill="${COL.warn}"/>`;
+        s += `<circle cx="${PX(d.t)}" cy="${PY(d.real)}" r="3" fill="${COL.good}"/>`;
+      }
+      // current-tau marker + dots
+      const dv = interp(T, "dream"), rv = interp(T, "real");
+      s += `<line x1="${PX(T)}" y1="${padT}" x2="${PX(T)}" y2="${H - padB}" stroke="${COL.accent}" stroke-width="1.5" stroke-dasharray="3 3"/>`;
+      s += `<circle cx="${PX(T)}" cy="${PY(dv)}" r="5" fill="${COL.warn}" stroke="${COL.panel}" stroke-width="1.5"/>`;
+      s += `<circle cx="${PX(T)}" cy="${PY(rv)}" r="5" fill="${COL.good}" stroke="${COL.panel}" stroke-width="1.5"/>`;
+      svg.innerHTML = s;
+      dreamOut.textContent = Math.round(dv);
+      realOut.textContent = Math.round(rv);
+      if (T < 0.85) { tag.textContent = "exploiting the model"; tag.className = "se-tag hot"; }
+      else if (T <= 1.25) { tag.textContent = "sweet spot"; tag.className = "se-tag good"; }
+      else { tag.textContent = "dream getting noisy"; tag.className = "se-tag warn"; }
+    }
+    onTheme(draw);
+    tau.addEventListener("input", draw);
+    draw();
+  })();
+})();
+</script>
+
+</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[A World Models agent splits into a large world model trained unsupervised and a tiny controller trained by evolution: V compresses each frame to a latent vector, M learns to predict the next latent given the action, and C maps that compressed state to an action — small enough to train entirely inside the model's own hallucinated rollouts, then transfer to reality.]]></summary></entry><entry><title type="html">Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines</title><link href="https://alexdruso.github.io/temperature-and-entropy-llms/" rel="alternate" type="text/html" title="Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines" /><published>2026-06-22T00:00:00+00:00</published><updated>2026-06-22T00:00:00+00:00</updated><id>https://alexdruso.github.io/temperature-and-entropy-llms</id><content type="html" xml:base="https://alexdruso.github.io/temperature-and-entropy-llms/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
