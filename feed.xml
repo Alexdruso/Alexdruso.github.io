@@ -1,4 +1,1285 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-06-24T06:21:08+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">World Models: Learning to Dream, Then Act</title><link href="https://alexdruso.github.io/world-models/" rel="alternate" type="text/html" title="World Models: Learning to Dream, Then Act" /><published>2026-06-23T00:00:00+00:00</published><updated>2026-06-23T00:00:00+00:00</updated><id>https://alexdruso.github.io/world-models</id><content type="html" xml:base="https://alexdruso.github.io/world-models/"><![CDATA[<style>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-07-05T20:47:11+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One</title><link href="https://alexdruso.github.io/forward-forward-algorithm/" rel="alternate" type="text/html" title="The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One" /><published>2026-07-05T00:00:00+00:00</published><updated>2026-07-05T00:00:00+00:00</updated><id>https://alexdruso.github.io/forward-forward-algorithm</id><content type="html" xml:base="https://alexdruso.github.io/forward-forward-algorithm/"><![CDATA[<style>
+/* ============================================================
+   Study Notes — shared design system
+   Sleek/futuristic: cyan-teal accent, hairline borders, flat
+   single-accent controls, monospace numerals, glow in dark only.
+   Adaptive light + dark via tokens. Every selector is scoped
+   under .study-note so nothing leaks to the rest of the site.
+   ============================================================ */
+.study-note {
+  --sn-accent: #0891b2;
+  --sn-accent-strong: #06b6d4;
+  --sn-accent-soft: rgba(8, 145, 178, 0.10);
+  --sn-accent-line: rgba(8, 145, 178, 0.30);
+  --sn-on-accent: #ffffff;
+
+  --sn-panel: #ffffff;
+  --sn-panel-inset: #f6f8fa;
+  --sn-section: #f7f9fb;
+  --sn-border: rgba(15, 23, 42, 0.08);
+  --sn-grid: rgba(15, 23, 42, 0.10);
+
+  --sn-text: #1f2933;
+  --sn-muted: #64748b;
+
+  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
+  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
+  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
+
+  --sn-radius: 12px;
+  --sn-radius-sm: 8px;
+  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sn-glow: none;
+  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+.dark-theme .study-note {
+  --sn-accent: #22d3ee;
+  --sn-accent-strong: #67e8f9;
+  --sn-accent-soft: rgba(34, 211, 238, 0.12);
+  --sn-accent-line: rgba(34, 211, 238, 0.35);
+  --sn-on-accent: #06141a;
+
+  --sn-panel: #11131c;
+  --sn-panel-inset: #161a26;
+  --sn-section: #14161f;
+  --sn-border: rgba(148, 163, 184, 0.14);
+  --sn-grid: rgba(148, 163, 184, 0.16);
+
+  --sn-text: #e2e8f0;
+  --sn-muted: #94a3b8;
+
+  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
+  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
+  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
+
+  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+/* ---- sections / cards ---- */
+.study-note .se-section,
+.study-note .bm-section,
+.study-note .mdp-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: var(--sn-radius);
+  background: var(--sn-section);
+  border: 1px solid var(--sn-border);
+  box-shadow: var(--sn-shadow);
+}
+.study-note .se-section h3,
+.study-note .bm-section h3,
+.study-note .mdp-section h3 {
+  margin-top: 0;
+  color: var(--sn-accent);
+  letter-spacing: -0.01em;
+}
+
+/* ---- equation boxes ---- */
+.study-note .se-equation,
+.study-note .bm-equation,
+.study-note .equation-box {
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  font-size: 1.1rem;
+  text-align: center;
+  overflow-x: auto;
+}
+.study-note .se-equation .big,
+.study-note .bm-equation .big { font-size: 1.25rem; }
+
+/* ---- callout / note ---- */
+.study-note .se-note,
+.study-note .bm-note {
+  background: var(--sn-accent-soft);
+  border-radius: var(--sn-radius-sm);
+  border-left: 3px solid var(--sn-accent);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- example box ---- */
+.study-note .se-example,
+.study-note .bm-example,
+.study-note .example-box {
+  background: var(--sn-panel-inset);
+  border: 1px solid var(--sn-border);
+  border-left: 3px solid var(--sn-warn);
+  border-radius: var(--sn-radius-sm);
+  padding: 1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- chart containers ---- */
+.study-note .se-chartwrap,
+.study-note .bm-chartwrap,
+.study-note .graph-wrap {
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem;
+}
+.study-note .graph-wrap { overflow-x: auto; }
+
+/* ---- primary buttons ---- */
+.study-note .se-btn,
+.study-note .bm-btn,
+.study-note .vi-btn {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--sn-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-on-accent);
+  background: var(--sn-accent);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
+}
+.study-note .se-btn:hover:not(:disabled),
+.study-note .bm-btn:hover:not(:disabled),
+.study-note .vi-btn:hover:not(:disabled) {
+  background: var(--sn-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sn-glow);
+}
+.study-note .se-btn:disabled,
+.study-note .bm-btn:disabled,
+.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* secondary variant */
+.study-note .se-btn.sec,
+.study-note .bm-btn.sec,
+.study-note .vi-btn.sec {
+  background: transparent;
+  color: var(--sn-accent);
+  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
+}
+.study-note .se-btn.sec:hover:not(:disabled),
+.study-note .bm-btn.sec:hover:not(:disabled),
+.study-note .vi-btn.sec:hover:not(:disabled) {
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+}
+
+/* ---- ghost / reset buttons ---- */
+.study-note .se-reset,
+.study-note .bm-reset,
+.study-note .reset-link {
+  background: none;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-muted);
+  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
+}
+.study-note .se-reset:hover,
+.study-note .bm-reset:hover,
+.study-note .reset-link:hover {
+  background: var(--sn-accent-soft);
+  border-color: var(--sn-accent-line);
+  color: var(--sn-accent);
+}
+
+/* ---- range sliders: flat, single-accent ---- */
+.study-note input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+  outline: none;
+  cursor: pointer;
+}
+.study-note input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
+}
+.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.study-note input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+}
+.study-note input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+}
+
+/* ---- status pills ---- */
+.study-note .se-tag,
+.study-note .bm-tag {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
+}
+.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
+.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
+
+/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
+.study-note .se-stat .val,
+.study-note .bm-stat .val,
+.study-note .score-item .sval,
+.study-note .compare-score {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-accent);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.study-note .se-readout,
+.study-note .bm-temp-readout {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sn-accent);
+}
+
+/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
+.study-note svg text { fill: var(--sn-muted); }
+</style>
+
+
+<div class="study-note">
+
+<style>
+/* Note-specific LAYOUT only. Colors come from --sn-* tokens; shared
+   components (sections, buttons, sliders, tags, equations, notes, charts)
+   live in _includes/study-note-styles.html. */
+.ff-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
+.ff-flexwrap { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
+.ff-panel { flex: 1; min-width: 250px; }
+.ff-panel h4 { margin: 0 0 0.4rem; text-align: center; }
+.ff-phaselabel {
+  text-align: center; font-size: 0.8rem; min-height: 2.2em; margin-top: 0.4rem;
+  color: var(--sn-muted);
+}
+.ff-readout { font-family: var(--sn-mono); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--sn-accent); }
+
+.ff-segbtns { display: inline-flex; border-radius: var(--sn-radius-sm); overflow: hidden; border: 1px solid var(--sn-accent-line); }
+.ff-segbtns button {
+  background: transparent; border: none; padding: 0.45rem 0.9rem; cursor: pointer;
+  font-family: inherit; font-size: 0.85rem; font-weight: 600; color: var(--sn-accent);
+  transition: background 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
+}
+.ff-segbtns button.active { background: var(--sn-accent); color: var(--sn-on-accent); }
+
+.ff-statrow { display: flex; gap: 1.6rem; flex-wrap: wrap; justify-content: center; margin: 0.6rem 0; }
+.ff-stat { text-align: center; }
+.ff-stat .lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; }
+.ff-stat .val { font-family: var(--sn-mono); font-variant-numeric: tabular-nums; color: var(--sn-accent); font-weight: 700; font-size: 1.35rem; }
+
+/* supervised-FF figure (CSS only, no JS) */
+.ff-recipe { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+.ff-sample { border: 1px solid var(--sn-border); border-radius: var(--sn-radius-sm); background: var(--sn-panel); padding: 0.7rem 0.9rem; text-align: center; }
+.ff-digit { display: grid; grid-template-columns: repeat(5, 13px); grid-template-rows: repeat(5, 13px); gap: 2px; margin: 0.45rem auto; width: max-content; }
+.ff-digit span { border-radius: 2px; background: var(--sn-panel-inset); }
+.ff-digit span.on { background: var(--sn-muted); }
+.ff-chips { display: flex; gap: 3px; justify-content: center; margin-top: 0.35rem; }
+.ff-chips span {
+  width: 15px; height: 15px; border-radius: 3px; background: var(--sn-panel-inset);
+  border: 1px solid var(--sn-border); font-size: 0.55rem; line-height: 14px; color: var(--sn-muted);
+}
+.ff-chips span.hotpos { background: var(--sn-good); border-color: var(--sn-good); color: var(--sn-panel); }
+.ff-chips span.hotneg { background: var(--sn-bad); border-color: var(--sn-bad); color: var(--sn-panel); }
+
+/* race demo */
+.ff-cv { width: 100%; max-width: 260px; display: block; margin: 0 auto; border-radius: var(--sn-radius-sm); border: 1px solid var(--sn-border); background: var(--sn-panel); cursor: crosshair; }
+
+/* scorecard table */
+.ff-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.ff-table th, .ff-table td { padding: 0.55rem 0.7rem; border: 1px solid var(--sn-border); text-align: left; vertical-align: top; }
+.ff-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sn-muted); background: var(--sn-panel-inset); }
+.ff-table td:first-child { font-weight: 600; }
+.ff-tablewrap { overflow-x: auto; }
+</style>
+
+<p>
+  The <strong>Forward-Forward algorithm</strong> (FF) is Geoffrey Hinton's proposal for training
+  neural networks without backpropagation (<em>"The Forward-Forward Algorithm: Some Preliminary
+  Investigations"</em>, 2022). Backprop learns by running data forward through the network and then
+  propagating exact error derivatives backward through every layer. FF removes the backward pass
+  entirely and asks the question this note answers: what has to change so that a network can learn
+  from <em>forward passes only</em> — and what does that buy, and cost, compared to backprop?
+</p>
+
+<div class="se-note">
+  <strong>One-sentence summary.</strong> Forward-Forward replaces backprop's forward-then-backward
+  sweep with <em>two forward passes</em> — one on real ("positive") data and one on fabricated
+  ("negative") data — and every layer learns <em>locally and immediately</em> by pushing a scalar
+  "goodness" (the sum of its squared activities) above a threshold for real data and below it for
+  fake data; layer normalization between layers keeps the trick from collapsing.
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. WHAT BACKPROP REQUIRES                                    -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🔁 What backprop actually requires</h3>
+  <p style="margin-top:0">
+    Backprop's chain rule is exact, which is its strength — and the source of all its structural
+    requirements. To compute <em>∂loss/∂w</em> for a weight deep in the network, backprop must:
+  </p>
+  <ul style="font-size:0.92rem">
+    <li><strong>Store every layer's activations</strong> during the forward pass, because the backward pass needs them to compute gradients.</li>
+    <li><strong>Know the derivative of every operation</strong> on the forward path. A black-box or non-differentiable component anywhere breaks the chain.</li>
+    <li><strong>Wait for the round trip.</strong> The first layer cannot update until the signal has gone all the way up <em>and</em> the error has come all the way back down ("update locking").</li>
+    <li><strong>Reuse the same weights backward</strong> (transposed) to route the error — the "weight transport" problem, one reason there is no evidence the cortex implements anything like backprop.</li>
+  </ul>
+  <p>
+    Forward-Forward drops all four requirements at once. Watch one training step of each,
+    side by side — the thing to track is <em>when each layer gets to update its weights</em>:
+  </p>
+
+  <div class="ff-flexwrap">
+    <div class="ff-panel">
+      <h4>Backpropagation</h4>
+      <div class="graph-wrap"><svg id="ff-bp-net" viewBox="0 0 300 250" width="100%"></svg></div>
+      <div class="ff-phaselabel" id="ff-bp-phase">press play</div>
+    </div>
+    <div class="ff-panel">
+      <h4>Forward-Forward</h4>
+      <div class="graph-wrap"><svg id="ff-ff-net" viewBox="0 0 300 250" width="100%"></svg></div>
+      <div class="ff-phaselabel" id="ff-ff-phase">press play</div>
+    </div>
+  </div>
+
+  <div class="ff-controls" style="justify-content:center">
+    <button class="se-btn" id="ff-anim-play">▶ play</button>
+    <button class="se-btn sec" id="ff-anim-step">step</button>
+    <button class="se-reset" id="ff-anim-reset">reset</button>
+  </div>
+
+  <p style="font-size:0.88rem; margin-bottom:0">
+    On the left, weight updates (⚡) only happen on the backward sweep, in reverse order, after the
+    loss is known — and every layer had to keep its activations (<span class="ff-readout" style="font-size:0.8rem">a</span> badges)
+    in memory the whole time. On the right there is no backward sweep at all: each layer updates
+    <em>the moment the pass flows through it</em>, once to make real data score high (green pass)
+    and once to make fake data score low (red pass). Nothing is stored, nothing waits.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. GOODNESS                                                  -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>⚡ Goodness: a local objective for every layer</h3>
+  <p style="margin-top:0">
+    Backprop gives every weight a share of <em>one global loss</em>. FF instead gives every layer its
+    <em>own private objective</em>. A layer's <strong>goodness</strong> on an input is simply the sum
+    of its squared activities:
+  </p>
+  <div class="se-equation">
+    <span class="big">G = &Sigma;<sub>j</sub> y<sub>j</sub><sup>2</sup></span>
+    &nbsp;&nbsp;&nbsp;
+    <span class="big">p(positive) = &sigma;(G &minus; &theta;)</span>
+  </div>
+  <p style="margin-top:0">
+    Each layer is trained as a tiny logistic classifier: activities should be <em>energetic</em>
+    (goodness above the threshold &theta;) when the input is real, and <em>quiet</em> (goodness below
+    &theta;) when the input is fake. The gradient of that objective with respect to each activity is
+    local — it only needs values the layer already has, so the weight update needs no information
+    from any other layer.
+  </p>
+  <p>
+    Below is one layer of 8 units. Choose whether the current input is being treated as positive or
+    negative, then apply update steps and watch the layer push its own goodness to the correct side
+    of &theta;. Note the <em>update pressure</em> |&sigma;(G&minus;&theta;) &minus; target|: it fades
+    as the layer becomes confident, so learning naturally stops once the sample is well classified.
+  </p>
+
+  <div class="ff-controls">
+    <div class="ff-segbtns" id="ff-gd-mode">
+      <button class="active" data-mode="pos">positive (real)</button>
+      <button data-mode="neg">negative (fake)</button>
+    </div>
+    <label style="font-size:0.85rem">&theta; = <span class="ff-readout" id="ff-gd-thetaout">4.0</span>
+      <input type="range" id="ff-gd-theta" min="1" max="10" step="0.5" value="4" style="vertical-align:middle">
+    </label>
+  </div>
+
+  <div class="graph-wrap"><svg id="ff-gd-chart" viewBox="0 0 460 230" width="100%"></svg></div>
+
+  <div class="ff-statrow">
+    <div class="ff-stat"><div class="lab">goodness G</div><div class="val" id="ff-gd-g">–</div></div>
+    <div class="ff-stat"><div class="lab" style="text-transform:none">&sigma;(G&minus;&theta;)</div><div class="val" id="ff-gd-p">–</div></div>
+    <div class="ff-stat"><div class="lab">update pressure</div><div class="val" id="ff-gd-press">–</div></div>
+    <div class="ff-stat"><div class="lab">layer says</div><div class="val" style="font-size:0.95rem"><span class="se-tag" id="ff-gd-verdict">–</span></div></div>
+  </div>
+
+  <div class="ff-controls" style="justify-content:center">
+    <button class="se-btn" id="ff-gd-step">⚡ one update</button>
+    <button class="se-btn sec" id="ff-gd-step10">×10 updates</button>
+    <button class="se-reset" id="ff-gd-resample">resample activities</button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. LAYER NORMALIZATION                                       -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>📏 The load-bearing trick: normalize between layers</h3>
+  <p style="margin-top:0">
+    There is an obvious way for this scheme to collapse. If layer 1 learns to make its activity
+    vector <em>long</em> for real data, layer 2 can get perfect goodness by just copying its input —
+    the vector's length already answers "real or fake?", so no layer after the first would learn
+    anything new about the data.
+  </p>
+  <p>
+    FF's fix: before a layer's activities are fed to the next layer, <strong>normalize the vector to
+    unit length</strong>. The length of the activity vector <em>is</em> the goodness (up to the
+    square root), so normalizing strips exactly the quantity the previous layer was optimizing.
+    What survives is the vector's <em>orientation</em> — the relative pattern of which units are
+    active. Each layer is forced to find <em>new</em> evidence in that pattern.
+  </p>
+  <div class="se-equation">
+    <span class="big">h = y / (&#8214;y&#8214; + &epsilon;)</span>
+    &nbsp;&nbsp; — length (goodness) removed, direction (information) kept
+  </div>
+  <p style="margin-top:0">
+    Drag the activity vector of a toy 2-unit layer. Its length — and therefore its goodness — can
+    be anything; the next layer only ever sees the point on the unit circle.
+  </p>
+
+  <div class="ff-flexwrap">
+    <div class="ff-panel" style="flex:0 1 340px; margin:0 auto">
+      <div class="graph-wrap"><svg id="ff-nm-chart" viewBox="0 0 320 300" width="100%" style="touch-action:none"></svg></div>
+    </div>
+    <div class="ff-panel" style="flex:1 1 200px">
+      <div class="ff-statrow" style="flex-direction:column; gap:0.9rem; align-items:center">
+        <div class="ff-stat"><div class="lab">this layer's goodness G = y&#8321;&sup2;+y&#8322;&sup2;</div><div class="val" id="ff-nm-g">–</div></div>
+        <div class="ff-stat"><div class="lab">what the next layer sees</div><div class="val" id="ff-nm-dir" style="font-size:1.05rem">–</div></div>
+      </div>
+      <p style="font-size:0.85rem; color:var(--sn-muted); text-align:center; margin-top:0.6rem">
+        Every point along the dashed ray has different goodness but is <em>identical</em>
+        to the next layer.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. NEGATIVE DATA + SUPERVISED RECIPE                          -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🏷️ Negative data, and how FF does supervised learning</h3>
+  <p style="margin-top:0">
+    FF is contrastive: layers only learn because positive and negative data pull goodness in
+    opposite directions. Good negative data should have the same low-level statistics as real data
+    and differ only in structure — otherwise layers can win by spotting trivia. In the paper's
+    unsupervised experiments the negatives are <em>hybrid images</em>: two digits blended through a
+    large-blob mask, so every patch looks locally like a digit but the whole is wrong.
+  </p>
+  <p>
+    The supervised recipe is neater, and it is the one used in the demo below:
+    <strong>put the label into the input</strong>. For MNIST, the first 10 pixels of the image are
+    overwritten with a one-hot encoding of the label. A <em>positive</em> example is an image with
+    its <em>correct</em> label baked in; a <em>negative</em> example is the same image with a
+    <em>wrong</em> label. The only way a layer can score them differently is to learn the
+    relationship between the label and the image content — which is exactly classification.
+  </p>
+
+  <div class="ff-recipe">
+    <div class="ff-sample">
+      <span class="se-tag good">positive</span>
+      <div class="ff-digit" aria-hidden="true">
+        <span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span>
+        <span></span><span></span><span></span><span class="on"></span><span></span>
+        <span></span><span></span><span class="on"></span><span></span><span></span>
+        <span></span><span class="on"></span><span></span><span></span><span></span>
+        <span class="on"></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="ff-chips">
+        <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span class="hotpos">7</span><span>8</span><span>9</span>
+      </div>
+      <div style="font-size:0.75rem; color:var(--sn-muted); margin-top:0.35rem">a 7, labeled "7" → goodness up</div>
+    </div>
+    <div class="ff-sample">
+      <span class="se-tag hot">negative</span>
+      <div class="ff-digit" aria-hidden="true">
+        <span class="on"></span><span class="on"></span><span class="on"></span><span class="on"></span><span></span>
+        <span></span><span></span><span></span><span class="on"></span><span></span>
+        <span></span><span></span><span class="on"></span><span></span><span></span>
+        <span></span><span class="on"></span><span></span><span></span><span></span>
+        <span class="on"></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="ff-chips">
+        <span>0</span><span>1</span><span>2</span><span class="hotneg">3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+      </div>
+      <div style="font-size:0.75rem; color:var(--sn-muted); margin-top:0.35rem">the same 7, labeled "3" → goodness down</div>
+    </div>
+  </div>
+
+  <p style="margin-top:1rem">
+    <strong>Inference</strong> follows directly: run one forward pass per candidate label and pick
+    the label whose pass accumulates the most goodness across layers. (In the paper's deeper nets
+    the first hidden layer's goodness is excluded from this sum; in the shallow 2-layer demo below,
+    summing all layers works better, so that is what it does.) The paper also describes a cheaper
+    one-pass variant — train a small softmax readout on the hidden activities — but the
+    try-every-label procedure is the purely forward-forward one.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. CENTERPIECE: TRAINING RACE                                 -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🥊 Forward-Forward vs backprop, live</h3>
+  <p style="margin-top:0">
+    Everything above, assembled and trained in the browser. Both learners see the same 300-point
+    dataset — an inner disk (<span style="color:var(--sn-accent)">●</span> class A) surrounded by a
+    ring (○ class B), not linearly separable. The backprop net is a standard 2→12→12→2 MLP with
+    softmax cross-entropy. The FF net has the same two hidden layers of 12 ReLU units, but its input
+    is <code>[x, y, label as one-hot]</code>, it trains with the local goodness rule
+    (&theta; = 2, positives = true label, negatives = wrong label), normalizes between layers, and
+    classifies by running both candidate labels and comparing summed goodness. Press train.
+  </p>
+
+  <div class="ff-controls" style="justify-content:center">
+    <button class="se-btn" id="ff-race-run">▶ train</button>
+    <button class="se-reset" id="ff-race-reset">reset</button>
+    <div class="ff-segbtns" id="ff-race-speed">
+      <button data-sp="1">🐢 slow</button>
+      <button class="active" data-sp="3">▶ normal</button>
+    </div>
+    <span style="font-size:0.85rem; color:var(--sn-muted)">step <span class="ff-readout" id="ff-race-step">0</span> / 900</span>
+  </div>
+
+  <div class="ff-flexwrap">
+    <div class="ff-panel">
+      <h4 style="font-size:0.95rem">Forward-Forward</h4>
+      <canvas id="ff-cv-ff" class="ff-cv" width="240" height="240"></canvas>
+      <div class="ff-statrow" style="margin-bottom:0">
+        <div class="ff-stat"><div class="lab">accuracy</div><div class="val" id="ff-race-accff">–</div></div>
+      </div>
+    </div>
+    <div class="ff-panel">
+      <h4 style="font-size:0.95rem">Backprop</h4>
+      <canvas id="ff-cv-bp" class="ff-cv" width="240" height="240"></canvas>
+      <div class="ff-statrow" style="margin-bottom:0">
+        <div class="ff-stat"><div class="lab">accuracy</div><div class="val" id="ff-race-accbp">–</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="graph-wrap" style="margin-top:1rem"><svg id="ff-race-chart" viewBox="0 0 460 170" width="100%"></svg></div>
+
+  <p style="font-size:0.88rem; margin-top:1rem">
+    Backprop converges in fewer steps — exact global gradients are hard to beat, and that echoes the
+    paper's own findings. But FF gets to the same boundary using only information each layer already
+    had. After training, <strong>click anywhere on the Forward-Forward canvas</strong> to see
+    inference happen: the point is run once with each candidate label, and the goodness readouts
+    below decide the class.
+  </p>
+
+  <div class="graph-wrap"><svg id="ff-probe-chart" viewBox="0 0 460 110" width="100%"></svg></div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. SCORECARD                                                  -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>⚖️ The honest scorecard</h3>
+  <p style="margin-top:0">
+    FF was published as a preliminary investigation, and the paper is upfront about where it stands:
+  </p>
+  <div class="ff-tablewrap">
+  <table class="ff-table">
+    <tr><th></th><th>Backpropagation</th><th>Forward-Forward</th></tr>
+    <tr>
+      <td>Learning signal</td>
+      <td>Exact global error derivatives, chained backward through every layer</td>
+      <td>A local per-layer objective: goodness high on real data, low on fake</td>
+    </tr>
+    <tr>
+      <td>Memory during training</td>
+      <td>Must store all activations for the backward pass</td>
+      <td>Nothing stored — a layer updates and is done</td>
+    </tr>
+    <tr>
+      <td>Differentiability</td>
+      <td>Every forward operation must have a known derivative</td>
+      <td>A black-box stage between layers is fine — no derivative ever crosses it</td>
+    </tr>
+    <tr>
+      <td>Timing</td>
+      <td>Update locking: layer 1 waits for the full round trip</td>
+      <td>Layers update during the pass; learning can be pipelined through streaming data</td>
+    </tr>
+    <tr>
+      <td>Biological plausibility</td>
+      <td>Weight transport + backward error channel: no cortical evidence</td>
+      <td>Forward-only and local — closer to something neurons could do</td>
+    </tr>
+    <tr>
+      <td>Hardware</td>
+      <td>Wants exact digital arithmetic</td>
+      <td>Tolerates imprecise, unit-to-unit-variable analog hardware — Hinton's "mortal computation"</td>
+    </tr>
+    <tr>
+      <td>Empirical results</td>
+      <td>State of the art everywhere it's been tried at scale</td>
+      <td>~1.4% MNIST test error with small fully-connected nets — comparable to an equivalent backprop MLP; somewhat behind on CIFAR-10; unproven at scale</td>
+    </tr>
+    <tr>
+      <td>Speed</td>
+      <td>Faster per example (one pass each way, exact gradients)</td>
+      <td>Somewhat slower, and generalizes slightly worse on several of the toy problems tested</td>
+    </tr>
+  </table>
+  </div>
+  <p style="margin-top:1rem; margin-bottom:0; font-size:0.9rem">
+    So FF is not a backprop replacement today. It is an existence proof: networks can learn useful
+    multi-layer representations from purely local, forward-only signals — which matters if the goal
+    is to understand how the cortex might learn, or to train networks on low-power analog hardware
+    where backprop is not an option.
+  </p>
+</div>
+
+<div class="se-note">
+  <strong>Takeaway.</strong> Backprop answers "how should this weight change?" with one exact,
+  global, backward-flowing derivative. Forward-Forward answers it with two cheap local questions —
+  "did real data excite you?" (be more excitable) and "did fake data excite you?" (be less) — asked
+  during two ordinary forward passes, with layer normalization forcing every layer to add new
+  information rather than echo the last one's verdict.
+</div>
+
+<p style="font-size:0.85rem; color:var(--sn-muted)">
+  Source: G. Hinton, <em>The Forward-Forward Algorithm: Some Preliminary Investigations</em>, 2022 —
+  <a href="https://arxiv.org/abs/2212.13345">arXiv:2212.13345</a>.
+</p>
+
+<script>
+(function () {
+  /* ---------- shared: theme-adaptive colors ---------- */
+  var SN = document.querySelector(".study-note");
+  function readCols() {
+    var cs = getComputedStyle(SN);
+    function c(n) { return cs.getPropertyValue(n).trim(); }
+    return { accent: c("--sn-accent"), strong: c("--sn-accent-strong"), soft: c("--sn-accent-soft"),
+             line: c("--sn-accent-line"), good: c("--sn-good"), bad: c("--sn-bad"), warn: c("--sn-warn"),
+             muted: c("--sn-muted"), grid: c("--sn-grid"), text: c("--sn-text"),
+             panel: c("--sn-panel"), inset: c("--sn-panel-inset") };
+  }
+  var COL = readCols();
+  var redrawFns = [];
+  new MutationObserver(function () { COL = readCols(); redrawFns.forEach(function (f) { f(); }); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  function sig(x) { return 1 / (1 + Math.exp(-x)); }
+  function rgbOf(col) {
+    if (col[0] === "#") {
+      var h = col.slice(1);
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    }
+    var m = col.match(/[\d.]+/g) || [0, 0, 0];
+    return [+m[0], +m[1], +m[2]];
+  }
+  function makeRng(seed) {
+    var s = seed >>> 0;
+    return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  function gauss(rng) {
+    var u = 0, v = 0;
+    while (u === 0) u = rng();
+    while (v === 0) v = rng();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  /* ============================================================
+     DEMO 1 — backprop vs FF pass animation
+     ============================================================ */
+  (function () {
+    var bpSvg = document.getElementById("ff-bp-net");
+    var ffSvg = document.getElementById("ff-ff-net");
+    var bpPhase = document.getElementById("ff-bp-phase");
+    var ffPhase = document.getElementById("ff-ff-phase");
+    var SIZES = [3, 4, 4, 3], XS = [35, 115, 195, 268], CY = 110, GAP = 42;
+    var bpStep = -1, ffStep = -1, timer = null;
+
+    function nodeY(li, i) { return CY + (i - (SIZES[li] - 1) / 2) * GAP; }
+
+    // edges between column a and a+1; returns svg string
+    function edges(a, color, w, dash) {
+      var s = "";
+      for (var i = 0; i < SIZES[a]; i++)
+        for (var j = 0; j < SIZES[a + 1]; j++)
+          s += '<line x1="' + XS[a] + '" y1="' + nodeY(a, i) + '" x2="' + XS[a + 1] + '" y2="' + nodeY(a + 1, j) +
+               '" stroke="' + color + '" stroke-width="' + w + '"' + (dash ? ' stroke-dasharray="4 3"' : '') + '/>';
+      return s;
+    }
+    function nodes(fills) {
+      var s = "";
+      for (var li = 0; li < 4; li++)
+        for (var i = 0; i < SIZES[li]; i++)
+          s += '<circle cx="' + XS[li] + '" cy="' + nodeY(li, i) + '" r="9" fill="' + (fills[li] || COL.inset) +
+               '" stroke="' + COL.grid + '"/>';
+      return s;
+    }
+    function bolt(a, color, label) {
+      var x = (XS[a] + XS[a + 1]) / 2;
+      return '<text x="' + x + '" y="228" text-anchor="middle" font-size="13" fill="' + color +
+             '" font-weight="700">⚡' + label + '</text>';
+    }
+    function badge(li, on) {
+      if (!on) return "";
+      return '<rect x="' + (XS[li] - 14) + '" y="196" width="28" height="16" rx="4" fill="' + COL.soft +
+             '"/><text x="' + XS[li] + '" y="208" text-anchor="middle" font-size="10" fill="' + COL.accent + '">a</text>';
+    }
+
+    function drawBP() {
+      var s = edges(0, COL.grid, 1) + edges(1, COL.grid, 1) + edges(2, COL.grid, 1);
+      var fills = [COL.muted, null, null, null];
+      var badges = [false, false, false, false];
+      var msg = "one training step = forward, then wait, then backward";
+      if (bpStep >= 0 && bpStep <= 2) {           // forward sweep, storing activations
+        for (var k = 0; k <= bpStep; k++) { s += edges(k, COL.accent, 2); fills[k + 1] = COL.accent; badges[k + 1] = true; }
+        msg = "forward pass — layer " + (bpStep + 1) + " computes and STORES its activations";
+      } else if (bpStep === 3) {                  // loss at the top
+        for (var k2 = 0; k2 < 3; k2++) { fills[k2 + 1] = COL.accent; badges[k2 + 1] = true; }
+        s += '<circle cx="' + XS[3] + '" cy="' + CY + '" r="16" fill="none" stroke="' + COL.warn + '" stroke-width="2"/>';
+        msg = "loss computed at the output — no weight has changed yet";
+      } else if (bpStep >= 4) {                   // backward sweep, consuming stored activations
+        var wb = 6 - bpStep;                      // 4→block2, 5→block1, 6→block0
+        for (var k3 = 0; k3 < 3; k3++) { fills[k3 + 1] = COL.accent; badges[k3 + 1] = (k3 < wb); }
+        s += edges(wb, COL.bad, 2.5, true) + bolt(wb, COL.bad, "");
+        msg = "backward pass — error derivatives reach W" + (wb + 1) + ", it finally updates";
+      }
+      s += nodes(fills);
+      for (var b = 0; b < 4; b++) s += badge(b, badges[b]);
+      bpSvg.innerHTML = s;
+      bpPhase.textContent = msg;
+    }
+
+    function drawFF() {
+      var s = edges(0, COL.grid, 1) + edges(1, COL.grid, 1) + edges(2, COL.grid, 1);
+      var fills = [COL.muted, null, null, null];
+      var msg = "one training step = a positive pass + a negative pass";
+      if (ffStep >= 0) {
+        var neg = ffStep >= 3, k = ffStep % 3, col = neg ? COL.bad : COL.good;
+        fills[0] = col;
+        for (var i = 0; i <= k; i++) fills[i + 1] = col;
+        s += edges(k, col, 2.5) + bolt(k, col, neg ? "↓G" : "↑G");
+        msg = (neg ? "negative pass — layer " + (k + 1) + " updates NOW to lower its goodness"
+                   : "positive pass — layer " + (k + 1) + " updates NOW to raise its goodness");
+      }
+      s += nodes(fills);
+      ffSvg.innerHTML = s;
+      ffPhase.textContent = msg;
+    }
+
+    function drawBoth() { drawBP(); drawFF(); }
+    function advance() { bpStep = (bpStep + 1) % 7; ffStep = (ffStep + 1) % 6; drawBoth(); }
+    function stop() { if (timer) { clearInterval(timer); timer = null; document.getElementById("ff-anim-play").textContent = "▶ play"; } }
+
+    document.getElementById("ff-anim-play").addEventListener("click", function () {
+      if (timer) { stop(); return; }
+      this.textContent = "❚❚ pause";
+      timer = setInterval(advance, 850);
+      advance();
+    });
+    document.getElementById("ff-anim-step").addEventListener("click", function () { stop(); advance(); });
+    document.getElementById("ff-anim-reset").addEventListener("click", function () {
+      stop(); bpStep = -1; ffStep = -1; drawBoth();
+      bpPhase.textContent = "press play"; ffPhase.textContent = "press play";
+    });
+    redrawFns.push(drawBoth);
+    drawBoth();
+    bpPhase.textContent = "press play"; ffPhase.textContent = "press play";
+  })();
+
+  /* ============================================================
+     DEMO 2 — goodness playground
+     ============================================================ */
+  (function () {
+    var svg = document.getElementById("ff-gd-chart");
+    var N = 8, LR = 0.1;
+    var rng = makeRng(42);
+    var y = [], mode = "pos";
+    function resample() { y = []; for (var i = 0; i < N; i++) y.push(0.2 + 1.3 * rng()); }
+    resample();
+
+    var thetaSl = document.getElementById("ff-gd-theta");
+    var outs = {
+      theta: document.getElementById("ff-gd-thetaout"), g: document.getElementById("ff-gd-g"),
+      p: document.getElementById("ff-gd-p"), press: document.getElementById("ff-gd-press"),
+      verdict: document.getElementById("ff-gd-verdict")
+    };
+
+    function goodness() { var G = 0; for (var i = 0; i < N; i++) G += y[i] * y[i]; return G; }
+
+    function update() {
+      var th = +thetaSl.value, G = goodness();
+      var dG = sig(G - th) - (mode === "pos" ? 1 : 0);
+      for (var i = 0; i < N; i++) y[i] = Math.max(0, y[i] - LR * dG * 2 * y[i]);
+    }
+
+    function draw() {
+      var th = +thetaSl.value, G = goodness();
+      var p = sig(G - th), press = Math.abs(p - (mode === "pos" ? 1 : 0));
+      outs.theta.textContent = th.toFixed(1);
+      outs.g.textContent = G.toFixed(2);
+      outs.p.textContent = p.toFixed(3);
+      outs.press.textContent = press.toFixed(3);
+      var real = G > th;
+      outs.verdict.textContent = real ? "looks real" : "looks fake";
+      outs.verdict.className = "se-tag " + (real ? "good" : "hot");
+
+      var W = 460, barW = 34, x0 = 30, base = 160, scale = 55;
+      var target = mode === "pos" ? COL.good : COL.bad;
+      var s = '<line x1="' + x0 + '" y1="' + base + '" x2="' + (x0 + N * (barW + 12)) + '" y2="' + base + '" stroke="' + COL.grid + '"/>';
+      for (var i = 0; i < N; i++) {
+        var h = y[i] * scale, x = x0 + i * (barW + 12);
+        s += '<rect x="' + x + '" y="' + (base - h) + '" width="' + barW + '" height="' + Math.max(h, 0.5) +
+             '" rx="4" fill="' + target + '" opacity="0.85"/>' +
+             '<text x="' + (x + barW / 2) + '" y="' + (base + 14) + '" text-anchor="middle" font-size="10">y' + (i + 1) + '</text>';
+      }
+      // goodness gauge under the bars
+      var gy = 200, gx0 = 30, gx1 = 430, gmax = 16;
+      var gx = function (v) { return gx0 + Math.min(v, gmax) / gmax * (gx1 - gx0); };
+      s += '<rect x="' + gx0 + '" y="' + gy + '" width="' + (gx1 - gx0) + '" height="10" rx="5" fill="' + COL.inset + '" stroke="' + COL.grid + '"/>' +
+           '<rect x="' + gx0 + '" y="' + gy + '" width="' + Math.max(gx(G) - gx0, 0) + '" height="10" rx="5" fill="' + target + '" opacity="0.8"/>' +
+           '<line x1="' + gx(th) + '" y1="' + (gy - 6) + '" x2="' + gx(th) + '" y2="' + (gy + 16) + '" stroke="' + COL.text + '" stroke-width="2"/>' +
+           '<text x="' + gx(th) + '" y="' + (gy - 10) + '" text-anchor="middle" font-size="10">θ</text>' +
+           '<text x="' + gx0 + '" y="' + (gy + 26) + '" font-size="9">G = 0</text>' +
+           '<text x="' + gx1 + '" y="' + (gy + 26) + '" text-anchor="end" font-size="9">G = ' + gmax + '</text>';
+      svg.innerHTML = s;
+    }
+
+    document.getElementById("ff-gd-mode").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      mode = b.dataset.mode;
+      this.querySelectorAll("button").forEach(function (x) { x.classList.toggle("active", x === b); });
+      draw();
+    });
+    thetaSl.addEventListener("input", draw);
+    document.getElementById("ff-gd-step").addEventListener("click", function () { update(); draw(); });
+    document.getElementById("ff-gd-step10").addEventListener("click", function () { for (var i = 0; i < 10; i++) update(); draw(); });
+    document.getElementById("ff-gd-resample").addEventListener("click", function () { resample(); draw(); });
+    redrawFns.push(draw);
+    draw();
+  })();
+
+  /* ============================================================
+     DEMO 3 — layer normalization strips length
+     ============================================================ */
+  (function () {
+    var svg = document.getElementById("ff-nm-chart");
+    var gOut = document.getElementById("ff-nm-g"), dOut = document.getElementById("ff-nm-dir");
+    var W = 320, H = 300, PAD = 34, MAX = 3.2;
+    var a = { x: 2.1, y: 1.3 };
+    function px(v) { return PAD + v / MAX * (W - PAD - 14); }
+    function py(v) { return H - PAD - v / MAX * (H - PAD - 14); }
+
+    function draw() {
+      var n = Math.sqrt(a.x * a.x + a.y * a.y), G = n * n;
+      var hx = a.x / (n + 1e-4), hy = a.y / (n + 1e-4);
+      gOut.textContent = G.toFixed(2);
+      dOut.textContent = "(" + hx.toFixed(2) + ", " + hy.toFixed(2) + ")";
+      var r = px(1) - px(0);
+      var s =
+        '<line x1="' + px(0) + '" y1="' + py(0) + '" x2="' + (W - 8) + '" y2="' + py(0) + '" stroke="' + COL.grid + '"/>' +
+        '<line x1="' + px(0) + '" y1="' + py(0) + '" x2="' + px(0) + '" y2="8" stroke="' + COL.grid + '"/>' +
+        '<text x="' + (W - 14) + '" y="' + (py(0) + 14) + '" font-size="11">y₁</text>' +
+        '<text x="' + (px(0) - 16) + '" y="16" font-size="11">y₂</text>' +
+        // unit circle quarter-arc
+        '<path d="M ' + (px(0) + r) + ' ' + py(0) + ' A ' + r + ' ' + r + ' 0 0 0 ' + px(0) + ' ' + (py(0) - r) +
+        '" fill="none" stroke="' + COL.line + '" stroke-width="1.5"/>' +
+        '<text x="' + (px(0) + r + 4) + '" y="' + (py(0) - 6) + '" font-size="9">‖h‖ = 1</text>' +
+        // ray of same-direction points
+        '<line x1="' + px(0) + '" y1="' + py(0) + '" x2="' + px(MAX * (a.x / Math.max(n, 1e-4))) + '" y2="' + py(MAX * (a.y / Math.max(n, 1e-4))) +
+        '" stroke="' + COL.grid + '" stroke-dasharray="4 4"/>' +
+        // raw activity vector
+        '<line x1="' + px(0) + '" y1="' + py(0) + '" x2="' + px(a.x) + '" y2="' + py(a.y) + '" stroke="' + COL.accent + '" stroke-width="2.5"/>' +
+        '<circle cx="' + px(a.x) + '" cy="' + py(a.y) + '" r="8" fill="' + COL.accent + '" style="cursor:grab"/>' +
+        '<text x="' + (px(a.x) + 12) + '" y="' + (py(a.y) - 8) + '" font-size="11" fill="' + COL.accent + '">y (drag me)</text>' +
+        // normalized point on the circle
+        '<circle cx="' + px(hx) + '" cy="' + py(hy) + '" r="6" fill="' + COL.strong + '" stroke="' + COL.panel + '" stroke-width="1.5"/>' +
+        '<text x="' + (px(hx) - 10) + '" y="' + (py(hy) + 18) + '" font-size="11" fill="' + COL.strong + '">h</text>';
+      svg.innerHTML = s;
+    }
+
+    var dragging = false;
+    function setFromEvent(e) {
+      var rect = svg.getBoundingClientRect();
+      var sx = (e.clientX - rect.left) / rect.width * W;
+      var sy = (e.clientY - rect.top) / rect.height * H;
+      a.x = Math.min(MAX, Math.max(0.02, (sx - PAD) / (W - PAD - 14) * MAX));
+      a.y = Math.min(MAX, Math.max(0.02, (H - PAD - sy) / (H - PAD - 14) * MAX));
+      draw();
+    }
+    svg.addEventListener("pointerdown", function (e) { dragging = true; svg.setPointerCapture(e.pointerId); setFromEvent(e); });
+    svg.addEventListener("pointermove", function (e) { if (dragging) setFromEvent(e); });
+    svg.addEventListener("pointerup", function () { dragging = false; });
+    redrawFns.push(draw);
+    draw();
+  })();
+
+  /* ============================================================
+     DEMO 4 — FF vs backprop training race
+     ============================================================ */
+  (function () {
+    var THETA = 2.0, EPS = 1e-4, STEPS = 900, BATCH = 8, GRID = 60, RANGE = 1.5;
+    var cvFF = document.getElementById("ff-cv-ff"), cvBP = document.getElementById("ff-cv-bp");
+    var ctxFF = cvFF.getContext("2d"), ctxBP = cvBP.getContext("2d");
+    var chart = document.getElementById("ff-race-chart");
+    var probeSvg = document.getElementById("ff-probe-chart");
+    var stepOut = document.getElementById("ff-race-step");
+    var accFFOut = document.getElementById("ff-race-accff"), accBPOut = document.getElementById("ff-race-accbp");
+    var runBtn = document.getElementById("ff-race-run");
+
+    /* ----- data (seeded, so reset replays the same run) ----- */
+    function makeData(rng) {
+      var pts = [], i, r, t;
+      for (i = 0; i < 150; i++) { r = 0.5 * Math.sqrt(rng()); t = 2 * Math.PI * rng(); pts.push({ x: r * Math.cos(t), y: r * Math.sin(t), c: 0 }); }
+      for (i = 0; i < 150; i++) {
+        r = 1.0 + 0.25 * rng(); t = 2 * Math.PI * rng();
+        pts.push({ x: r * Math.cos(t) + 0.05 * (rng() - 0.5), y: r * Math.sin(t) + 0.05 * (rng() - 0.5), c: 1 });
+      }
+      return pts;
+    }
+
+    /* ----- nets ----- */
+    function mkLayer(nin, nout, rng) {
+      var W = [], b = new Float64Array(nout), j, k, w;
+      for (j = 0; j < nout; j++) { w = new Float64Array(nin); for (k = 0; k < nin; k++) w[k] = gauss(rng) / Math.sqrt(nin); W.push(w); }
+      return { nin: nin, nout: nout, W: W, b: b };
+    }
+    function mkGrads(net) {
+      return net.map(function (lay) {
+        var W = [], j;
+        for (j = 0; j < lay.nout; j++) W.push(new Float64Array(lay.nin));
+        return { W: W, b: new Float64Array(lay.nout) };
+      });
+    }
+    function zeroGrads(g) {
+      g.forEach(function (gl) { gl.b.fill(0); gl.W.forEach(function (w) { w.fill(0); }); });
+    }
+    function applyGrads(net, g, lr) {
+      var L, j, k;
+      for (L = 0; L < net.length; L++)
+        for (j = 0; j < net[L].nout; j++) {
+          var w = net[L].W[j], gw = g[L].W[j];
+          for (k = 0; k < net[L].nin; k++) w[k] -= lr * gw[k];
+          net[L].b[j] -= lr * g[L].b[j];
+        }
+    }
+
+    /* ----- Forward-Forward: strictly forward, local updates ----- */
+    function ffForward(net, inp) {
+      var h = inp, acts = [], ins = [], L, j, k;
+      for (L = 0; L < net.length; L++) {
+        var lay = net[L], a = new Float64Array(lay.nout);
+        ins.push(h);
+        for (j = 0; j < lay.nout; j++) {
+          var z = lay.b[j], w = lay.W[j];
+          for (k = 0; k < lay.nin; k++) z += w[k] * h[k];
+          a[j] = z > 0 ? z : 0;
+        }
+        acts.push(a);
+        var s = 0;
+        for (j = 0; j < lay.nout; j++) s += a[j] * a[j];
+        var n = Math.sqrt(s) + EPS, hn = new Float64Array(lay.nout);
+        for (j = 0; j < lay.nout; j++) hn[j] = a[j] / n;      // normalize BEFORE next layer
+        h = hn;
+      }
+      return { acts: acts, ins: ins };
+    }
+    // local goodness gradient: dL/dG = σ(G−θ) − target, ReLU-gated, no backward pass
+    function ffAccum(net, g, inp, isPos) {
+      var f = ffForward(net, inp), L, j, k;
+      for (L = 0; L < net.length; L++) {
+        var a = f.acts[L], h = f.ins[L], lay = net[L], G = 0;
+        for (j = 0; j < lay.nout; j++) G += a[j] * a[j];
+        var dG = sig(G - THETA) - (isPos ? 1 : 0);
+        for (j = 0; j < lay.nout; j++) {
+          if (a[j] <= 0) continue;
+          var dz = dG * 2 * a[j], gw = g[L].W[j];
+          for (k = 0; k < lay.nin; k++) gw[k] += dz * h[k];
+          g[L].b[j] += dz;
+        }
+      }
+    }
+    function ffEmbed(x, y, label) { return [x, y, label === 0 ? 1 : 0, label === 1 ? 1 : 0]; }
+    function ffGoodnessPerLayer(net, x, y, label) {
+      var f = ffForward(net, ffEmbed(x, y, label));
+      return f.acts.map(function (a) { var G = 0, j; for (j = 0; j < a.length; j++) G += a[j] * a[j]; return G; });
+    }
+    // inference: one pass per candidate label, argmax of summed goodness
+    // (all layers — in this shallow net skipping the first layer hurts)
+    function ffPredict(net, x, y) {
+      var g0 = ffGoodnessPerLayer(net, x, y, 0), g1 = ffGoodnessPerLayer(net, x, y, 1);
+      return (g1[0] + g1[1] > g0[0] + g0[1]) ? 1 : 0;
+    }
+
+    /* ----- Backprop baseline: same hidden sizes, softmax CE ----- */
+    function bpForward(net, inp) {
+      var hs = [inp], h = inp, L, j, k;
+      for (L = 0; L < net.length; L++) {
+        var lay = net[L], a = new Float64Array(lay.nout);
+        for (j = 0; j < lay.nout; j++) {
+          var z = lay.b[j], w = lay.W[j];
+          for (k = 0; k < lay.nin; k++) z += w[k] * h[k];
+          a[j] = (L < net.length - 1 && z < 0) ? 0 : z;       // ReLU on hidden, linear output
+        }
+        hs.push(a); h = a;
+      }
+      return hs;
+    }
+    function bpAccum(net, g, inp, label) {
+      var hs = bpForward(net, inp), out = hs[net.length];
+      var m = Math.max(out[0], out[1]);
+      var e0 = Math.exp(out[0] - m), e1 = Math.exp(out[1] - m), Z = e0 + e1;
+      var delta = [e0 / Z - (label === 0 ? 1 : 0), e1 / Z - (label === 1 ? 1 : 0)];
+      var L, j, k;
+      for (L = net.length - 1; L >= 0; L--) {
+        var lay = net[L], h = hs[L], prev = new Float64Array(lay.nin);
+        for (j = 0; j < lay.nout; j++) {
+          var d = delta[j];
+          if (d === 0) continue;
+          var w = lay.W[j], gw = g[L].W[j];
+          for (k = 0; k < lay.nin; k++) { gw[k] += d * h[k]; prev[k] += d * w[k]; }
+          g[L].b[j] += d;
+        }
+        if (L > 0) {
+          for (k = 0; k < lay.nin; k++) if (hs[L][k] <= 0) prev[k] = 0;   // ReLU gate
+          delta = prev;
+        }
+      }
+    }
+    function bpPredict(net, x, y) {
+      var out = bpForward(net, [x, y]);
+      var o = out[net.length];
+      return o[1] > o[0] ? 1 : 0;
+    }
+
+    /* ----- state ----- */
+    var data, ffNet, bpNet, gFF, gBP, rngTrain, step, curve, running = false, tick = 0;
+    var gridFF = new Uint8Array(GRID * GRID), gridBP = new Uint8Array(GRID * GRID), gridReady = false;
+    var probe = null;
+    var stepsPerTick = 3;
+
+    function init() {
+      var rng = makeRng(20260705);
+      data = makeData(rng);
+      ffNet = [mkLayer(4, 12, rng), mkLayer(12, 12, rng)];
+      bpNet = [mkLayer(2, 12, rng), mkLayer(12, 12, rng), mkLayer(12, 2, rng)];
+      gFF = mkGrads(ffNet); gBP = mkGrads(bpNet);
+      rngTrain = makeRng(777);
+      step = 0; tick = 0; curve = []; gridReady = false; probe = null;
+      classifyGrids(); evalAcc();
+    }
+
+    function trainStep() {
+      var lrFF = 0.08 / (1 + step / 300), lrBP = 0.15 / (1 + step / 600), i;
+      zeroGrads(gFF); zeroGrads(gBP);
+      for (i = 0; i < BATCH; i++) {
+        var p = data[Math.floor(rngTrain() * data.length)];
+        ffAccum(ffNet, gFF, ffEmbed(p.x, p.y, p.c), true);        // correct label → positive
+        ffAccum(ffNet, gFF, ffEmbed(p.x, p.y, 1 - p.c), false);   // wrong label → negative
+        bpAccum(bpNet, gBP, [p.x, p.y], p.c);
+      }
+      applyGrads(ffNet, gFF, lrFF / (2 * BATCH));
+      applyGrads(bpNet, gBP, lrBP / BATCH);
+      step++;
+    }
+
+    function evalAcc() {
+      var okFF = 0, okBP = 0, i;
+      for (i = 0; i < data.length; i++) {
+        if (ffPredict(ffNet, data[i].x, data[i].y) === data[i].c) okFF++;
+        if (bpPredict(bpNet, data[i].x, data[i].y) === data[i].c) okBP++;
+      }
+      var aFF = okFF / data.length, aBP = okBP / data.length;
+      curve.push({ s: step, ff: aFF, bp: aBP });
+      accFFOut.textContent = (aFF * 100).toFixed(1) + "%";
+      accBPOut.textContent = (aBP * 100).toFixed(1) + "%";
+      return [aFF, aBP];
+    }
+
+    function classifyGrids() {
+      var i, j;
+      for (i = 0; i < GRID; i++) {
+        var y = -RANGE + (i + 0.5) / GRID * 2 * RANGE;
+        for (j = 0; j < GRID; j++) {
+          var x = -RANGE + (j + 0.5) / GRID * 2 * RANGE;
+          gridFF[i * GRID + j] = ffPredict(ffNet, x, y);
+          gridBP[i * GRID + j] = bpPredict(bpNet, x, y);
+        }
+      }
+      gridReady = true;
+    }
+
+    /* ----- rendering ----- */
+    var off = document.createElement("canvas");
+    off.width = GRID; off.height = GRID;
+    var offCtx = off.getContext("2d");
+
+    function cvX(x) { return (x + RANGE) / (2 * RANGE) * 240; }
+    function cvY(y) { return 240 - (y + RANGE) / (2 * RANGE) * 240; }
+
+    function drawBoard(ctx, grid) {
+      ctx.clearRect(0, 0, 240, 240);
+      if (gridReady) {
+        var img = offCtx.createImageData(GRID, GRID);
+        var ca = rgbOf(COL.accent), cm = rgbOf(COL.muted), i;
+        for (i = 0; i < GRID * GRID; i++) {
+          var row = GRID - 1 - Math.floor(i / GRID), colIx = i % GRID;   // flip y for canvas
+          var c = grid[row * GRID + colIx] === 0 ? ca : cm;
+          var o = i * 4;
+          img.data[o] = c[0]; img.data[o + 1] = c[1]; img.data[o + 2] = c[2];
+          img.data[o + 3] = grid[row * GRID + colIx] === 0 ? 60 : 40;
+        }
+        offCtx.putImageData(img, 0, 0);
+        ctx.imageSmoothingEnabled = true;
+        ctx.drawImage(off, 0, 0, 240, 240);
+      }
+      var k;
+      for (k = 0; k < data.length; k++) {
+        var p = data[k];
+        ctx.beginPath();
+        ctx.arc(cvX(p.x), cvY(p.y), 2.6, 0, 2 * Math.PI);
+        if (p.c === 0) { ctx.fillStyle = COL.accent; ctx.fill(); }
+        else { ctx.strokeStyle = COL.text; ctx.lineWidth = 1.1; ctx.stroke(); }
+      }
+      if (probe && ctx === ctxFF) {
+        ctx.beginPath();
+        ctx.moveTo(cvX(probe.x) - 6, cvY(probe.y)); ctx.lineTo(cvX(probe.x) + 6, cvY(probe.y));
+        ctx.moveTo(cvX(probe.x), cvY(probe.y) - 6); ctx.lineTo(cvX(probe.x), cvY(probe.y) + 6);
+        ctx.strokeStyle = COL.warn; ctx.lineWidth = 2; ctx.stroke();
+      }
+    }
+
+    function drawChart() {
+      var W = 460, H = 170, L = 42, R = 12, T = 14, B = 26;
+      var xs = function (s) { return L + s / STEPS * (W - L - R); };
+      var ys = function (a) { return T + (1 - (a - 0.4) / 0.6) * (H - T - B); };
+      var s = "", g;
+      for (g = 0.4; g <= 1.001; g += 0.2) {
+        s += '<line x1="' + L + '" y1="' + ys(g) + '" x2="' + (W - R) + '" y2="' + ys(g) + '" stroke="' + COL.grid + '"/>' +
+             '<text x="' + (L - 6) + '" y="' + (ys(g) + 3) + '" text-anchor="end" font-size="9">' + Math.round(g * 100) + '%</text>';
+      }
+      s += '<text x="' + (W - R) + '" y="' + (H - 8) + '" text-anchor="end" font-size="9">training steps →</text>';
+      if (curve.length > 1) {
+        var pf = "", pb = "", i;
+        for (i = 0; i < curve.length; i++) {
+          pf += xs(curve[i].s) + "," + ys(Math.max(curve[i].ff, 0.4)) + " ";
+          pb += xs(curve[i].s) + "," + ys(Math.max(curve[i].bp, 0.4)) + " ";
+        }
+        s += '<polyline points="' + pb + '" fill="none" stroke="' + COL.muted + '" stroke-width="2" stroke-dasharray="5 4"/>' +
+             '<polyline points="' + pf + '" fill="none" stroke="' + COL.accent + '" stroke-width="2.5"/>';
+      }
+      var ly = H - 12;
+      s += '<line x1="' + (L + 8) + '" y1="' + (ly - 4) + '" x2="' + (L + 30) + '" y2="' + (ly - 4) + '" stroke="' + COL.accent + '" stroke-width="2.5"/>' +
+           '<text x="' + (L + 36) + '" y="' + ly + '" font-size="10">Forward-Forward</text>' +
+           '<line x1="' + (L + 150) + '" y1="' + (ly - 4) + '" x2="' + (L + 172) + '" y2="' + (ly - 4) + '" stroke="' + COL.muted + '" stroke-width="2" stroke-dasharray="5 4"/>' +
+           '<text x="' + (L + 178) + '" y="' + ly + '" font-size="10">backprop</text>';
+      chart.innerHTML = s;
+    }
+
+    function drawProbe() {
+      var W = 460, H = 110;
+      if (!probe) {
+        probeSvg.innerHTML = '<text x="' + (W / 2) + '" y="' + (H / 2) + '" text-anchor="middle" font-size="11">click the Forward-Forward canvas to probe a point</text>';
+        return;
+      }
+      var g0 = ffGoodnessPerLayer(ffNet, probe.x, probe.y, 0);
+      var g1 = ffGoodnessPerLayer(ffNet, probe.x, probe.y, 1);
+      var t0 = g0[0] + g0[1], t1 = g1[0] + g1[1];
+      var win0 = t0 >= t1;
+      var maxG = Math.max(t0, t1, 4), bx = 160, bw = 210;
+      var rows = [
+        { lab: "try label ● inner", G: t0, win: win0 },
+        { lab: "try label ○ outer", G: t1, win: !win0 }
+      ];
+      var s = '<text x="12" y="20" font-size="11" font-weight="700" fill="' + COL.text + '">inference at (' +
+              probe.x.toFixed(2) + ', ' + probe.y.toFixed(2) + '): one forward pass per label</text>';
+      var i;
+      for (i = 0; i < rows.length; i++) {
+        var y = 44 + i * 30, r = rows[i];
+        s += '<text x="12" y="' + (y + 4) + '" font-size="11">' + r.lab + '</text>' +
+             '<rect x="' + bx + '" y="' + (y - 9) + '" width="' + bw + '" height="16" rx="6" fill="' + COL.inset + '" stroke="' + COL.grid + '"/>' +
+             '<rect x="' + bx + '" y="' + (y - 9) + '" width="' + Math.max(4, r.G / maxG * bw) + '" height="16" rx="6" fill="' +
+             (r.win ? COL.accent : COL.muted) + '" opacity="0.85"/>' +
+             '<text x="' + (bx + bw + 8) + '" y="' + (y + 4) + '" font-size="11" font-family="monospace" fill="' +
+             (r.win ? COL.accent : COL.muted) + '">G=' + r.G.toFixed(1) + (r.win ? " ✓" : "") + '</text>';
+      }
+      s += '<text x="12" y="100" font-size="10">higher summed goodness wins — the net "recognizes" the correct image+label pairing</text>';
+      probeSvg.innerHTML = s;
+    }
+
+    function drawAll() { drawBoard(ctxFF, gridFF); drawBoard(ctxBP, gridBP); drawChart(); drawProbe(); stepOut.textContent = step; }
+
+    /* ----- run loop ----- */
+    function frame() {
+      if (!running) return;
+      var i;
+      for (i = 0; i < stepsPerTick && step < STEPS; i++) trainStep();
+      tick++;
+      if (tick % 3 === 0 || step >= STEPS) { classifyGrids(); evalAcc(); }
+      drawAll();
+      if (step >= STEPS) { running = false; runBtn.textContent = "▶ train"; classifyGrids(); evalAcc(); drawAll(); return; }
+      requestAnimationFrame(frame);
+    }
+
+    runBtn.addEventListener("click", function () {
+      if (running) { running = false; runBtn.textContent = "▶ train"; return; }
+      if (step >= STEPS) { init(); }
+      running = true; runBtn.textContent = "❚❚ pause";
+      requestAnimationFrame(frame);
+    });
+    document.getElementById("ff-race-reset").addEventListener("click", function () {
+      running = false; runBtn.textContent = "▶ train"; init(); drawAll();
+    });
+    document.getElementById("ff-race-speed").addEventListener("click", function (e) {
+      var b = e.target.closest("button"); if (!b) return;
+      stepsPerTick = +b.dataset.sp;
+      this.querySelectorAll("button").forEach(function (x) { x.classList.toggle("active", x === b); });
+    });
+    cvFF.addEventListener("click", function (e) {
+      var rect = cvFF.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width * 240;
+      var y = (e.clientY - rect.top) / rect.height * 240;
+      probe = { x: x / 240 * 2 * RANGE - RANGE, y: (240 - y) / 240 * 2 * RANGE - RANGE };
+      drawAll();
+    });
+
+    redrawFns.push(drawAll);
+    init();
+    drawAll();
+  })();
+})();
+</script>
+
+</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Hinton's Forward-Forward algorithm trains a network without backpropagation: it replaces the forward-then-backward sweep with two forward passes — one on real data, one on fake — and lets every layer learn immediately from its own local 'goodness' objective. What goodness is, why layer normalization is the load-bearing trick, and a live in-browser training race between Forward-Forward and backprop.]]></summary></entry><entry><title type="html">World Models: Learning to Dream, Then Act</title><link href="https://alexdruso.github.io/world-models/" rel="alternate" type="text/html" title="World Models: Learning to Dream, Then Act" /><published>2026-06-23T00:00:00+00:00</published><updated>2026-06-23T00:00:00+00:00</updated><id>https://alexdruso.github.io/world-models</id><content type="html" xml:base="https://alexdruso.github.io/world-models/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
