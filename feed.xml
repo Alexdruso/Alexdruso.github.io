@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-07-05T20:47:11+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One</title><link href="https://alexdruso.github.io/forward-forward-algorithm/" rel="alternate" type="text/html" title="The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One" /><published>2026-07-05T00:00:00+00:00</published><updated>2026-07-05T00:00:00+00:00</updated><id>https://alexdruso.github.io/forward-forward-algorithm</id><content type="html" xml:base="https://alexdruso.github.io/forward-forward-algorithm/"><![CDATA[<style>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-07-06T03:17:00+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One</title><link href="https://alexdruso.github.io/forward-forward-algorithm/" rel="alternate" type="text/html" title="The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One" /><published>2026-07-05T00:00:00+00:00</published><updated>2026-07-05T00:00:00+00:00</updated><id>https://alexdruso.github.io/forward-forward-algorithm</id><content type="html" xml:base="https://alexdruso.github.io/forward-forward-algorithm/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
@@ -646,12 +646,12 @@
     <tr>
       <td>Empirical results</td>
       <td>State of the art everywhere it's been tried at scale</td>
-      <td>~1.4% MNIST test error with small fully-connected nets — comparable to an equivalent backprop MLP; somewhat behind on CIFAR-10; unproven at scale</td>
+      <td>1.36% MNIST test error (4 hidden layers of 2000 ReLUs, 60 epochs) — comparable to a ~1.4% backprop MLP baseline; slightly behind on CIFAR-10 (≈41% vs ≈37% test error); unproven at scale</td>
     </tr>
     <tr>
       <td>Speed</td>
-      <td>Faster per example (one pass each way, exact gradients)</td>
-      <td>Somewhat slower, and generalizes slightly worse on several of the toy problems tested</td>
+      <td>Faster (reaches FF's MNIST accuracy in ~20 epochs)</td>
+      <td>Somewhat slower (~60 epochs for the MNIST result), and generalizes slightly worse on several of the toy problems tested</td>
     </tr>
   </table>
   </div>
