@@ -387,12 +387,12 @@ excerpt: "Hinton's Forward-Forward algorithm trains a network without backpropag
     <tr>
       <td>Empirical results</td>
       <td>State of the art everywhere it's been tried at scale</td>
-      <td>~1.4% MNIST test error with small fully-connected nets — comparable to an equivalent backprop MLP; somewhat behind on CIFAR-10; unproven at scale</td>
+      <td>1.36% MNIST test error (4 hidden layers of 2000 ReLUs, 60 epochs) — comparable to a ~1.4% backprop MLP baseline; slightly behind on CIFAR-10 (≈41% vs ≈37% test error); unproven at scale</td>
     </tr>
     <tr>
       <td>Speed</td>
-      <td>Faster per example (one pass each way, exact gradients)</td>
-      <td>Somewhat slower, and generalizes slightly worse on several of the toy problems tested</td>
+      <td>Faster (reaches FF's MNIST accuracy in ~20 epochs)</td>
+      <td>Somewhat slower (~60 epochs for the MNIST result), and generalizes slightly worse on several of the toy problems tested</td>
     </tr>
   </table>
   </div>
