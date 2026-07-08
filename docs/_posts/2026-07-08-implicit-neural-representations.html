@@ -3,7 +3,7 @@ layout: post
 title: "Implicit Neural Representations: When the Network Is the Image"
 date: 2026-07-08
 categories: [Machine Learning, Interactive]
-excerpt: "An implicit neural representation stores a signal as a function: a small network maps continuous (x, y) coordinates to RGB, so the image lives in the weights instead of a pixel grid. Why a plain ReLU MLP can only learn a blurry version (spectral bias), how Fourier features and SIREN's sine activations fix it, and what the functional view buys — rendering one trained network at any resolution, including scales it never saw. With live in-browser training."
+excerpt: "An implicit neural representation stores a signal as a function: a small network maps continuous (x, y) coordinates to RGB, so the image lives in the weights instead of a pixel grid. Why a plain ReLU MLP can only learn a blurry version (spectral bias), how Fourier features and SIREN's sine activations fix it, and what the functional view buys — rendering one trained network at any resolution, including scales it never saw. With live in-browser training, and a final demo that reruns the whole comparison on any image dropped into the page — processed entirely locally, nothing uploaded."
 ---
 
 {% include study-note-styles.html %}
@@ -56,6 +56,25 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 .inr-legend .l-ff::before { color: var(--sn-accent); }
 .inr-legend .l-siren::before { color: var(--sn-good); }
 .inr-legend .l-tgt::before { color: var(--sn-muted); }
+
+/* demo 5: user-supplied image */
+.inr-drop {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 0.3rem; min-height: 84px; max-width: 420px; margin: 0.9rem auto; padding: 1rem;
+  border: 1px dashed var(--sn-accent-line); border-radius: var(--sn-radius);
+  background: var(--sn-panel-inset); color: var(--sn-muted); font-size: 0.88rem;
+  text-align: center; cursor: pointer;
+  transition: border-color 0.18s var(--sn-ease), background 0.18s var(--sn-ease), color 0.18s var(--sn-ease);
+}
+.inr-drop:hover, .inr-drop.drag { border-color: var(--sn-accent); background: var(--sn-accent-soft); color: var(--sn-accent-strong); }
+.inr-drop input { display: none; }
+.inr-drop .sub { font-size: 0.72rem; opacity: 0.85; }
+/* like .inr-cv but without the fixed 2:3 aspect — user images keep their own */
+.inr-ucv {
+  display: block; margin: 0 auto;
+  border-radius: var(--sn-radius-sm); border: 1px solid var(--sn-border);
+  background: var(--sn-panel-inset); image-rendering: pixelated;
+}
 </style>
 
 <p>
@@ -333,7 +352,80 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 </div>
 
 <!-- ============================================================ -->
-<!-- 5. WHERE THIS GOES                                            -->
+<!-- 5. THE RACE ON A USER-SUPPLIED IMAGE                          -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🖼️ The same race, on any image</h3>
+  <p style="margin-top:0">
+    Nothing above is specific to the lighthouse: any picture is just another dataset of
+    (coordinate, colour) pairs, and the three parametrizations can be compared on it directly.
+    Drop an image below (or click to choose a file) to rerun the experiment on it — the picture
+    is downscaled to roughly 3,500 pixels, exactly the size the race above trains on, and three
+    freshly initialized networks start fitting it immediately. The file is read locally with the
+    browser's File API and used only as training targets for the JavaScript on this page; it is
+    never uploaded anywhere.
+  </p>
+
+  <label class="inr-drop" id="inr-user-drop">
+    <input type="file" id="inr-user-file" accept="image/*">
+    <span id="inr-user-drop-msg">drop an image here, or click to choose one</span>
+    <span class="sub">stays in the browser — nothing is uploaded</span>
+  </label>
+
+  <div id="inr-user-ui" hidden>
+    <div class="inr-controls" style="justify-content:center">
+      <button class="se-btn" id="inr-user-play">❚❚ pause</button>
+      <button class="se-reset" id="inr-user-reset">reset</button>
+      <span style="font-size:0.82rem; color:var(--sn-muted)">step <span class="inr-readout" id="inr-user-step">0</span> / 1800</span>
+      <label style="font-size:0.82rem">Fourier σ
+        <input type="range" id="inr-user-sigma" min="1" max="12" step="1" value="3" style="width:110px; vertical-align:middle">
+        <span class="inr-readout" id="inr-user-sigma-out">3</span>
+      </label>
+    </div>
+
+    <div class="inr-flexwrap">
+      <div class="inr-panel">
+        <h4>target</h4>
+        <canvas id="inr-user-target" class="inr-ucv"></canvas>
+        <div class="inr-pstag" id="inr-user-size">&nbsp;</div>
+      </div>
+      <div class="inr-panel">
+        <h4 style="color:var(--sn-warn)">ReLU MLP</h4>
+        <canvas id="inr-user-cv-relu" class="inr-ucv"></canvas>
+        <div class="inr-pstag" id="inr-user-psnr-relu">— dB</div>
+      </div>
+      <div class="inr-panel">
+        <h4 style="color:var(--sn-accent)">Fourier features</h4>
+        <canvas id="inr-user-cv-fourier" class="inr-ucv"></canvas>
+        <div class="inr-pstag" id="inr-user-psnr-fourier">— dB</div>
+      </div>
+      <div class="inr-panel">
+        <h4 style="color:var(--sn-good)">SIREN</h4>
+        <canvas id="inr-user-cv-siren" class="inr-ucv"></canvas>
+        <div class="inr-pstag" id="inr-user-psnr-siren">— dB</div>
+      </div>
+    </div>
+
+    <div class="graph-wrap" style="margin-top:0.9rem"><svg id="inr-user-chart" viewBox="0 0 560 280" width="100%"></svg></div>
+    <div class="inr-legend">
+      <span class="l-relu">ReLU MLP</span>
+      <span class="l-ff">Fourier features</span>
+      <span class="l-siren">SIREN</span>
+    </div>
+
+    <p style="font-size:0.9rem; margin-bottom:0">
+      The gap between the models is a direct readout of the image's frequency content. On smooth
+      content — sky, skin, soft gradients — the plain ReLU MLP holds its own, because there is
+      little high-frequency detail for spectral bias to starve. On text, foliage, fabric or
+      anything with hard edges, the ordering from the lighthouse reappears and σ becomes worth
+      retuning: busier images reward a larger σ (a wider kernel bandwidth), smoother ones a
+      smaller one. Drop in a new image at any time to restart the race on it.
+    </p>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. WHERE THIS GOES                                            -->
 <!-- ============================================================ -->
 <div class="se-section">
   <h3>🧭 Where this goes</h3>
@@ -1044,6 +1136,219 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
     scaleSl.addEventListener("input", renderAll);
     init(); renderAll();
   };
+
+  /* ================================================================
+     Demo 5: the race on a user-supplied image.
+     The file is read with the File API and consumed entirely in this
+     closure — it never leaves the browser.
+     ================================================================ */
+  (function () {
+    var MAX = 1800, BATCH = 224, EVAL = 60, BUDGET = 3456, MAXDIM = 96;
+    var KINDS = ["relu", "fourier", "siren"];
+    var LRS = { relu: 3e-3, fourier: 5e-3, siren: 1e-3 };
+
+    var drop = document.getElementById("inr-user-drop");
+    var msg = document.getElementById("inr-user-drop-msg");
+    var fileIn = document.getElementById("inr-user-file");
+    var ui = document.getElementById("inr-user-ui");
+    var playBtn = document.getElementById("inr-user-play");
+    var stepOut = document.getElementById("inr-user-step");
+    var sizeOut = document.getElementById("inr-user-size");
+    var chart = document.getElementById("inr-user-chart");
+    var targetCv = document.getElementById("inr-user-target");
+    var cvs = {}, tags = {};
+    KINDS.forEach(function (kk) {
+      cvs[kk] = document.getElementById("inr-user-cv-" + kk);
+      tags[kk] = document.getElementById("inr-user-psnr-" + kk);
+    });
+
+    /* the user's image as training data (set by loadFile) */
+    var UW = 0, UH = 0, UP = 0, upx = null, grid = null;
+    var models, feats, curves, lastEval, step = 0, running = false, rot = 0, sigma = 3;
+    var batchRng = makeRng(99);
+    var Xb = {}, Yb = new Float32Array(BATCH * 3);
+
+    function buildModel(kind) {
+      var opts = { width: 36, depth: 3, seed: 1 };
+      if (kind === "fourier") { opts.mapping = 32; opts.sigma = sigma; }
+      if (kind === "siren") opts.omega = 30;
+      models[kind] = makeModel(kind, opts);
+      feats[kind] = new Float32Array(UP * models[kind].inDim);
+      mapInput(models[kind], grid, UP, feats[kind]);
+      curves[kind] = [];
+      lastEval[kind] = -1;
+    }
+    function init() {
+      step = 0; rot = 0;
+      models = {}; feats = {}; curves = {}; lastEval = {};
+      KINDS.forEach(buildModel);
+      KINDS.forEach(evalModel);
+    }
+    function evalModel(kind) {
+      var pred = forward(models[kind], feats[kind], UP);
+      var ps = imagePsnr(pred, upx, UP * 3);
+      var px = new Float32Array(UP * 3);
+      for (var i = 0; i < UP * 3; i++) px[i] = Math.max(0, Math.min(1, pred[i]));
+      drawPixels(cvs[kind], px, UW, UH);
+      fitCanvas(cvs[kind]);
+      tags[kind].innerHTML = "<b>" + ps.toFixed(1) + "</b> dB";
+      curves[kind].push([step, ps]);
+      lastEval[kind] = step;
+    }
+    function stepAll() {
+      var idx = [];
+      for (var n = 0; n < BATCH; n++) {
+        var p = (batchRng() * UP) | 0;
+        idx.push(p);
+        Yb.set(upx.subarray(p * 3, p * 3 + 3), n * 3);
+      }
+      KINDS.forEach(function (kind) {
+        var m = models[kind], D = m.inDim;
+        if (!Xb[kind] || Xb[kind].length < BATCH * D) Xb[kind] = new Float32Array(BATCH * D);
+        var xb = Xb[kind], f = feats[kind];
+        for (var n2 = 0; n2 < BATCH; n2++)
+          xb.set(f.subarray(idx[n2] * D, (idx[n2] + 1) * D), n2 * D);
+        trainStep(m, xb, Yb, BATCH, LRS[kind]);
+      });
+      step++;
+    }
+
+    function drawChart() {
+      var W = 560, H = 280, L = 40, R = 14, T = 12, B = 28;
+      var ymin = 8, ymax = 40;
+      function px(s) { return L + s / MAX * (W - L - R); }
+      function py(p) { return T + (ymax - p) / (ymax - ymin) * (H - T - B); }
+      var s = "";
+      for (var g = ymin; g <= ymax; g += 4) {
+        s += '<line x1="' + L + '" y1="' + py(g) + '" x2="' + (W - R) + '" y2="' + py(g) + '" stroke="' + COL.grid + '"/>' +
+             '<text x="' + (L - 6) + '" y="' + (py(g) + 4) + '" font-size="10" text-anchor="end" fill="' + COL.muted + '">' + g + '</text>';
+      }
+      [0, 450, 900, 1350].forEach(function (t) {
+        s += '<text x="' + px(t) + '" y="' + (H - 8) + '" font-size="10" text-anchor="middle" fill="' + COL.muted + '">' + t + '</text>';
+      });
+      s += '<text x="' + (L + 4) + '" y="' + (T + 10) + '" font-size="10" fill="' + COL.muted + '">PSNR (dB)</text>';
+      s += '<text x="' + (W - R) + '" y="' + (H - 8) + '" font-size="10" text-anchor="end" fill="' + COL.muted + '">step</text>';
+      var colOf = { relu: COL.warn, fourier: COL.accent, siren: COL.good };
+      KINDS.forEach(function (kind) {
+        var c = curves[kind];
+        if (!c || c.length < 2) return;
+        var pts = "";
+        for (var i = 0; i < c.length; i++)
+          pts += px(c[i][0]).toFixed(1) + "," + py(Math.max(ymin, Math.min(ymax, c[i][1]))).toFixed(1) + " ";
+        s += '<polyline points="' + pts + '" fill="none" stroke="' + colOf[kind] + '" stroke-width="2"/>';
+      });
+      chart.innerHTML = s;
+      stepOut.textContent = step;
+    }
+
+    function setRunning(on) {
+      running = on;
+      playBtn.textContent = on ? "❚❚ pause" : "▶ train";
+      if (on) requestAnimationFrame(frame);
+    }
+    function frame() {
+      if (!running || !upx) return;
+      var t0 = performance.now();
+      while (performance.now() - t0 < 16 && step < MAX) stepAll();
+      var kind = KINDS[rot % 3]; rot++;
+      if (step - lastEval[kind] >= EVAL || step >= MAX) evalModel(kind);
+      drawChart();
+      if (step >= MAX) {
+        KINDS.forEach(function (kk) { if (lastEval[kk] < MAX) evalModel(kk); });
+        drawChart();
+        setRunning(false);
+        return;
+      }
+      requestAnimationFrame(frame);
+    }
+
+    playBtn.addEventListener("click", function () {
+      if (!upx) return;
+      if (running) { setRunning(false); return; }
+      if (step >= MAX) { init(); drawChart(); }
+      setRunning(true);
+    });
+    document.getElementById("inr-user-reset").addEventListener("click", function () {
+      if (!upx) return;
+      setRunning(false); init(); drawChart();
+    });
+    var sigSlider = document.getElementById("inr-user-sigma");
+    var sigOut = document.getElementById("inr-user-sigma-out");
+    sigSlider.addEventListener("input", function () {
+      sigma = +sigSlider.value;
+      sigOut.textContent = sigma;
+      if (!upx) return;
+      buildModel("fourier");
+      models.fourier.t = 0;
+      evalModel("fourier");
+      drawChart();
+    });
+    redrawFns.push(function () { if (upx) drawChart(); });
+
+    /* display size: cap on-screen footprint, keep the image's own aspect */
+    function fitCanvas(cv) {
+      var sc = Math.min(150 / UW, 200 / UH);
+      cv.style.width = Math.round(UW * sc) + "px";
+    }
+
+    function loadFile(file) {
+      if (!file || !/^image\//.test(file.type)) {
+        if (file) msg.textContent = "that doesn't look like an image — try a different file";
+        return;
+      }
+      var url = URL.createObjectURL(file);
+      var im = new Image();
+      im.onload = function () {
+        URL.revokeObjectURL(url);
+        /* pick w*h ≈ BUDGET pixels at the image's own aspect ratio */
+        var ar = im.naturalWidth / im.naturalHeight;
+        var h = Math.sqrt(BUDGET / ar), w = h * ar;
+        var sc = Math.min(1, MAXDIM / Math.max(w, h));
+        UW = Math.max(8, Math.round(w * sc));
+        UH = Math.max(8, Math.round(h * sc));
+        UP = UW * UH;
+        var cv = document.createElement("canvas");
+        cv.width = UW; cv.height = UH;
+        var ctx = cv.getContext("2d");
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(im, 0, 0, UW, UH);
+        var d = ctx.getImageData(0, 0, UW, UH).data;
+        upx = new Float32Array(UP * 3);
+        for (var i = 0, j = 0; j < d.length; i += 3, j += 4) {
+          upx[i] = d[j] / 255; upx[i + 1] = d[j + 1] / 255; upx[i + 2] = d[j + 2] / 255;
+        }
+        grid = makeGrid(UH, UW);
+        drawPixels(targetCv, upx, UW, UH);
+        fitCanvas(targetCv);
+        sizeOut.textContent = UW + " × " + UH + " = " + UP.toLocaleString("en-US") + " training pairs";
+        msg.textContent = "training on " + (file.name || "your image") + " — drop another to swap";
+        ui.hidden = false;
+        setRunning(false);
+        init(); drawChart();
+        setRunning(true);
+      };
+      im.onerror = function () {
+        URL.revokeObjectURL(url);
+        msg.textContent = "couldn't read that file — try a different image";
+      };
+      im.src = url;
+    }
+
+    fileIn.addEventListener("change", function () {
+      loadFile(fileIn.files[0]);
+      fileIn.value = "";   /* allow re-selecting the same file */
+    });
+    ["dragenter", "dragover"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add("drag"); });
+    });
+    ["dragleave", "drop"].forEach(function (ev) {
+      drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.remove("drag"); });
+    });
+    drop.addEventListener("drop", function (e) {
+      loadFile(e.dataTransfer.files && e.dataTransfer.files[0]);
+    });
+  })();
 
 })();
 </script>
