@@ -57,6 +57,17 @@
   --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
 }
 
+/* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
+.study-note sub,
+.study-note sup {
+  font-size: 0.72em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.study-note sup { top: -0.5em; }
+.study-note sub { bottom: -0.22em; }
+
 /* ---- sections / cards ---- */
 .study-note .se-section,
 .study-note .bm-section,
