@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Software Engineer at Optiver">
+    <meta name="author" content="Alessandro Sanvito">
+    <title>Self-Attention: The Content-Addressed Lookup at the Heart of Transformers – Alessandro Sanvito</title>
+
+        <link rel="canonical" href="https://alexdruso.github.io/self-attention/" />
+    <meta property="og:url" content="https://alexdruso.github.io/self-attention/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:image" content="https://alexdruso.github.io/images/me.jpg" />
+    <meta name="twitter:card" content="summary" />
+
+    
+    <meta name="description" content="Self-attention computes each token's new representation as a weighted average of every token's value vector, with the weights chosen by content: a softmax over query–key dot products. The 1/√d scaling is literally a softmax temperature, causal masking is a renormalized softmax over the prefix, and multiple heads run the same lookup in parallel subspaces so different relations can coexist. From Bahdanau's RNN attention to sinusoidal positions, the full residual + LayerNorm + FFN block, and the inference tricks — KV cache, GQA, FlashAttention — that make the O(n²) core affordable." />
+    <meta property="og:description" content="Self-attention computes each token's new representation as a weighted average of every token's value vector, with the weights chosen by content: a softmax over query–key dot products. The 1/√d scaling is literally a softmax temperature, causal masking is a renormalized softmax over the prefix, and multiple heads run the same lookup in parallel subspaces so different relations can coexist. From Bahdanau's RNN attention to sinusoidal positions, the full residual + LayerNorm + FFN block, and the inference tricks — KV cache, GQA, FlashAttention — that make the O(n²) core affordable." />
+    
+    <meta name="author" content="Alessandro Sanvito" />
+
+    
+    <meta property="og:title" content="Self-Attention: The Content-Addressed Lookup at the Heart of Transformers" />
+    <meta property="twitter:title" content="Self-Attention: The Content-Addressed Lookup at the Heart of Transformers" />
+    
+
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link rel="alternate" type="application/rss+xml" title="Alessandro Sanvito - Software Engineer at Optiver" href="/feed.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  </head>
+
+  <body>
+    <div class="wrapper-masthead">
+      <div class="container">
+        <header class="masthead clearfix">
+          <a href="/" class="site-avatar"><img src="/images/me.jpg" alt="Alessandro Sanvito" /></a>
+
+          <div class="site-info">
+            <h1 class="site-name"><a href="/">Alessandro Sanvito</a></h1>
+            <p class="site-description">Software Engineer at Optiver</p>
+          </div>
+
+          <nav>
+            
+              <a href="/" >
+                <i class="fas fa-user"></i>
+                About Me
+              </a>
+            
+              <a href="/publications/" >
+                <i class="fas fa-graduation-cap"></i>
+                Publications
+              </a>
+            
+              <a href="/projects/" >
+                <i class="fas fa-code-branch"></i>
+                Projects
+              </a>
+            
+              <a href="/study-notes/" >
+                <i class="fas fa-book-open"></i>
+                Study Notes
+              </a>
+            
+              <a href="/cv/" >
+                <i class="fas fa-file-alt"></i>
+                CV
+              </a>
+            
+              <a href="/game/" >
+                <i class="fas fa-gamepad"></i>
+                Snake
+              </a>
+            
+          </nav>
+        </header>
+      </div>
+    </div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <h1>Self-Attention: The Content-Addressed Lookup at the Heart of Transformers</h1>
+
+  <div class="entry">
+    <style>
+/* ============================================================
+   Study Notes — shared design system
+   Sleek/futuristic: cyan-teal accent, hairline borders, flat
+   single-accent controls, monospace numerals, glow in dark only.
+   Adaptive light + dark via tokens. Every selector is scoped
+   under .study-note so nothing leaks to the rest of the site.
+   ============================================================ */
+.study-note {
+  --sn-accent: #0891b2;
+  --sn-accent-strong: #06b6d4;
+  --sn-accent-soft: rgba(8, 145, 178, 0.10);
+  --sn-accent-line: rgba(8, 145, 178, 0.30);
+  --sn-on-accent: #ffffff;
+
+  --sn-panel: #ffffff;
+  --sn-panel-inset: #f6f8fa;
+  --sn-section: #f7f9fb;
+  --sn-border: rgba(15, 23, 42, 0.08);
+  --sn-grid: rgba(15, 23, 42, 0.10);
+
+  --sn-text: #1f2933;
+  --sn-muted: #64748b;
+
+  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
+  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
+  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
+
+  --sn-radius: 12px;
+  --sn-radius-sm: 8px;
+  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sn-glow: none;
+  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+.dark-theme .study-note {
+  --sn-accent: #22d3ee;
+  --sn-accent-strong: #67e8f9;
+  --sn-accent-soft: rgba(34, 211, 238, 0.12);
+  --sn-accent-line: rgba(34, 211, 238, 0.35);
+  --sn-on-accent: #06141a;
+
+  --sn-panel: #11131c;
+  --sn-panel-inset: #161a26;
+  --sn-section: #14161f;
+  --sn-border: rgba(148, 163, 184, 0.14);
+  --sn-grid: rgba(148, 163, 184, 0.16);
+
+  --sn-text: #e2e8f0;
+  --sn-muted: #94a3b8;
+
+  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
+  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
+  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
+
+  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+/* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
+.study-note sub,
+.study-note sup {
+  font-size: 0.72em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.study-note sup { top: -0.5em; }
+.study-note sub { bottom: -0.22em; }
+
+/* ---- sections / cards ---- */
+.study-note .se-section,
+.study-note .bm-section,
+.study-note .mdp-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: var(--sn-radius);
+  background: var(--sn-section);
+  border: 1px solid var(--sn-border);
+  box-shadow: var(--sn-shadow);
+}
+.study-note .se-section h3,
+.study-note .bm-section h3,
+.study-note .mdp-section h3 {
+  margin-top: 0;
+  color: var(--sn-accent);
+  letter-spacing: -0.01em;
+}
+
+/* ---- equation boxes ---- */
+.study-note .se-equation,
+.study-note .bm-equation,
+.study-note .equation-box {
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  font-size: 1.1rem;
+  text-align: center;
+  overflow-x: auto;
+}
+.study-note .se-equation .big,
+.study-note .bm-equation .big { font-size: 1.25rem; }
+
+/* ---- callout / note ---- */
+.study-note .se-note,
+.study-note .bm-note {
+  background: var(--sn-accent-soft);
+  border-radius: var(--sn-radius-sm);
+  border-left: 3px solid var(--sn-accent);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- example box ---- */
+.study-note .se-example,
+.study-note .bm-example,
+.study-note .example-box {
+  background: var(--sn-panel-inset);
+  border: 1px solid var(--sn-border);
+  border-left: 3px solid var(--sn-warn);
+  border-radius: var(--sn-radius-sm);
+  padding: 1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- chart containers ---- */
+.study-note .se-chartwrap,
+.study-note .bm-chartwrap,
+.study-note .graph-wrap {
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem;
+}
+.study-note .graph-wrap { overflow-x: auto; }
+
+/* ---- primary buttons ---- */
+.study-note .se-btn,
+.study-note .bm-btn,
+.study-note .vi-btn {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--sn-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-on-accent);
+  background: var(--sn-accent);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
+}
+.study-note .se-btn:hover:not(:disabled),
+.study-note .bm-btn:hover:not(:disabled),
+.study-note .vi-btn:hover:not(:disabled) {
+  background: var(--sn-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sn-glow);
+}
+.study-note .se-btn:disabled,
+.study-note .bm-btn:disabled,
+.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* secondary variant */
+.study-note .se-btn.sec,
+.study-note .bm-btn.sec,
+.study-note .vi-btn.sec {
+  background: transparent;
+  color: var(--sn-accent);
+  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
+}
+.study-note .se-btn.sec:hover:not(:disabled),
+.study-note .bm-btn.sec:hover:not(:disabled),
+.study-note .vi-btn.sec:hover:not(:disabled) {
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+}
+
+/* ---- ghost / reset buttons ---- */
+.study-note .se-reset,
+.study-note .bm-reset,
+.study-note .reset-link {
+  background: none;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-muted);
+  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
+}
+.study-note .se-reset:hover,
+.study-note .bm-reset:hover,
+.study-note .reset-link:hover {
+  background: var(--sn-accent-soft);
+  border-color: var(--sn-accent-line);
+  color: var(--sn-accent);
+}
+
+/* ---- range sliders: flat, single-accent ---- */
+.study-note input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+  outline: none;
+  cursor: pointer;
+}
+.study-note input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
+}
+.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.study-note input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+}
+.study-note input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+}
+
+/* ---- status pills ---- */
+.study-note .se-tag,
+.study-note .bm-tag {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
+}
+.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
+.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
+
+/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
+.study-note .se-stat .val,
+.study-note .bm-stat .val,
+.study-note .score-item .sval,
+.study-note .compare-score {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-accent);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.study-note .se-readout,
+.study-note .bm-temp-readout {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sn-accent);
+}
+
+/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
+.study-note svg text { fill: var(--sn-muted); }
+</style>
+
+
+<div class="study-note">
+
+<style>
+/* Note-specific LAYOUT only. Colors come from --sn-* tokens; shared
+   components (sections, buttons, sliders, tags, equations, notes, charts)
+   live in _includes/study-note-styles.html. */
+.sa-flexwrap { display: flex; gap: 1.25rem; flex-wrap: wrap; align-items: flex-start; }
+.sa-panel { flex: 1; min-width: 250px; }
+
+.sa-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
+.sa-readout { font: 1rem var(--sn-mono); font-variant-numeric: tabular-nums; color: var(--sn-accent); }
+
+.sa-geo-svg { touch-action: none; display: block; width: 100%; max-width: 380px; margin: 0 auto; }
+
+.sa-geo-tbl { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.sa-geo-tbl th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sn-muted); font-weight: 600; text-align: left; padding: 0.25rem 0.4rem; }
+.sa-geo-tbl td { padding: 0.3rem 0.4rem; border-top: 1px solid var(--sn-border); font-family: var(--sn-mono); font-variant-numeric: tabular-nums; }
+.sa-geo-tbl .chip { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; }
+.sa-geo-tbl .wbar { height: 10px; border-radius: 3px; background: var(--sn-accent); min-width: 2px; }
+.sa-geo-tbl .wcell { width: 34%; }
+
+.sa-headgrid { display: flex; gap: 0.9rem; flex-wrap: wrap; justify-content: center; }
+.sa-headcell { text-align: center; }
+.sa-headlab { font-size: 0.72rem; color: var(--sn-muted); margin-top: 0.3rem; }
+
+.sa-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.75rem 0; }
+.sa-table th { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sn-muted); font-weight: 600; text-align: left; padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--sn-border); }
+.sa-table td { padding: 0.35rem 0.5rem; border-bottom: 1px solid var(--sn-border); }
+.sa-table td.mono { font-family: var(--sn-mono); font-variant-numeric: tabular-nums; }
+
+.sa-blockdiag { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: center; margin-top: 0.7rem; }
+.sa-blockdiag .box {
+  border: 1px solid var(--sn-border); border-radius: var(--sn-radius-sm);
+  background: var(--sn-panel); padding: 0.45rem 0.7rem; text-align: center;
+  font-family: var(--sn-mono); font-size: 0.8rem;
+}
+.sa-blockdiag .box .lab { display: block; font-family: inherit; font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sn-muted); margin-bottom: 0.15rem; }
+.sa-blockdiag .fn { border-color: var(--sn-accent-line); background: var(--sn-accent-soft); color: var(--sn-accent-strong); font-weight: 700; }
+.sa-blockdiag .plus { border-radius: 50%; width: 1.6rem; height: 1.6rem; display: flex; align-items: center; justify-content: center; padding: 0; font-weight: 700; color: var(--sn-accent-strong); border: 1px solid var(--sn-accent-line); background: var(--sn-accent-soft); }
+.sa-blockdiag .arrow { color: var(--sn-muted); font-size: 1.05rem; }
+
+.sa-legend { font-size: 0.78rem; opacity: 0.85; display: flex; gap: 1.1rem; flex-wrap: wrap; margin-top: 0.4rem; justify-content: center; }
+.sa-legend span::before { content: "— "; font-weight: 800; }
+</style>
+
+<p>
+  <strong>Self-attention</strong> is the operation that lets every token in a sequence rebuild its
+  representation as a weighted average of <em>all</em> tokens' representations, with the weights
+  computed from content rather than position: each token asks a question (a <em>query</em>), every
+  token advertises what it holds (a <em>key</em>), and the closeness of question to advertisement —
+  a dot product, pushed through a softmax — decides how much of each token's <em>value</em> flows
+  into the result. This note unpacks the scaled dot-product formula from
+  <em>Attention Is All You Need</em> (Vaswani et al., 2017) piece by piece, then widens out: where
+  attention came from (RNN encoder–decoders), why it needs positional information, how it sits
+  inside the full transformer block, and what makes it affordable at inference time.
+</p>
+
+<div class="se-note">
+  <strong>Self-attention is a differentiable, content-addressed lookup.</strong> Each output is
+  <em>softmax(q&middot;k / &radic;d<sub>k</sub>)</em>-weighted average of value vectors: the
+  &radic;d<sub>k</sub> divisor is literally a
+  <a href="/temperature-and-entropy-llms/">softmax temperature</a> that keeps gradients alive,
+  causal masking is a softmax renormalized over the prefix, and multiple heads run the same lookup
+  in parallel low-dimensional subspaces so several relations (coreference, adjacency, salience) can
+  be read out at once. The O(n&sup2;) cost lives in the attention <em>pattern</em>, not in the
+  parameters — which is why the modern fixes (KV cache, GQA, FlashAttention) are systems tricks,
+  not architecture changes.
+</div>
+
+<!-- ============================================================ -->
+<!-- 1. QUERIES, KEYS, VALUES                                      -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🧲 Queries, keys, values: a differentiable lookup</h3>
+  <p style="margin-top:0">
+    A dictionary lookup retrieves the single value whose key exactly matches the query.
+    Self-attention softens both halves of that sentence: every key matches <em>a little</em>, and
+    the result is a weighted <em>blend</em> of all values. Because the blend weights come from a
+    softmax — smooth in its inputs — the whole lookup is differentiable, so gradient descent can
+    learn what to ask for and what to advertise. In matrix form, for a sequence packed into rows of
+    <em>X</em>:
+  </p>
+  <div class="se-equation">
+    <span class="big">Attention(Q, K, V) = softmax(QK<sup>T</sup> &frasl; &radic;d<sub>k</sub>) V</span>
+  </div>
+  <p style="margin-top:0">
+    The "self" in self-attention: queries, keys, and values are all learned linear projections of
+    the <em>same</em> input sequence,
+  </p>
+  <div class="se-equation">
+    Q = XW<sup>Q</sup>, &nbsp; K = XW<sup>K</sup>, &nbsp; V = XW<sup>V</sup>
+  </div>
+  <p style="margin-top:0">
+    so the sequence is querying itself. Written per token, the weight that token <em>i</em> places
+    on token <em>j</em>, and the resulting output, are
+  </p>
+  <div class="se-equation">
+    &alpha;<sub>ij</sub> = e<sup>q<sub>i</sub>&middot;k<sub>j</sub> / &radic;d<sub>k</sub></sup>
+    &frasl; &Sigma;<sub>l</sub> e<sup>q<sub>i</sub>&middot;k<sub>l</sub> / &radic;d<sub>k</sub></sup>
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    out<sub>i</sub> = &Sigma;<sub>j</sub> &alpha;<sub>ij</sub> v<sub>j</sub>
+  </div>
+  <p style="margin-top:0">
+    A concrete sequence carries the arithmetic for the rest of the note:
+    <em>"the robot picked up the ball because it was heavy"</em>. The token <strong>"it"</strong>
+    is the interesting one — resolving what "it" refers to requires looking at other tokens, which
+    is exactly what a lookup provides. Suppose the trained projections give "it" a query whose dot
+    products (already scaled) with the other tokens' keys are: <em>ball</em> 3.4, <em>heavy</em>
+    2.8, <em>robot</em> 2.1, and 0 for the remaining seven tokens.
+  </p>
+  <div class="se-example">
+    <strong>The softmax, by hand.</strong> Exponentiate the scores:
+    e<sup>3.4</sup> &asymp; 30.0, e<sup>2.8</sup> &asymp; 16.4, e<sup>2.1</sup> &asymp; 8.2, and
+    seven tokens at e<sup>0</sup> = 1 each. The normalizer is
+    Z &asymp; 30.0 + 16.4 + 8.2 + 7.0 = 61.6, so "it" attends
+    <strong>&asymp; 0.49 to "ball", 0.27 to "heavy", 0.13 to "robot"</strong>, and spreads the
+    remaining &asymp; 0.11 thinly over everything else. The new representation of "it" is that
+    weighted average of value vectors — roughly half "ball", which is the model deciding, softly
+    and reversibly, that <em>it = the ball</em>.
+  </div>
+  <p style="margin-bottom:0">
+    Nothing in the formula privileges nearby tokens, earlier tokens, or the token itself:
+    relevance is decided entirely by the learned q&middot;k geometry. That single fact explains
+    both attention's power (any token can reach any other in one step) and the two complications
+    handled below — the need for masking in §2 and for positional information in §7.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. READING AN ATTENTION PATTERN (DEMO 1)                      -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🗺️ Reading an attention pattern</h3>
+  <p style="margin-top:0">
+    One row of the attention matrix — one token's outgoing weights — is a probability
+    distribution over the sequence. Below, the arcs and bars show that row for the selected token,
+    using a hand-built pattern of the kind a trained coreference-tracking head produces.
+  </p>
+  <p>
+    <strong>Causal masking.</strong> A decoder generating left-to-right must not let token
+    <em>i</em> read tokens that come after it — at generation time they do not exist yet. The
+    implementation is not "zero out the weights afterwards": the <em>scores</em> of future
+    positions are set to &minus;&infin; <em>before</em> the softmax,
+  </p>
+  <div class="se-equation">
+    s<sub>ij</sub> &rarr; &minus;&infin; &nbsp;for&nbsp; j &gt; i,
+    &nbsp;&nbsp; &alpha;<sub>ij</sub> = softmax over j &le; i only
+  </div>
+  <p style="margin-top:0">
+    so the surviving weights renormalize over the visible prefix and still sum to 1. The demo
+    makes the difference concrete: under the mask, "it" (position 8 of 10) can no longer see
+    "heavy" — and the weight "heavy" used to receive does not vanish into nothing, it flows
+    proportionally to "ball", "robot", and the rest.
+  </p>
+
+  <div class="sa-controls">
+    <button class="se-btn sec" id="sa-hm-mask" aria-pressed="false">🔓 causal mask: off</button>
+    <span class="se-tag" id="sa-hm-tag"></span>
+  </div>
+  <div class="se-chartwrap">
+    <svg id="sa-hm-svg" viewBox="0 0 720 320" width="100%" role="img" aria-label="Attention weights of the selected token over the sentence"></svg>
+  </div>
+  <p style="font-size:0.9rem; margin-bottom:0">
+    Click (or hover) a token to see where its query lands. Then toggle the causal mask with
+    "it" selected and watch the renormalization: "heavy" is cut off, and its share flows to the
+    remaining tokens — "ball" rises above its unmasked 49%.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. WHY DIVIDE BY SQRT(D)                                      -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🌡️ Why divide by &radic;d: the scaling is a temperature</h3>
+  <p style="margin-top:0">
+    The one non-obvious constant in the formula is the &radic;d<sub>k</sub> divisor. The problem
+    it solves is statistical: a dot product is a sum of d<sub>k</sub> terms, and sums grow with
+    the number of terms. If the components of q and k are independent with mean 0 and variance 1,
+    then
+  </p>
+  <div class="se-equation">
+    Var(q&middot;k) = &Sigma;<sub>c=1</sub><sup>d<sub>k</sub></sup> Var(q<sub>c</sub>k<sub>c</sub>) = d<sub>k</sub>
+    &nbsp;&nbsp;&rArr;&nbsp;&nbsp; typical |q&middot;k| &sim; &radic;d<sub>k</sub>
+  </div>
+  <p style="margin-top:0">
+    At d<sub>k</sub> = 64 the raw scores are typically 8&times; larger than at d<sub>k</sub> = 1.
+    Feed scores that large into a softmax and it <strong>saturates</strong>: one weight pins to
+    &asymp;1, the rest to &asymp;0, and the gradient through the softmax — which is proportional
+    to &alpha;(1&minus;&alpha;) terms — collapses toward zero. Early in training that means the
+    attention pattern freezes into an arbitrary hard lookup before it has learned anything.
+    Dividing by &radic;d<sub>k</sub> restores the scores to unit variance regardless of dimension.
+  </p>
+  <p>
+    Seen through the lens of the <a href="/temperature-and-entropy-llms/">temperature note</a>,
+    this is not a new trick at all:
+  </p>
+  <div class="se-equation">
+    softmax(q&middot;k &frasl; &radic;d<sub>k</sub>) &nbsp;=&nbsp; softmax at temperature
+    T = &radic;d<sub>k</sub>
+  </div>
+  <p style="margin-top:0; margin-bottom:0">
+    The divisor is a fixed softmax temperature, chosen so that the effective score distribution
+    neither freezes into an argmax (cold) nor flattens into a uniform average (hot). The same
+    vocabulary applies to reading trained heads: the
+    <a href="/shannon-entropy-visually/">Shannon entropy</a> of a weight row measures how focused
+    the head is — a near-one-hot coreference row has low entropy, a broad averaging row has high
+    entropy. The next demo puts a hand on this dial.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. Q·K GEOMETRY (DEMO 2)                                      -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🧭 Attention weight is vector alignment</h3>
+  <p style="margin-top:0">
+    Everything upstream of the softmax is a dot product, and a dot product is geometry:
+  </p>
+  <div class="se-equation">
+    q&middot;k = |q| |k| cos&theta;
+  </div>
+  <p style="margin-top:0">
+    A key scores highly by <em>pointing the same way</em> as the query (cos&theta; &rarr; 1) or by
+    being <em>long</em> (a learned way for a token to shout). And because the softmax normalizes
+    across keys, weights are relative — a key wins not by scoring well but by scoring
+    <em>better than the others</em>. Keys compete.
+  </p>
+
+  <div class="sa-flexwrap">
+    <div class="sa-panel se-chartwrap" style="max-width:420px">
+      <svg id="sa-geo-svg" class="sa-geo-svg" viewBox="0 0 380 380" role="img" aria-label="Draggable query and key vectors in the plane"></svg>
+    </div>
+    <div class="sa-panel">
+      <table class="sa-geo-tbl" id="sa-geo-tbl"></table>
+      <div class="sa-controls" style="margin-top:0.9rem">
+        <label style="font-size:0.85rem">d<sub>k</sub> =
+          <input type="range" id="sa-geo-d" min="0" max="8" step="1" value="0">
+        </label>
+        <span class="sa-readout" id="sa-geo-dval">2</span>
+        <span class="se-tag" id="sa-geo-tag"></span>
+        <button class="se-reset" id="sa-geo-reset">reset vectors</button>
+      </div>
+      <p style="font-size:0.88rem; margin-bottom:0">
+        Drag the tips of <strong>q</strong> and the three keys. Alignment and length raise a key's
+        dot product; the softmax turns the three scores into competing weights. Then slide
+        d<sub>k</sub>: the vectors do not move, but the divisor &radic;d<sub>k</sub> grows — the
+        <a href="/temperature-and-entropy-llms/">softmax runs hotter</a> and the same geometry
+        yields flatter, higher-entropy weights. That slide is exactly what the &radic;d scaling
+        holds constant across head sizes.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. MULTI-HEAD (DEMO 3)                                        -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🎭 Many heads, many relations</h3>
+  <p style="margin-top:0">
+    One softmax produces one distribution — one pattern of relevance. But a token often needs
+    several relations at once: "it" wants its referent (a coreference pattern), its local context
+    (an adjacency pattern), and the salient content words (a salience pattern). A single head
+    forced to serve all three can only average them into mush. Multi-head attention runs
+    <em>h</em> independent copies of the lookup, each in its own learned
+    d<sub>model</sub>/h-dimensional projected subspace, then concatenates the results and mixes
+    them with one more linear map:
+  </p>
+  <div class="se-equation">
+    head<sub>i</sub> = Attention(XW<sub>i</sub><sup>Q</sup>, XW<sub>i</sub><sup>K</sup>, XW<sub>i</sub><sup>V</sup>)
+    <br>
+    MultiHead(X) = Concat(head<sub>1</sub>, &hellip;, head<sub>h</sub>) W<sup>O</sup>,
+    &nbsp;&nbsp; d<sub>k</sub> = d<sub>v</sub> = d<sub>model</sub> &frasl; h
+  </div>
+  <p style="margin-top:0">
+    Because each head works at width d<sub>model</sub>/h, the parameter count and compute are
+    about the same as one full-width head — the heads are not extra capacity, they are the same
+    capacity <em>partitioned</em> so that separate relations get separate softmaxes. (The original
+    transformer uses h = 8 heads of d<sub>k</sub> = 64 at d<sub>model</sub> = 512.)
+  </p>
+
+  <div class="sa-controls">
+    <button class="se-btn" id="sa-mh-3">3 heads</button>
+    <button class="se-btn sec" id="sa-mh-1">1 head (averaged)</button>
+  </div>
+  <div class="se-chartwrap">
+    <svg id="sa-mh-toks" viewBox="0 0 720 46" width="100%" role="img" aria-label="Token strip; click to select a query token"></svg>
+  </div>
+  <div class="sa-headgrid" id="sa-mh-grids"></div>
+  <div class="se-chartwrap" style="margin-top:0.8rem">
+    <svg id="sa-mh-concat" viewBox="0 0 720 78" width="100%" role="img" aria-label="Concatenation of head outputs followed by the output projection"></svg>
+  </div>
+  <p style="font-size:0.9rem; margin-bottom:0">
+    Click a token in the strip; its row is outlined in each head's matrix. With "it" selected,
+    head A points at "ball" (coreference), head B at "was" (previous token), head C at the three
+    content words (salience) — three simultaneous, mutually incompatible patterns. Flip to
+    <em>1 head</em>: the averaged scores hedge every row into a blur — visibly higher
+    <a href="/shannon-entropy-visually/">entropy</a>, and no single relation survives cleanly.
+    The strip underneath shows the mechanics: each head writes a d<sub>model</sub>/h-slice of the
+    output, and W<sup>O</sup> mixes the concatenation back to width d<sub>model</sub>.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. ORIGINS                                                    -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🕰️ Where attention came from, and why recurrence was dropped</h3>
+  <p style="margin-top:0">
+    Attention predates the transformer by three years, and it was invented to fix a bottleneck.
+    The RNN encoder–decoders of 2014 translated by reading the whole source sentence into
+    <em>one fixed-size vector</em>, then generating from it — every fact about a 50-word sentence
+    squeezed through the same few hundred numbers. Bahdanau et al. (2015) let the decoder instead
+    look back at <em>all</em> encoder hidden states at every step, scoring each with a small
+    learned network (<em>additive</em> attention):
+  </p>
+  <div class="se-equation">
+    e<sub>ij</sub> = v<sup>T</sup> tanh(W<sub>s</sub> s<sub>i&minus;1</sub> + W<sub>h</sub> h<sub>j</sub>)
+  </div>
+  <p style="margin-top:0">
+    Luong et al. (2015) simplified the score to a plain dot product (<em>multiplicative</em>
+    attention),
+  </p>
+  <div class="se-equation">
+    e<sub>ij</sub> = s<sub>i&minus;1</sub> &middot; h<sub>j</sub>
+  </div>
+  <p style="margin-top:0">
+    which is the direct ancestor of QK<sup>T</sup>. In both, attention was an <em>add-on</em>: the
+    RNN still did the representation work, attention just fetched. The 2017 move was to delete the
+    RNN and keep only the fetching — <em>attention is all you need</em> — for two structural
+    reasons:
+  </p>
+  <div class="sa-flexwrap">
+    <div class="sa-panel se-example" style="margin:0">
+      <strong>Parallelism.</strong> An RNN computes hidden state t only after t&minus;1 — training
+      is a sequential chain n steps long, no matter how many processors are available.
+      Self-attention computes all n outputs simultaneously as a few matrix multiplications, which
+      is the shape of computation GPUs are built for.
+    </div>
+    <div class="sa-panel se-example" style="margin:0">
+      <strong>Path length.</strong> For token 3 to influence token 48 in an RNN, the signal
+      travels 45 recurrent steps, shrinking at each; learning long-range dependencies fights
+      vanishing gradients. In self-attention the two tokens are one dot product apart — a
+      constant-length path, regardless of distance.
+    </div>
+  </div>
+  <table class="sa-table">
+    <thead>
+      <tr><th>per layer</th><th>recurrent</th><th>self-attention</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>sequential operations</td><td class="mono">O(n)</td><td class="mono">O(1)</td></tr>
+      <tr><td>maximum path length</td><td class="mono">O(n)</td><td class="mono">O(1)</td></tr>
+      <tr><td>compute</td><td class="mono">O(n&middot;d&sup2;)</td><td class="mono">O(n&sup2;&middot;d)</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-bottom:0">
+    The last row is the honest price: every token attends to every token, so compute and the
+    attention matrix itself grow <em>quadratically</em> in sequence length. For d &gt; n the trade
+    is favorable; for long contexts it is the central cost of the architecture, and §9 is about
+    paying it down.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 7. POSITIONAL ENCODING                                        -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>📍 Attention is order-blind: positional encoding</h3>
+  <p style="margin-top:0">
+    The formula in §1 never mentions position: shuffle the input tokens and the (unmasked)
+    outputs shuffle identically — self-attention is <em>permutation-equivariant</em>, a set
+    operation. To the mechanism, "the robot picked up the ball" and any reordering of it are the
+    same bag of tokens. Word order has to be injected into the representations themselves. The
+    original transformer adds a deterministic <strong>sinusoidal positional encoding</strong> to
+    each token embedding: dimension pair 2i oscillates with position at a wavelength that grows
+    geometrically with i, from 2&pi; up to 10000&middot;2&pi;,
+  </p>
+  <div class="se-equation">
+    PE(pos, 2i) = sin(pos &frasl; 10000<sup>2i/d<sub>model</sub></sup>)
+    &nbsp;&nbsp;&nbsp;
+    PE(pos, 2i+1) = cos(pos &frasl; 10000<sup>2i/d<sub>model</sub></sup>)
+  </div>
+  <div class="se-chartwrap">
+    <svg id="sa-pe-svg" viewBox="0 0 720 210" width="100%" role="img" aria-label="Sinusoidal positional encoding dimensions across positions"></svg>
+    <div class="sa-legend" id="sa-pe-legend"></div>
+  </div>
+  <p style="margin-top:0.6rem">
+    Fast dimensions distinguish neighbors; slow dimensions distinguish regions — together the
+    dimensions form a smooth binary-counter-like code, unique per position. The construction has
+    two useful properties: for any fixed offset &Delta;, PE(pos+&Delta;) is a <em>linear</em>
+    function (a rotation) of PE(pos), so relative position is easy for the model to compute; and
+    the code is defined for every position, including ones longer than any training sequence.
+  </p>
+  <p style="margin-bottom:0">
+    Modern practice moved the same idea inside the attention operation: learned absolute
+    embeddings (GPT-style) simply train a vector per position, while <strong>RoPE</strong>
+    (rotary position embedding, Su et al. 2021) <em>rotates</em> each query and key by an angle
+    proportional to its position, so that q<sub>i</sub>&middot;k<sub>j</sub> depends only on the
+    relative offset i&minus;j. RoPE is the standard in Llama-class LLMs; the underlying trick —
+    encode position as rotation, so dot products see only differences — is the sinusoidal idea
+    finished properly.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 8. THE FULL TRANSFORMER BLOCK                                 -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🧱 The full transformer block</h3>
+  <p style="margin-top:0">
+    Attention only ever <em>mixes</em> information across tokens — a weighted average cannot
+    compute a new feature of a single token. The transformer block pairs it with a position-wise
+    <strong>feed-forward network</strong> (the same two-layer MLP applied to every token
+    independently, hidden width 4&times;d<sub>model</sub> in the original), which transforms each
+    token but mixes nothing. Mix across, then transform within. Both sublayers sit on a
+    <strong>residual stream</strong> — each adds a refinement to a representation that flows
+    through unchanged — and each is stabilized by <strong>LayerNorm</strong>:
+  </p>
+  <div class="se-equation">
+    x &larr; x + MultiHead(LN(x))
+    &nbsp;&nbsp;&nbsp;
+    x &larr; x + FFN(LN(x))
+    <br>
+    FFN(x) = max(0, xW<sub>1</sub> + b<sub>1</sub>) W<sub>2</sub> + b<sub>2</sub>
+  </div>
+  <p style="margin-top:0">
+    (Written here in the <em>pre-LN</em> arrangement of modern stacks — normalize before each
+    sublayer; the 2017 paper normalized after, which trains less stably at depth. The FFN, often
+    treated as an afterthought, holds roughly two-thirds of the block's parameters.)
+  </p>
+  <div class="sa-blockdiag">
+    <div class="box"><span class="lab">stream</span>x</div>
+    <div class="arrow">→</div>
+    <div class="box">LN</div>
+    <div class="arrow">→</div>
+    <div class="box fn">multi-head attention</div>
+    <div class="arrow">→</div>
+    <div class="box plus" title="residual add">+</div>
+    <div class="arrow">→</div>
+    <div class="box">LN</div>
+    <div class="arrow">→</div>
+    <div class="box fn">FFN</div>
+    <div class="arrow">→</div>
+    <div class="box plus" title="residual add">+</div>
+    <div class="arrow">→</div>
+    <div class="box"><span class="lab">stream</span>x&prime;</div>
+  </div>
+  <p>
+    Stack the block and two architectures fall out. The original machine-translation transformer
+    is an <strong>encoder–decoder</strong>: the encoder runs unmasked self-attention over the
+    source; the decoder runs causal self-attention over the target <em>plus</em> a
+    <strong>cross-attention</strong> sublayer whose queries come from the decoder and whose keys
+    and values come from the encoder output —
+  </p>
+  <div class="se-equation">
+    Attention(Q = Y<sub>dec</sub>W<sup>Q</sup>, &nbsp; K = X<sub>enc</sub>W<sup>K</sup>, &nbsp; V = X<sub>enc</sub>W<sup>V</sup>)
+  </div>
+  <p style="margin-top:0; margin-bottom:0">
+    — the same formula with a different source for K and V. Cross-attention <em>is</em> Bahdanau's
+    decoder-looks-at-encoder attention reborn inside the new architecture. GPT-style LLMs drop the
+    encoder entirely: a <strong>decoder-only</strong> stack of causal self-attention blocks, where
+    "everything is context" and generation is next-token prediction.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 9. INFERENCE                                                  -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>⚡ Attention at inference: cache, share, tile</h3>
+  <p style="margin-top:0">
+    Generation exposes the O(n&sup2;) honestly: producing token t naively re-runs attention over
+    the whole prefix, every step. Three fixes, in escalating order, are why chat-scale inference
+    works at all.
+  </p>
+  <p>
+    <strong>1. The KV cache.</strong> Under causal masking, the keys and values of past tokens
+    never change — token t cannot alter what tokens 1…t&minus;1 advertise. So cache them: at step
+    t only the new query q<sub>t</sub> is computed, dotted against t stored keys. Per-step cost
+    drops from O(t&sup2;) to O(t); the price is memory,
+  </p>
+  <div class="se-equation">
+    cache size = 2 &middot; n<sub>layers</sub> &middot; h &middot; d<sub>head</sub> &middot; t
+    &nbsp; values per sequence
+  </div>
+  <p style="margin-top:0">
+    (the 2 is keys <em>and</em> values), which for long contexts rivals the model weights
+    themselves and becomes the binding constraint on batch size.
+  </p>
+  <p>
+    <strong>2. Share the keys and values.</strong> The cache is dominated by the factor h — every
+    head stores its own K and V. <strong>Multi-query attention</strong> (MQA, Shazeer 2019) keeps
+    per-head queries but shares a single K and V across all heads, shrinking the cache h-fold at a
+    small quality cost. <strong>Grouped-query attention</strong> (GQA, Ainslie et al. 2023)
+    interpolates: heads are divided into g groups, each sharing one K/V pair — near-MQA memory at
+    near-full quality, and the default in current open-weight LLMs.
+  </p>
+  <p style="margin-bottom:0">
+    <strong>3. Never materialize the matrix.</strong> <strong>FlashAttention</strong> (Dao et al.
+    2022) computes <em>exact</em> attention while refusing to ever write the n&times;n weight
+    matrix to GPU main memory: it tiles Q, K, V through fast on-chip SRAM and maintains running
+    softmax statistics (the "online softmax"), merging partial results block by block. Same math,
+    same output — the speedup comes entirely from doing fewer slow-memory round-trips. It is the
+    cleanest illustration of the section's theme: the quadratic lives in the pattern, so the wins
+    come from how the pattern is <em>scheduled</em>, not from changing the formula.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 10. LITERATURE + CONSEQUENCES                                 -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>📚 Where this lives in the literature</h3>
+  <ul style="margin-top:0">
+    <li><strong>Bahdanau, Cho &amp; Bengio (2015)</strong>, <em>Neural Machine Translation by Jointly Learning to Align and Translate</em> — additive attention over RNN encoder states; the fixed-vector bottleneck argument.</li>
+    <li><strong>Luong, Pham &amp; Manning (2015)</strong>, <em>Effective Approaches to Attention-based NMT</em> — dot-product (multiplicative) attention.</li>
+    <li><strong>Vaswani et al. (2017)</strong>, <em>Attention Is All You Need</em> — scaled dot-product and multi-head attention, sinusoidal positions, the encoder–decoder transformer.</li>
+    <li><strong>Shazeer (2019)</strong>, <em>Fast Transformer Decoding: One Write-Head Is All You Need</em> — multi-query attention.</li>
+    <li><strong>Su et al. (2021)</strong>, <em>RoFormer</em> — rotary position embedding (RoPE).</li>
+    <li><strong>Dao et al. (2022)</strong>, <em>FlashAttention: Fast and Memory-Efficient Exact Attention with IO-Awareness</em>.</li>
+    <li><strong>Ainslie et al. (2023)</strong>, <em>GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints</em>.</li>
+  </ul>
+
+  <h3>🎯 Consequences worth remembering</h3>
+  <ul style="margin-bottom:0">
+    <li>Self-attention is a <strong>differentiable soft lookup</strong>: softmax(q&middot;k) weights over value vectors, with Q, K, V all projections of the same sequence.</li>
+    <li>The <strong>&radic;d divisor is a softmax temperature</strong> chosen to keep score variance at 1 — not a heuristic, a variance calculation.</li>
+    <li><strong>Masking is renormalization</strong>, not post-hoc zeroing: &minus;&infin; before the softmax, so the visible prefix reclaims the masked weight.</li>
+    <li><strong>Heads are partitioned, not extra, capacity</strong> — h parallel lookups in d/h-dimensional subspaces at the cost of one full-width lookup.</li>
+    <li>Attention itself is <strong>order-blind</strong>; position must be injected (added sinusoids/embeddings, or RoPE rotating it directly into the dot product).</li>
+    <li>The <strong>O(n&sup2;) lives in the pattern, not the parameters</strong> — which is why the fixes are systems fixes: cache the K/V, share them across heads, tile the computation.</li>
+  </ul>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- theme-adaptive color plumbing (see docs/_posts/CLAUDE.md) ---------- */
+  const SN = document.querySelector(".study-note");
+  const readCols = () => { const cs = getComputedStyle(SN); const c = n => cs.getPropertyValue(n).trim();
+    return { accent: c("--sn-accent"), accentStrong: c("--sn-accent-strong"),
+             onAccent: c("--sn-on-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
+             warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
+             text: c("--sn-text") }; };
+  let COL = readCols();
+  const redrawFns = [];
+  const onTheme = fn => { redrawFns.push(fn); return fn; };
+  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  /* ---------- shared data ---------- */
+  const TOKENS = ["the","robot","picked","up","the","ball","because","it","was","heavy"];
+  const N = TOKENS.length;
+
+  // maskUpTo: if non-null, positions j > maskUpTo get score -Infinity (causal mask)
+  const softmaxRow = (scores, maskUpTo) => {
+    const s = scores.map((v, j) => (maskUpTo != null && j > maskUpTo) ? -Infinity : v);
+    const m = Math.max(...s);
+    const e = s.map(v => v === -Infinity ? 0 : Math.exp(v - m));
+    const Z = e.reduce((a, b) => a + b, 0);
+    return e.map(v => v / Z);
+  };
+
+  // Hand-authored score (logit) matrices; row = query token, col = key token.
+  // Row "it" of S_COREF must stay exactly {ball 3.4, heavy 2.8, robot 2.1} —
+  // the prose in section 1 walks that softmax by hand.
+  //             the  robot pick  up   the  ball becau it   was  heavy
+  const S_COREF = [
+    [0.5, 2.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],  // the (0)
+    [0.0, 0.5, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],  // robot
+    [0.0, 3.0, 0.5, 0.0, 0.0, 1.5, 0.0, 0.0, 0.0, 0.0],  // picked
+    [0.0, 0.0, 3.2, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],  // up
+    [0.0, 0.0, 0.0, 0.0, 0.5, 2.5, 0.0, 0.0, 0.0, 0.0],  // the (4)
+    [0.0, 0.0, 2.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0],  // ball
+    [0.0, 0.0, 1.8, 0.0, 0.0, 0.0, 0.5, 0.0, 1.8, 0.0],  // because
+    [0.0, 2.1, 0.0, 0.0, 0.0, 3.4, 0.0, 0.0, 0.0, 2.8],  // it
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.5, 0.5, 0.0],  // was
+    [0.0, 0.0, 0.0, 0.0, 0.0, 2.8, 0.0, 1.5, 0.0, 0.5]   // heavy
+  ];
+  // previous-token head: strong on j = i-1, weaker on j = i-2
+  const S_LOCAL = Array.from({ length: N }, (_, i) =>
+    Array.from({ length: N }, (_, j) =>
+      i === 0 ? (j === 0 ? 3.0 : 0.0) : (j === i - 1 ? 3.0 : j === i - 2 ? 1.0 : 0.0)));
+  // content-word head: every query attends to the salient nouns/adjective
+  const S_CONTENT = Array.from({ length: N }, () =>
+    Array.from({ length: N }, (_, j) => (j === 1 || j === 5 || j === 9) ? 2.5 : 0.0));
+
+  const meanMatrix = mats => Array.from({ length: N }, (_, i) =>
+    Array.from({ length: N }, (_, j) =>
+      mats.reduce((a, M) => a + M[i][j], 0) / mats.length));
+  const S_AVG = meanMatrix([S_COREF, S_LOCAL, S_CONTENT]);
+
+  const pct = w => (w * 100).toFixed(0) + "%";
+
+  /* ================================================================
+     DEMO 1 — attention heatmap with causal-mask toggle
+     ================================================================ */
+  (function () {
+    const svg = document.getElementById("sa-hm-svg");
+    const maskBtn = document.getElementById("sa-hm-mask");
+    const tag = document.getElementById("sa-hm-tag");
+    const st = { sel: 7, causal: false };
+
+    const W = 720, SLOT = W / N, PILL_W = 62, PILL_H = 30, PILL_Y = 158;
+    const cx = i => SLOT * i + SLOT / 2;
+
+    function draw() {
+      const w = softmaxRow(S_COREF[st.sel], st.causal ? st.sel : null);
+      let out = "";
+
+      // arcs from the selected token to every other visible token
+      for (let j = 0; j < N; j++) {
+        if (j === st.sel || w[j] < 0.005) continue;
+        const x1 = cx(st.sel), x2 = cx(j), mid = (x1 + x2) / 2;
+        const lift = Math.min(140, 26 + Math.abs(x2 - x1) * 0.28);
+        out += `<path d="M ${x1} ${PILL_Y - 4} Q ${mid} ${PILL_Y - 4 - lift} ${x2} ${PILL_Y - 4}"
+                 fill="none" stroke="${COL.accent}"
+                 stroke-width="${(1 + 9 * w[j]).toFixed(2)}"
+                 stroke-opacity="${(0.25 + 0.75 * w[j]).toFixed(2)}"
+                 stroke-linecap="round"/>`;
+      }
+
+      // token pills
+      for (let j = 0; j < N; j++) {
+        const masked = st.causal && j > st.sel;
+        const seld = j === st.sel;
+        out += `<g class="sa-hm-tok" data-i="${j}" style="cursor:pointer" opacity="${masked ? 0.35 : 1}">
+          <rect x="${cx(j) - PILL_W / 2}" y="${PILL_Y}" width="${PILL_W}" height="${PILL_H}" rx="7"
+            fill="${seld ? COL.accent : "none"}" stroke="${seld ? COL.accent : COL.grid}" stroke-width="1"/>
+          <text x="${cx(j)}" y="${PILL_Y + PILL_H / 2 + 4}" text-anchor="middle" font-size="12"
+            fill="${seld ? COL.onAccent : COL.text}">${TOKENS[j]}</text>
+        </g>`;
+      }
+
+      // weight bars under each token
+      const BASE = 306, HMAX = 92;
+      for (let j = 0; j < N; j++) {
+        if (st.causal && j > st.sel) continue;
+        const h = Math.max(1.5, w[j] * HMAX);
+        out += `<rect x="${cx(j) - 16}" y="${BASE - h}" width="32" height="${h}" rx="2"
+                 fill="${COL.accent}" fill-opacity="${j === st.sel ? 0.45 : 0.9}"/>`;
+        if (w[j] >= 0.05)
+          out += `<text x="${cx(j)}" y="${BASE - h - 5}" text-anchor="middle" font-size="10"
+                   fill="${COL.muted}">${pct(w[j])}</text>`;
+      }
+      out += `<line x1="10" y1="${BASE}" x2="${W - 10}" y2="${BASE}" stroke="${COL.grid}"/>`;
+      svg.innerHTML = out;
+
+      // readout: strongest non-self target
+      let best = -1;
+      for (let j = 0; j < N; j++) if (j !== st.sel && (best < 0 || w[j] > w[best])) best = j;
+      tag.textContent = `${TOKENS[st.sel]} → ${TOKENS[best]} ${pct(w[best])}`;
+      tag.className = "se-tag good";
+    }
+
+    // delegate on the svg — children are re-created on every draw
+    const pick = evt => {
+      const g = evt.target.closest("[data-i]");
+      if (!g) return;
+      const i = +g.getAttribute("data-i");
+      if (i !== st.sel) { st.sel = i; draw(); }
+    };
+    svg.addEventListener("click", pick);
+    svg.addEventListener("pointerover", pick);
+
+    maskBtn.addEventListener("click", () => {
+      st.causal = !st.causal;
+      maskBtn.textContent = st.causal ? "🔒 causal mask: on" : "🔓 causal mask: off";
+      maskBtn.setAttribute("aria-pressed", String(st.causal));
+      maskBtn.classList.toggle("sec", !st.causal);
+      draw();
+    });
+
+    onTheme(draw); draw();
+  })();
+
+  /* ================================================================
+     DEMO 2 — Q·K geometry playground
+     ================================================================ */
+  (function () {
+    const svg = document.getElementById("sa-geo-svg");
+    const tbl = document.getElementById("sa-geo-tbl");
+    const dSlider = document.getElementById("sa-geo-d");
+    const dVal = document.getElementById("sa-geo-dval");
+    const tag = document.getElementById("sa-geo-tag");
+    const resetBtn = document.getElementById("sa-geo-reset");
+
+    const DEFAULTS = { q: [1.6, 0.4], k: [[1.4, 0.9], [-0.6, 1.5], [0.9, -1.3]] };
+    const st = { q: DEFAULTS.q.slice(), k: DEFAULTS.k.map(v => v.slice()), drag: null };
+
+    const S = 380, C = S / 2, SCALE = 70, LIM = 2.4;
+    const px = v => C + v * SCALE, py = v => C - v * SCALE;
+    const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+    const mag = a => Math.hypot(a[0], a[1]);
+    const dOf = () => Math.pow(2, +dSlider.value + 1);
+
+    const keyCols = () => [COL.good, COL.warn, COL.bad];
+
+    function arrow(v, color, width, label) {
+      const x = px(v[0]), y = py(v[1]);
+      const ang = Math.atan2(py(0) - y, x - px(0));
+      const a1 = ang + 2.6, a2 = ang - 2.6, AH = 9;
+      return `<line x1="${C}" y1="${C}" x2="${x}" y2="${y}" stroke="${color}" stroke-width="${width}" stroke-linecap="round"/>
+        <polygon points="${x},${y} ${x - AH * Math.cos(a1)},${y + AH * Math.sin(a1)} ${x - AH * Math.cos(a2)},${y + AH * Math.sin(a2)}" fill="${color}"/>
+        <text x="${x + (v[0] >= 0 ? 10 : -10)}" y="${y + (v[1] >= 0 ? -8 : 16)}" text-anchor="middle"
+          font-size="13" font-weight="700" fill="${color}">${label}</text>`;
+    }
+
+    function weights() {
+      const d = dOf();
+      return { d, dots: st.k.map(k => dot(st.q, k)),
+               w: softmaxRow(st.k.map(k => dot(st.q, k) / Math.sqrt(d)), null) };
+    }
+
+    function draw() {
+      const kc = keyCols();
+      let out = "";
+      // grid
+      for (let g = -2; g <= 2; g++) {
+        out += `<line x1="${px(g)}" y1="0" x2="${px(g)}" y2="${S}" stroke="${COL.grid}" stroke-width="${g === 0 ? 1.4 : 0.6}"/>`;
+        out += `<line x1="0" y1="${py(g)}" x2="${S}" y2="${py(g)}" stroke="${COL.grid}" stroke-width="${g === 0 ? 1.4 : 0.6}"/>`;
+      }
+      out += `<circle cx="${C}" cy="${C}" r="${SCALE}" fill="none" stroke="${COL.grid}" stroke-dasharray="4 5"/>`;
+      st.k.forEach((k, i) => { out += arrow(k, kc[i], 2, "k" + (i + 1)); });
+      out += arrow(st.q, COL.accent, 3, "q");
+      // invisible grab handles (drawn last = on top)
+      const tips = [st.q, ...st.k];
+      tips.forEach((v, idx) => {
+        out += `<circle data-tip="${idx}" cx="${px(v[0])}" cy="${py(v[1])}" r="15"
+                 fill="transparent" style="cursor:grab"/>`;
+      });
+      svg.innerHTML = out;
+
+      // readout table
+      const { d, dots, w } = weights();
+      dVal.textContent = d;
+      let rows = `<tr><th></th><th>q&middot;k</th><th>cos&theta;</th><th class="wcell">softmax weight</th></tr>`;
+      st.k.forEach((k, i) => {
+        const cos = dots[i] / (mag(st.q) * mag(k) || 1);
+        rows += `<tr>
+          <td><span class="chip" style="background:${kc[i]}"></span> k${i + 1}</td>
+          <td>${dots[i].toFixed(2)}</td>
+          <td>${cos.toFixed(2)}</td>
+          <td class="wcell"><div class="wbar" style="width:${Math.max(2, w[i] * 100)}%"></div>${pct(w[i])}</td>
+        </tr>`;
+      });
+      tbl.innerHTML = rows;
+
+      const wmax = Math.max(...w);
+      tag.textContent = wmax > 0.6 ? "confident: one key dominates" : "spread: keys compete";
+      tag.className = "se-tag " + (wmax > 0.6 ? "good" : "warn");
+    }
+
+    // dragging: pointer events, svg-coordinate mapping, capture for smooth drags
+    const toPlane = evt => {
+      const r = svg.getBoundingClientRect();
+      const x = (evt.clientX - r.left) / r.width * S;
+      const y = (evt.clientY - r.top) / r.height * S;
+      return [(x - C) / SCALE, (C - y) / SCALE];
+    };
+    svg.addEventListener("pointerdown", evt => {
+      const h = evt.target.closest("[data-tip]");
+      if (!h) return;
+      st.drag = +h.getAttribute("data-tip");
+      svg.setPointerCapture(evt.pointerId);
+      evt.preventDefault();
+    });
+    svg.addEventListener("pointermove", evt => {
+      if (st.drag == null) return;
+      const p = toPlane(evt).map(v => Math.max(-LIM, Math.min(LIM, v)));
+      if (st.drag === 0) st.q = p; else st.k[st.drag - 1] = p;
+      draw();
+    });
+    const drop = () => { st.drag = null; };
+    svg.addEventListener("pointerup", drop);
+    svg.addEventListener("pointercancel", drop);
+
+    dSlider.addEventListener("input", draw);
+    resetBtn.addEventListener("click", () => {
+      st.q = DEFAULTS.q.slice();
+      st.k = DEFAULTS.k.map(v => v.slice());
+      dSlider.value = 0;
+      draw();
+    });
+
+    onTheme(draw); draw();
+  })();
+
+  /* ================================================================
+     DEMO 3 — multi-head splitter
+     ================================================================ */
+  (function () {
+    const toksSvg = document.getElementById("sa-mh-toks");
+    const grids = document.getElementById("sa-mh-grids");
+    const concat = document.getElementById("sa-mh-concat");
+    const btn3 = document.getElementById("sa-mh-3");
+    const btn1 = document.getElementById("sa-mh-1");
+    const st = { sel: 7, mode: 3 };
+
+    // per-head weight matrices (unmasked, encoder-style, for legibility)
+    const heads = [
+      { name: "head A — coreference", S: S_COREF },
+      { name: "head B — previous token", S: S_LOCAL },
+      { name: "head C — content words", S: S_CONTENT }
+    ];
+    const rowsOf = S => S.map(r => softmaxRow(r, null));
+    const W3 = heads.map(h => rowsOf(h.S));
+    const W1 = rowsOf(S_AVG);
+    const headTints = () => [COL.accent, COL.good, COL.warn];
+
+    /* token strip */
+    const TW = 720, SLOT = TW / N, PILL_W = 62, PILL_H = 28;
+    const cx = i => SLOT * i + SLOT / 2;
+    function drawToks() {
+      let out = "";
+      for (let j = 0; j < N; j++) {
+        const seld = j === st.sel;
+        out += `<g data-i="${j}" style="cursor:pointer">
+          <rect x="${cx(j) - PILL_W / 2}" y="8" width="${PILL_W}" height="${PILL_H}" rx="7"
+            fill="${seld ? COL.accent : "none"}" stroke="${seld ? COL.accent : COL.grid}"/>
+          <text x="${cx(j)}" y="${8 + PILL_H / 2 + 4}" text-anchor="middle" font-size="12"
+            fill="${seld ? COL.onAccent : COL.text}">${TOKENS[j]}</text>
+        </g>`;
+      }
+      toksSvg.innerHTML = out;
+    }
+    const pick = evt => {
+      const g = evt.target.closest("[data-i]");
+      if (!g) return;
+      const i = +g.getAttribute("data-i");
+      if (i !== st.sel) { st.sel = i; drawAll(); }
+    };
+    toksSvg.addEventListener("click", pick);
+    toksSvg.addEventListener("pointerover", pick);
+
+    /* one 10x10 heatmap grid as an svg string */
+    function gridSvg(Wm) {
+      const CELL = 16, GUT = 36, SZ = GUT + N * CELL + 4;
+      let out = `<svg viewBox="0 0 ${SZ} ${SZ}" width="${SZ * 1.05}" role="img">`;
+      for (let i = 0; i < N; i++) {
+        out += `<text x="${GUT - 4}" y="${GUT + i * CELL + CELL / 2 + 2.5}" text-anchor="end"
+                 font-size="7" fill="${COL.muted}">${TOKENS[i].slice(0, 4)}</text>`;
+        out += `<text x="${GUT + i * CELL + CELL / 2}" y="${GUT - 5}" text-anchor="start"
+                 font-size="7" fill="${COL.muted}"
+                 transform="rotate(-55 ${GUT + i * CELL + CELL / 2} ${GUT - 5})">${TOKENS[i].slice(0, 4)}</text>`;
+      }
+      for (let i = 0; i < N; i++)
+        for (let j = 0; j < N; j++)
+          out += `<rect x="${GUT + j * CELL}" y="${GUT + i * CELL}" width="${CELL - 1}" height="${CELL - 1}"
+                   fill="${COL.accent}" fill-opacity="${Math.pow(Wm[i][j], 0.7).toFixed(3)}"/>`;
+      out += `<rect x="${GUT - 0.5}" y="${GUT + st.sel * CELL - 0.5}" width="${N * CELL}" height="${CELL}"
+               fill="none" stroke="${COL.accentStrong}" stroke-width="1.4"/>`;
+      return out + "</svg>";
+    }
+
+    function drawGrids() {
+      if (st.mode === 3) {
+        grids.innerHTML = heads.map((h, hi) =>
+          `<div class="sa-headcell">${gridSvg(W3[hi])}<div class="sa-headlab">${h.name}</div></div>`
+        ).join("");
+      } else {
+        grids.innerHTML =
+          `<div class="sa-headcell">${gridSvg(W1)}<div class="sa-headlab">one head — averaged scores (every relation hedged)</div></div>`;
+      }
+    }
+
+    /* concat strip: head slices -> W^O mix */
+    function drawConcat() {
+      const tints = headTints();
+      const X0 = 40, SEGW = 140, H = 26, Y = 14, GAP = 4;
+      let out = `<text x="${X0}" y="${Y - 4}" font-size="10" fill="${COL.muted}">output for "${TOKENS[st.sel]}"</text>`;
+      if (st.mode === 3) {
+        for (let hi = 0; hi < 3; hi++) {
+          const x = X0 + hi * (SEGW + GAP);
+          out += `<rect x="${x}" y="${Y}" width="${SEGW}" height="${H}" rx="4" fill="${tints[hi]}" fill-opacity="0.8"/>
+            <text x="${x + SEGW / 2}" y="${Y + H / 2 + 4}" text-anchor="middle" font-size="11"
+              fill="${COL.onAccent}">head ${"ABC"[hi]} · d/3</text>`;
+        }
+      } else {
+        out += `<rect x="${X0}" y="${Y}" width="${3 * SEGW + 2 * GAP}" height="${H}" rx="4" fill="${COL.accent}" fill-opacity="0.8"/>
+          <text x="${X0 + (3 * SEGW + 2 * GAP) / 2}" y="${Y + H / 2 + 4}" text-anchor="middle" font-size="11"
+            fill="${COL.onAccent}">one head · full width d</text>`;
+      }
+      const ax = X0 + 3 * SEGW + 2 * GAP + 14;
+      out += `<text x="${ax + 22}" y="${Y + H / 2 + 4}" text-anchor="middle" font-size="13" fill="${COL.muted}">→ W<tspan baseline-shift="super" font-size="9">O</tspan> →</text>`;
+      const mx = ax + 52;
+      out += `<rect x="${mx}" y="${Y}" width="${720 - mx - 14}" height="${H}" rx="4"
+               fill="none" stroke="${COL.accentStrong}" stroke-width="1.4"/>
+        <text x="${mx + (720 - mx - 14) / 2}" y="${Y + H / 2 + 4}" text-anchor="middle" font-size="11"
+          fill="${COL.text}">mixed · d<tspan baseline-shift="sub" font-size="8">model</tspan></text>`;
+      concat.innerHTML = out;
+    }
+
+    function setMode(m) {
+      st.mode = m;
+      btn3.classList.toggle("sec", m !== 3);
+      btn1.classList.toggle("sec", m !== 1);
+      drawAll();
+    }
+    btn3.addEventListener("click", () => setMode(3));
+    btn1.addEventListener("click", () => setMode(1));
+
+    function drawAll() { drawToks(); drawGrids(); drawConcat(); }
+    onTheme(drawAll); drawAll();
+  })();
+
+  /* ================================================================
+     Section 7 mini-figure — sinusoidal PE dimensions
+     ================================================================ */
+  (function () {
+    const svg = document.getElementById("sa-pe-svg");
+    const legend = document.getElementById("sa-pe-legend");
+    const W = 720, H = 210, L = 40, R = 14, T = 16, B = 26;
+    const MAXPOS = 40;
+    // dimension indices 2i in a d_model = 64 encoding: wavelength 2π·10000^(2i/64)
+    const DIMS = [
+      { i: 0, lab: "dim 0 (fast)" },
+      { i: 4, lab: "dim 8" },
+      { i: 8, lab: "dim 16" },
+      { i: 16, lab: "dim 32 (slow)" }
+    ];
+    const freq = i => 1 / Math.pow(10000, (2 * i) / 64);
+    const px = p => L + p / MAXPOS * (W - L - R);
+    const py = v => T + (1 - v) / 2 * (H - T - B);
+
+    function draw() {
+      const cols = [COL.accent, COL.good, COL.warn, COL.muted];
+      let out = "";
+      out += `<line x1="${L}" y1="${py(0)}" x2="${W - R}" y2="${py(0)}" stroke="${COL.grid}"/>`;
+      for (let p = 0; p <= MAXPOS; p += 10) {
+        out += `<line x1="${px(p)}" y1="${T}" x2="${px(p)}" y2="${H - B}" stroke="${COL.grid}" stroke-width="0.6"/>
+          <text x="${px(p)}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${COL.muted}">${p}</text>`;
+      }
+      out += `<text x="${W / 2}" y="${H - 8}" text-anchor="middle" font-size="10" fill="${COL.muted}" dy="0"></text>`;
+      DIMS.forEach((d, di) => {
+        let pts = "";
+        for (let p = 0; p <= MAXPOS; p += 0.25)
+          pts += `${px(p).toFixed(1)},${py(Math.sin(p * freq(d.i))).toFixed(1)} `;
+        out += `<polyline points="${pts}" fill="none" stroke="${cols[di]}" stroke-width="1.8"/>`;
+      });
+      out += `<text x="${L - 6}" y="${py(1) + 4}" text-anchor="end" font-size="10" fill="${COL.muted}">+1</text>
+        <text x="${L - 6}" y="${py(-1) + 4}" text-anchor="end" font-size="10" fill="${COL.muted}">−1</text>`;
+      svg.innerHTML = out;
+      legend.innerHTML = DIMS.map((d, di) =>
+        `<span style="color:${[COL.accent, COL.good, COL.warn, COL.muted][di]}">${d.lab}</span>`).join("");
+    }
+    onTheme(draw); draw();
+  })();
+
+})();
+</script>
+
+</div>
+
+  </div>
+
+  <div class="date">
+    Written on July 18, 2026
+  </div>
+</article>
+
+    </div>
+
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          
+<a href="mailto:alessandro.sanvito@gmail.com"><i class="svg-icon email"></i></a>
+
+
+<a href="https://github.com/Alexdruso"><i class="svg-icon github"></i></a>
+
+<a href="https://www.linkedin.com/in/alessandro-sanvito-07706114b"><i class="svg-icon linkedin"></i></a>
+
+<a href="/feed.xml"><i class="svg-icon rss"></i></a>
+
+
+
+
+        </footer>
+      </div>
+    </div>
+
+    <button class="theme-toggle" aria-label="Toggle dark mode">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
+    <script>
+      // Theme switcher
+      const themeToggle = document.querySelector('.theme-toggle');
+      const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+      
+      // Check for saved theme preference or use system preference
+      const currentTheme = localStorage.getItem('theme') || 
+        (prefersDarkScheme.matches ? 'dark' : 'light');
+      
+      // Apply theme on load
+      if (currentTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+
+      // Toggle theme
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.body.classList.toggle('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+
+      // Listen for system theme changes
+      prefersDarkScheme.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+          document.body.classList.toggle('dark-theme', e.matches);
+        }
+      });
+    </script>
+
+    
+<script data-goatcounter="https://alexdruso.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+
+
+  </body>
+</html>
