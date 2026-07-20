@@ -36,6 +36,9 @@
                 {{ item.title }}
               </a>
             {% endfor %}
+            <button class="nav-search" aria-label="Search the site (Ctrl+K or ⌘K)">
+              <i class="fas fa-search"></i><kbd>⌘K</kbd>
+            </button>
           </nav>
         </header>
       </div>
@@ -86,6 +89,8 @@
         }
       });
     </script>
+
+    {% include command-palette.html %}
 
     {% include analytics.html %}
   </body>
