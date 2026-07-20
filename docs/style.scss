@@ -835,6 +835,12 @@ footer {
 
 // Game styles
 .game-container {
+  // Board colors — read by the canvas JS at runtime so drawing follows the theme
+  --board-bg: #f0f0f0;
+  --board-snake: #4CAF50;
+  --board-snake-head: #388E3C;
+  --board-food: #FF5722;
+
   max-width: 800px;
   margin: 0 auto;
   padding: 2rem;
@@ -941,9 +947,211 @@ footer {
   opacity: 0.9;
 }
 
+// Mode switch (play yourself vs watch the AI learn)
+.mode-switch {
+  display: inline-flex;
+  border: 1px solid $lightBlue;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.mode-btn {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  background-color: $white;
+  color: $darkGray;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &.active {
+    background-color: $accentBlue;
+    color: $white;
+  }
+
+  &:not(.active):hover {
+    background-color: $lightBlue;
+  }
+}
+
+// Hide the touch d-pad while the AI is driving
+.game-container.ai-mode .dpad {
+  display: none;
+}
+
+// AI training panel
+.ai-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.ai-speed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-speed-label {
+  font-size: 0.9rem;
+  color: $gray;
+}
+
+.speed-btn {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  background-color: $lightBlue;
+  color: $darkGray;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &.active {
+    background-color: $accentBlue;
+    color: $white;
+  }
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.ai-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.4rem;
+}
+
+.ai-stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 3.2rem;
+
+  .ai-stat-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: $darkGray;
+  }
+
+  .ai-stat-label {
+    font-size: 0.75rem;
+    color: $gray;
+  }
+}
+
+.ai-spark {
+  // Sparkline colors — read by the canvas JS at runtime so it follows the theme
+  --spark-bg: #{$white};
+  --spark-grid: #{$lightGray};
+  --spark-raw: #{rgba($accentBlue, 0.35)};
+  --spark-avg: #{$accentBlue};
+  --spark-text: #{$gray};
+
+  width: 100%;
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 90px;
+    border: 1px solid $lightBlue;
+    border-radius: 4px;
+  }
+}
+
+#resetBrainButton {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  background-color: $lightBlue;
+  color: $darkGray;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
 // Dark theme adjustments for game
 .dark-theme {
+  .game-container {
+    --board-bg: #22262e;
+    --board-snake: #66bb6a;
+    --board-snake-head: #a5d6a7;
+    --board-food: #ff7043;
+  }
+
   .game-description {
+    color: $dark-text;
+  }
+
+  .mode-switch {
+    border-color: $dark-border;
+  }
+
+  .mode-btn {
+    background-color: $dark-bg;
+    color: $dark-text;
+
+    &.active {
+      background-color: $dark-accent;
+      color: $dark-bg;
+    }
+
+    &:not(.active):hover {
+      background-color: $dark-border;
+    }
+  }
+
+  .ai-speed-label {
+    color: $dark-gray;
+  }
+
+  .speed-btn {
+    background-color: $dark-border;
+    color: $dark-text;
+
+    &.active {
+      background-color: $dark-accent;
+      color: $dark-bg;
+    }
+  }
+
+  .ai-stat {
+    .ai-stat-value {
+      color: $dark-text;
+    }
+
+    .ai-stat-label {
+      color: $dark-gray;
+    }
+  }
+
+  .ai-spark {
+    --spark-bg: #11131c;
+    --spark-grid: #{$dark-border};
+    --spark-raw: #{rgba($dark-accent, 0.4)};
+    --spark-avg: #{$dark-accent};
+    --spark-text: #{$dark-gray};
+
+    canvas {
+      border-color: $dark-border;
+    }
+  }
+
+  #resetBrainButton {
+    background-color: $dark-border;
     color: $dark-text;
   }
 
