@@ -6,14 +6,39 @@ permalink: /game/
 
 <div class="game-container">
   <h1>Snake Game</h1>
-  <p class="game-description">Take a break and play a classic game of Snake! On desktop use the arrow keys; on a phone, swipe on the board or use the on-screen pad below. Eat the food to grow longer.</p>
-  
+  <p class="game-description">Take a break and play a classic game of Snake! On desktop use the arrow keys; on a phone, swipe on the board or use the on-screen pad below. Eat the food to grow longer. Or switch to AI mode and watch a tiny Q-learning agent teach itself to play, learning live in your browser.</p>
+
+  <div class="mode-switch" role="group" aria-label="Game mode">
+    <button class="mode-btn active" data-mode="human" id="modeHumanButton">Play yourself</button>
+    <button class="mode-btn" data-mode="ai" id="modeAIButton">Watch the AI learn</button>
+  </div>
+
   <div class="game-wrapper">
     <canvas id="gameCanvas" width="400" height="400"></canvas>
     <div class="game-controls">
       <div class="score">Score: <span id="score">0</span></div>
       <button id="startButton">Start Game</button>
       <button id="resetButton">Reset Game</button>
+    </div>
+
+    <div class="ai-panel" id="aiPanel" hidden>
+      <div class="ai-speed" role="group" aria-label="Training speed">
+        <span class="ai-speed-label">Speed:</span>
+        <button class="speed-btn active" data-speed="1">1&times;</button>
+        <button class="speed-btn" data-speed="50">50&times;</button>
+        <button class="speed-btn" data-speed="500">500&times;</button>
+      </div>
+      <div class="ai-stats">
+        <div class="ai-stat"><span class="ai-stat-value" id="statEpisodes">0</span><span class="ai-stat-label">Episodes</span></div>
+        <div class="ai-stat"><span class="ai-stat-value" id="statLast">&ndash;</span><span class="ai-stat-label">Last</span></div>
+        <div class="ai-stat"><span class="ai-stat-value" id="statBest">0</span><span class="ai-stat-label">Best</span></div>
+        <div class="ai-stat"><span class="ai-stat-value" id="statAvg">&ndash;</span><span class="ai-stat-label">Avg (50)</span></div>
+        <div class="ai-stat"><span class="ai-stat-value" id="statEpsilon">1.00</span><span class="ai-stat-label">&epsilon; (explore)</span></div>
+      </div>
+      <div class="ai-spark" id="aiSpark">
+        <canvas id="sparklineCanvas" width="400" height="90" aria-label="Score per episode"></canvas>
+      </div>
+      <button id="resetBrainButton">Reset Brain</button>
     </div>
 
     <div class="dpad" id="dpad" aria-label="Directional controls">
@@ -41,6 +66,13 @@ let gameInterval;
 let score = 0;
 let gameStarted = false;
 let listenersBound = false;
+
+// Mode: 'human' (arrow keys / swipe / d-pad) or 'ai' (Q-learning agent)
+let mode = 'human';
+
+// Board colors are CSS custom properties so the canvas matches the site theme;
+// they're cached here and refreshed when the theme toggles (see MutationObserver)
+let boardColors = null;
 
 // Initialize game
 function initGame() {
@@ -93,9 +125,43 @@ function initGame() {
       resetButton.addEventListener('click', resetGame);
     }
 
+    // Mode switch (human vs AI)
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => setMode(btn.getAttribute('data-mode')));
+    });
+
+    // AI training speed
+    document.querySelectorAll('.speed-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        aiSpeed = parseInt(btn.getAttribute('data-speed'), 10);
+        document.querySelectorAll('.speed-btn').forEach(b => b.classList.toggle('active', b === btn));
+      });
+    });
+
+    const resetBrainButton = document.getElementById('resetBrainButton');
+    if (resetBrainButton) {
+      resetBrainButton.addEventListener('click', resetBrain);
+    }
+
+    // Canvas colors come from CSS custom properties; recolor when the site
+    // theme toggles (the toggle flips .dark-theme on <body>)
+    new MutationObserver(() => {
+      refreshBoardColors();
+      draw();
+      drawSparkline();
+    }).observe(document.body, {attributes: true, attributeFilter: ['class']});
+
+    // Don't lose the learned Q-table when the visitor leaves mid-training
+    window.addEventListener('beforeunload', () => { if (brainDirty) saveBrain(); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden' && brainDirty) saveBrain();
+    });
+
     listenersBound = true;
   }
   
+  refreshBoardColors();
+
   // Draw initial state
   draw();
 }
@@ -121,6 +187,7 @@ const OPPOSITE = {up: 'down', down: 'up', left: 'right', right: 'left'};
 
 // Apply a direction change from any input source (keyboard, swipe, d-pad)
 function setDirection(dir) {
+  if (mode !== 'human') return;
   if (!gameStarted) return;
   if (OPPOSITE[dir] !== direction) {
     nextDirection = dir;
@@ -221,10 +288,7 @@ function moveSnake() {
   // Check if snake ate food
   if (head.x === food.x && head.y === food.y) {
     score += 10;
-    const scoreElement = document.getElementById('score');
-    if (scoreElement) {
-      scoreElement.textContent = score;
-    }
+    updateScoreDisplay();
     generateFood();
   } else {
     snake.pop();
@@ -243,18 +307,37 @@ function checkCollision(head) {
   return snake.some(segment => segment.x === head.x && segment.y === head.y);
 }
 
+function updateScoreDisplay() {
+  const scoreElement = document.getElementById('score');
+  if (scoreElement) {
+    scoreElement.textContent = score;
+  }
+}
+
+function refreshBoardColors() {
+  if (!canvas) return;
+  const cs = getComputedStyle(canvas);
+  boardColors = {
+    bg: cs.getPropertyValue('--board-bg').trim() || '#f0f0f0',
+    snake: cs.getPropertyValue('--board-snake').trim() || '#4CAF50',
+    head: cs.getPropertyValue('--board-snake-head').trim() || '#388E3C',
+    food: cs.getPropertyValue('--board-food').trim() || '#FF5722'
+  };
+}
+
 // Draw game state
 function draw() {
   if (!ctx || !canvas) return;
+  if (!boardColors) refreshBoardColors();
   
   // Clear canvas
-  ctx.fillStyle = '#f0f0f0';
+  ctx.fillStyle = boardColors.bg;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   
   // Draw snake
   snake.forEach((segment, index) => {
-    // Make head slightly darker
-    ctx.fillStyle = index === 0 ? '#388E3C' : '#4CAF50';
+    // The head gets its own shade
+    ctx.fillStyle = index === 0 ? boardColors.head : boardColors.snake;
     ctx.fillRect(
       segment.x * GRID_SIZE,
       segment.y * GRID_SIZE,
@@ -264,7 +347,7 @@ function draw() {
   });
   
   // Draw food
-  ctx.fillStyle = '#FF5722';
+  ctx.fillStyle = boardColors.food;
   ctx.fillRect(
     food.x * GRID_SIZE,
     food.y * GRID_SIZE,
@@ -279,8 +362,13 @@ function gameLoop() {
   draw();
 }
 
-// Start game
+// Start game (in AI mode this button starts/pauses training instead)
 function startGame() {
+  if (mode === 'ai') {
+    toggleTraining();
+    return;
+  }
+
   const startButton = document.getElementById('startButton');
   if (!startButton) return;
   
@@ -295,21 +383,17 @@ function startGame() {
   }
 }
 
-// Reset game
+// Reset game (board only — the AI's learned Q-table survives; use Reset Brain for that)
 function resetGame() {
   clearInterval(gameInterval);
+  stopTraining();
   gameStarted = false;
   score = 0;
+  updateScoreDisplay();
   
-  const scoreElement = document.getElementById('score');
   const startButton = document.getElementById('startButton');
-  
-  if (scoreElement) {
-    scoreElement.textContent = score;
-  }
-  
   if (startButton) {
-    startButton.textContent = 'Start Game';
+    startButton.textContent = mode === 'ai' ? 'Start Training' : 'Start Game';
   }
   
   direction = 'right';
@@ -317,7 +401,7 @@ function resetGame() {
   initGame();
 }
 
-// Game over
+// Game over (human mode only; AI episodes end silently in endEpisode)
 function gameOver() {
   clearInterval(gameInterval);
   gameStarted = false;
@@ -330,6 +414,385 @@ function gameOver() {
   alert(`Game Over! Your score: ${score}`);
 }
 
+// ---------------------------------------------------------------------------
+// AI mode — tabular Q-learning
+//
+// State (a few hundred entries at most): danger straight/left/right relative
+// to the current heading, the heading itself, and the sign of the food's
+// offset from the head. Actions are relative (straight / turn left / turn
+// right), so the agent can never reverse into its own neck.
+// ---------------------------------------------------------------------------
+const BRAIN_KEY = 'snake-ai-brain-v1';
+const STARVE_LIMIT = 200;      // steps without food before the episode is cut off
+const HISTORY_MAX = 200;       // episodes kept for the sparkline
+const AVG_WINDOW = 50;         // rolling-average window for the stats readout
+
+const AI = {
+  alpha: 0.15,                 // learning rate
+  gamma: 0.9,                  // discount factor
+  epsilon: 1.0,                // exploration rate (decays per episode)
+  epsilonMin: 0.01,
+  epsilonDecay: 0.995,
+  q: {},                       // stateKey -> [Q(straight), Q(left), Q(right)]
+  episodes: 0,
+  best: 0,
+  history: []                  // score per episode, most recent last
+};
+
+let aiRunning = false;
+let aiSpeed = 1;               // multiplier over the human game speed
+let aiRaf = null;
+let aiLastTs = null;
+let aiStepCarry = 0;
+let stepsSinceFood = 0;
+let brainDirty = false;
+let sparkEpisodes = -1;        // episode count at last sparkline redraw
+
+// Headings in clockwise order, so "turn" is an index shift
+const DIRS = ['up', 'right', 'down', 'left'];
+
+function turnDir(dir, action) {
+  const i = DIRS.indexOf(dir);
+  if (action === 1) return DIRS[(i + 3) % 4];  // left
+  if (action === 2) return DIRS[(i + 1) % 4];  // right
+  return dir;                                  // straight
+}
+
+function nextCell(pos, dir) {
+  return {
+    x: pos.x + (dir === 'right') - (dir === 'left'),
+    y: pos.y + (dir === 'down') - (dir === 'up')
+  };
+}
+
+function getStateKey() {
+  const head = snake[0];
+  const dS = checkCollision(nextCell(head, direction)) ? 1 : 0;
+  const dL = checkCollision(nextCell(head, turnDir(direction, 1))) ? 1 : 0;
+  const dR = checkCollision(nextCell(head, turnDir(direction, 2))) ? 1 : 0;
+  const fx = Math.sign(food.x - head.x);
+  const fy = Math.sign(food.y - head.y);
+  return dS + '' + dL + dR + '|' + direction + '|' + fx + ',' + fy;
+}
+
+function getQ(stateKey) {
+  if (!AI.q[stateKey]) AI.q[stateKey] = [0, 0, 0];
+  return AI.q[stateKey];
+}
+
+function chooseAction(stateKey) {
+  if (Math.random() < AI.epsilon) {
+    return Math.floor(Math.random() * 3);
+  }
+  const q = getQ(stateKey);
+  let best = [0];
+  for (let a = 1; a < 3; a++) {
+    if (q[a] > q[best[0]]) best = [a];
+    else if (q[a] === q[best[0]]) best.push(a);
+  }
+  return best[Math.floor(Math.random() * best.length)];
+}
+
+// One environment step + one Q-update
+function aiStep() {
+  const stateKey = getStateKey();
+  const action = chooseAction(stateKey);
+  direction = turnDir(direction, action);
+  nextDirection = direction;
+
+  const head = snake[0];
+  const newHead = nextCell(head, direction);
+  const distBefore = Math.abs(food.x - head.x) + Math.abs(food.y - head.y);
+
+  let reward;
+  let done = false;
+
+  if (checkCollision(newHead)) {
+    reward = -10;
+    done = true;
+  } else {
+    snake.unshift(newHead);
+    if (newHead.x === food.x && newHead.y === food.y) {
+      score += 10;
+      stepsSinceFood = 0;
+      generateFood();
+      reward = 10;
+    } else {
+      snake.pop();
+      // Shaping: nudge toward the food; slightly asymmetric so circling
+      // in place is a net loss
+      const distAfter = Math.abs(food.x - newHead.x) + Math.abs(food.y - newHead.y);
+      reward = distAfter < distBefore ? 0.3 : -0.45;
+      stepsSinceFood++;
+      if (stepsSinceFood > STARVE_LIMIT) {
+        reward = -10;
+        done = true;
+      }
+    }
+  }
+
+  const q = getQ(stateKey);
+  const target = done ? reward : reward + AI.gamma * Math.max(...getQ(getStateKey()));
+  q[action] += AI.alpha * (target - q[action]);
+  brainDirty = true;
+
+  if (done) endEpisode();
+}
+
+function endEpisode() {
+  AI.episodes++;
+  AI.history.push(score);
+  if (AI.history.length > HISTORY_MAX) AI.history.shift();
+  if (score > AI.best) AI.best = score;
+  AI.epsilon = Math.max(AI.epsilonMin, AI.epsilon * AI.epsilonDecay);
+  if (AI.episodes % 20 === 0) saveBrain();
+  resetBoard();
+}
+
+function resetBoard() {
+  score = 0;
+  direction = 'right';
+  nextDirection = 'right';
+  snake = [
+    {x: 5, y: 5},
+    {x: 4, y: 5},
+    {x: 3, y: 5}
+  ];
+  generateFood();
+  stepsSinceFood = 0;
+}
+
+// rAF-driven training loop: 1x matches the human tick; fast-forward runs many
+// steps per frame but still renders only once per frame
+function aiFrame(ts) {
+  if (!aiRunning) return;
+  if (aiLastTs === null) aiLastTs = ts;
+  const dt = Math.min(ts - aiLastTs, 250);
+  aiLastTs = ts;
+
+  aiStepCarry += dt * aiSpeed * (1000 / GAME_SPEED) / 1000;
+  let steps = Math.floor(aiStepCarry);
+  aiStepCarry -= steps;
+  if (steps > 5000) steps = 5000;
+
+  for (let i = 0; i < steps; i++) aiStep();
+
+  draw();
+  updateScoreDisplay();
+  updateStatsDisplay();
+  if (AI.episodes !== sparkEpisodes) {
+    sparkEpisodes = AI.episodes;
+    drawSparkline();
+  }
+  aiRaf = requestAnimationFrame(aiFrame);
+}
+
+function toggleTraining() {
+  const startButton = document.getElementById('startButton');
+  if (!aiRunning) {
+    aiRunning = true;
+    aiLastTs = null;
+    aiStepCarry = 0;
+    if (startButton) startButton.textContent = 'Pause Training';
+    aiRaf = requestAnimationFrame(aiFrame);
+  } else {
+    stopTraining();
+    if (startButton) startButton.textContent = 'Resume Training';
+  }
+}
+
+function stopTraining() {
+  if (!aiRunning) return;
+  aiRunning = false;
+  if (aiRaf !== null) cancelAnimationFrame(aiRaf);
+  aiRaf = null;
+  saveBrain();
+}
+
+function setMode(newMode) {
+  if (newMode === mode) return;
+  clearInterval(gameInterval);
+  stopTraining();
+  gameStarted = false;
+  mode = newMode;
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-mode') === mode);
+  });
+
+  const container = document.querySelector('.game-container');
+  if (container) container.classList.toggle('ai-mode', mode === 'ai');
+
+  const aiPanel = document.getElementById('aiPanel');
+  if (aiPanel) aiPanel.hidden = mode !== 'ai';
+
+  const startButton = document.getElementById('startButton');
+  if (startButton) startButton.textContent = mode === 'ai' ? 'Start Training' : 'Start Game';
+
+  resetBoard();
+  updateScoreDisplay();
+  draw();
+  if (mode === 'ai') {
+    updateStatsDisplay();
+    drawSparkline();
+  }
+}
+
+// ---- Stats readout + sparkline ----
+
+function updateStatsDisplay() {
+  const set = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+  const recent = AI.history.slice(-AVG_WINDOW);
+  const avg = recent.length
+    ? (recent.reduce((a, b) => a + b, 0) / recent.length).toFixed(1)
+    : '–';
+  set('statEpisodes', AI.episodes);
+  set('statLast', AI.history.length ? AI.history[AI.history.length - 1] : '–');
+  set('statBest', AI.best);
+  set('statAvg', avg);
+  set('statEpsilon', AI.epsilon.toFixed(2));
+}
+
+// Score-per-episode sparkline; colors come from --spark-* custom properties so
+// it follows the site theme
+function drawSparkline() {
+  const spark = document.getElementById('sparklineCanvas');
+  if (!spark) return;
+  const g = spark.getContext('2d');
+  if (!g) return;
+
+  const cs = getComputedStyle(spark);
+  const colors = {
+    bg: cs.getPropertyValue('--spark-bg').trim() || '#ffffff',
+    grid: cs.getPropertyValue('--spark-grid').trim() || '#eeeeee',
+    raw: cs.getPropertyValue('--spark-raw').trim() || 'rgba(34, 88, 165, 0.35)',
+    avg: cs.getPropertyValue('--spark-avg').trim() || '#2258a5',
+    text: cs.getPropertyValue('--spark-text').trim() || '#666666'
+  };
+
+  const w = spark.width;
+  const h = spark.height;
+  const pad = 6;
+
+  g.clearRect(0, 0, w, h);
+  g.fillStyle = colors.bg;
+  g.fillRect(0, 0, w, h);
+
+  const hist = AI.history;
+  if (hist.length < 2) {
+    g.fillStyle = colors.text;
+    g.font = '12px "Helvetica Neue", Helvetica, Arial, sans-serif';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.fillText('Score per episode will chart here', w / 2, h / 2);
+    return;
+  }
+
+  const maxScore = Math.max(10, ...hist);
+  const x = i => pad + (i / (hist.length - 1)) * (w - 2 * pad);
+  const y = v => h - pad - (v / maxScore) * (h - 2 * pad);
+
+  // Faint gridline at the best score so the axis has some anchor
+  g.strokeStyle = colors.grid;
+  g.lineWidth = 1;
+  g.beginPath();
+  g.moveTo(pad, y(maxScore));
+  g.lineTo(w - pad, y(maxScore));
+  g.stroke();
+
+  // Raw per-episode scores
+  g.strokeStyle = colors.raw;
+  g.lineWidth = 1;
+  g.beginPath();
+  hist.forEach((v, i) => { i === 0 ? g.moveTo(x(i), y(v)) : g.lineTo(x(i), y(v)); });
+  g.stroke();
+
+  // Rolling average on top — this is the learning curve
+  g.strokeStyle = colors.avg;
+  g.lineWidth = 2;
+  g.beginPath();
+  let sum = 0;
+  const win = [];
+  hist.forEach((v, i) => {
+    win.push(v);
+    sum += v;
+    if (win.length > 20) sum -= win.shift();
+    const m = sum / win.length;
+    i === 0 ? g.moveTo(x(i), y(m)) : g.lineTo(x(i), y(m));
+  });
+  g.stroke();
+
+  // Best-score label
+  g.fillStyle = colors.text;
+  g.font = '10px "Helvetica Neue", Helvetica, Arial, sans-serif';
+  g.textAlign = 'left';
+  g.textBaseline = 'top';
+  g.fillText(String(maxScore), pad + 2, y(maxScore) + 2);
+}
+
+// ---- Brain persistence (localStorage) ----
+
+function saveBrain() {
+  try {
+    localStorage.setItem(BRAIN_KEY, JSON.stringify({
+      q: AI.q,
+      episodes: AI.episodes,
+      epsilon: AI.epsilon,
+      best: AI.best,
+      history: AI.history
+    }));
+    brainDirty = false;
+  } catch (e) {
+    // localStorage may be unavailable (private mode, quota) — training still works
+  }
+}
+
+function loadBrain() {
+  try {
+    const raw = localStorage.getItem(BRAIN_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    if (data && typeof data.q === 'object' && data.q !== null) AI.q = data.q;
+    if (Number.isFinite(data.episodes)) AI.episodes = data.episodes;
+    if (Number.isFinite(data.epsilon)) {
+      AI.epsilon = Math.min(1, Math.max(AI.epsilonMin, data.epsilon));
+    }
+    if (Number.isFinite(data.best)) AI.best = data.best;
+    if (Array.isArray(data.history)) {
+      AI.history = data.history.filter(Number.isFinite).slice(-HISTORY_MAX);
+    }
+  } catch (e) {
+    // Corrupt or unreadable saved brain — start fresh
+  }
+}
+
+function resetBrain() {
+  if (!confirm('Forget everything the AI has learned?')) return;
+  const wasRunning = aiRunning;
+  stopTraining();
+  AI.q = {};
+  AI.episodes = 0;
+  AI.epsilon = 1.0;
+  AI.best = 0;
+  AI.history = [];
+  brainDirty = false;
+  try { localStorage.removeItem(BRAIN_KEY); } catch (e) {}
+  resetBoard();
+  updateScoreDisplay();
+  draw();
+  updateStatsDisplay();
+  drawSparkline();
+  if (wasRunning) toggleTraining();
+}
+
 // Initialize game when page loads
-window.addEventListener('load', initGame);
-</script> 
+window.addEventListener('load', () => {
+  loadBrain();
+  initGame();
+  updateStatsDisplay();
+  drawSparkline();
+});
+</script>
