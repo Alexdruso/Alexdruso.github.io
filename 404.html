@@ -76,6 +76,9 @@
                 Snake
               </a>
             
+            <button class="nav-search" aria-label="Search the site (Ctrl+K or ⌘K)">
+              <i class="fas fa-search"></i><kbd>⌘K</kbd>
+            </button>
           </nav>
         </header>
       </div>
@@ -146,6 +149,152 @@
         }
       });
     </script>
+
+    <div class="cmdk-backdrop" id="cmdk" hidden>
+  <div class="cmdk" role="dialog" aria-modal="true" aria-label="Site search">
+    <div class="cmdk-input-row">
+      <i class="fas fa-search" aria-hidden="true"></i>
+      <input id="cmdk-input" type="text" placeholder="Search pages, study notes, projects, publications…" autocomplete="off" spellcheck="false" />
+      <kbd>esc</kbd>
+    </div>
+    <ul class="cmdk-results" id="cmdk-results" role="listbox"></ul>
+    <div class="cmdk-foot">↑ ↓ to navigate &nbsp;·&nbsp; ↵ to open &nbsp;·&nbsp; esc to close</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var backdrop = document.getElementById('cmdk');
+  var input = document.getElementById('cmdk-input');
+  var list = document.getElementById('cmdk-results');
+  var index = null;
+  var results = [];
+  var active = 0;
+
+  function load() {
+    if (index) return Promise.resolve(index);
+    return fetch('/search.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) { index = data; return index; });
+  }
+
+  // Subsequence fuzzy match; contiguous runs and word starts score higher.
+  // Returns {score, positions} or null.
+  function fuzzy(query, text) {
+    var q = query.toLowerCase(), s = text.toLowerCase();
+    var qi = 0, score = 0, run = 0, positions = [];
+    for (var i = 0; i < s.length && qi < q.length; i++) {
+      if (s[i] === q[qi]) {
+        positions.push(i);
+        run++;
+        score += 1 + run * 2 + (i === 0 || s[i - 1] === ' ' ? 4 : 0);
+        qi++;
+      } else {
+        run = 0;
+      }
+    }
+    return qi === q.length ? { score: score, positions: positions } : null;
+  }
+
+  function highlight(title, positions) {
+    var out = '', set = {};
+    positions.forEach(function (p) { set[p] = true; });
+    for (var i = 0; i < title.length; i++) {
+      var ch = title[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      out += set[i] ? '<mark>' + ch + '</mark>' : ch;
+    }
+    return out;
+  }
+
+  function search(query) {
+    if (!index) return;
+    if (!query) {
+      results = index.map(function (item) { return { item: item, positions: [] }; });
+    } else {
+      results = [];
+      index.forEach(function (item) {
+        var m = fuzzy(query, item.title);
+        if (m) {
+          results.push({ item: item, positions: m.positions, score: m.score + 20 });
+        } else if (item.text && fuzzy(query, item.text)) {
+          results.push({ item: item, positions: [], score: 1 });
+        }
+      });
+      results.sort(function (a, b) { return b.score - a.score; });
+    }
+    results = results.slice(0, 12);
+    active = 0;
+    render(query);
+  }
+
+  function render() {
+    if (!results.length) {
+      list.innerHTML = '<div class="cmdk-empty">No matches.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    results.forEach(function (r, i) {
+      var li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.className = i === active ? 'active' : '';
+      li.innerHTML =
+        '<span class="cmdk-title">' + highlight(r.item.title, r.positions) + '</span>' +
+        '<span class="cmdk-type">' + r.item.type + '</span>';
+      li.addEventListener('click', function () { go(r.item); });
+      li.addEventListener('mousemove', function () {
+        if (active !== i) { active = i; render(); }
+      });
+      list.appendChild(li);
+    });
+    var el = list.children[active];
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+  }
+
+  function go(item) {
+    window.location.href = '' + item.url;
+  }
+
+  function open() {
+    backdrop.hidden = false;
+    input.value = '';
+    load().then(function () { search(''); });
+    input.focus();
+  }
+
+  function close() {
+    backdrop.hidden = true;
+  }
+
+  window.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      backdrop.hidden ? open() : close();
+      return;
+    }
+    if (backdrop.hidden) return;
+    if (e.key === 'Escape') {
+      close();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (results.length) { active = (active + 1) % results.length; render(); }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (results.length) { active = (active - 1 + results.length) % results.length; render(); }
+    } else if (e.key === 'Enter') {
+      if (results[active]) go(results[active].item);
+    }
+  });
+
+  input.addEventListener('input', function () { search(input.value.trim()); });
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) close();
+  });
+
+  var navBtn = document.querySelector('.nav-search');
+  if (navBtn) navBtn.addEventListener('click', open);
+})();
+</script>
+
 
     
 <script data-goatcounter="https://alexdruso.goatcounter.com/count"

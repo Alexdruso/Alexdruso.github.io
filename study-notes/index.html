@@ -76,6 +76,9 @@
                 Snake
               </a>
             
+            <button class="nav-search" aria-label="Search the site (Ctrl+K or ⌘K)">
+              <i class="fas fa-search"></i><kbd>⌘K</kbd>
+            </button>
           </nav>
         </header>
       </div>
@@ -87,247 +90,566 @@
   <p class="blog-description">Interactive, hands-on explainers of ideas in machine learning and math — built to be poked, dragged, and run.</p>
 </div>
 
-<div class="posts">
+<div class="note-grid">
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">July 18, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Deep Learning</span>
-            
-              <span class="post-category">Transformers</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/self-attention/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="self-attention" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">July 18, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Deep Learning</span>
+              
+                <span class="post-category">Transformers</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/self-attention/">Self-Attention: The Content-Addressed Lookup at the Heart of Transformers</a></h2>
+
+        <div class="note-card-excerpt">
+          Self-attention computes each token's new representation as a weighted average of every token's value vector, with the weights chosen by content: a softmax over query–key dot products. The 1/√d scaling is literally a softmax temperature, causal masking is a renormalized softmax over the prefix, and multiple heads run the same lookup in parallel subspaces so different relations can coexist. From Bahdanau's RNN attention to sinusoidal positions, the full residual + LayerNorm + FFN block, and the inference tricks — KV cache, GQA, FlashAttention — that make the O(n²) core affordable.
+        </div>
+
+        <a href="/self-attention/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/self-attention/">Self-Attention: The Content-Addressed Lookup at the Heart of Transformers</a></h2>
-
-      <div class="entry">
-        Self-attention computes each token's new representation as a weighted average of every token's value vector, with the weights chosen by content: a softmax over query–key dot products. The 1/√d scaling is literally a softmax temperature, causal masking is a renormalized softmax over the prefix, and multiple heads run the same lookup in parallel subspaces so different relations can coexist. From Bahdanau's RNN attention to sinusoidal positions, the full residual + LayerNorm + FFN block, and the inference tricks — KV cache, GQA, FlashAttention — that make the O(n²) core affordable.
-      </div>
-
-      <a href="/self-attention/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">July 8, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Machine Learning</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/implicit-neural-representations/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="implicit-neural-representations" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">July 8, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Machine Learning</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/implicit-neural-representations/">Implicit Neural Representations: When the Network Is the Image</a></h2>
+
+        <div class="note-card-excerpt">
+          An implicit neural representation stores a signal as a function: a small network maps continuous (x, y) coordinates to RGB, so the image lives in the weights instead of a pixel grid. Why a plain ReLU MLP can only learn a blurry version (spectral bias), how Fourier features and SIREN's sine activations fix it, and what the functional view buys — rendering one trained network at any resolution, including scales it never saw. With live in-browser training, and a final demo that reruns the whole comparison on any image dropped into the page — processed entirely locally, nothing uploaded.
+        </div>
+
+        <a href="/implicit-neural-representations/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/implicit-neural-representations/">Implicit Neural Representations: When the Network Is the Image</a></h2>
-
-      <div class="entry">
-        An implicit neural representation stores a signal as a function: a small network maps continuous (x, y) coordinates to RGB, so the image lives in the weights instead of a pixel grid. Why a plain ReLU MLP can only learn a blurry version (spectral bias), how Fourier features and SIREN's sine activations fix it, and what the functional view buys — rendering one trained network at any resolution, including scales it never saw. With live in-browser training, and a final demo that reruns the whole comparison on any image dropped into the page — processed entirely locally, nothing uploaded.
-      </div>
-
-      <a href="/implicit-neural-representations/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">July 5, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Machine Learning</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/forward-forward-algorithm/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="forward-forward-algorithm" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">July 5, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Machine Learning</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/forward-forward-algorithm/">The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One</a></h2>
+
+        <div class="note-card-excerpt">
+          Hinton's Forward-Forward algorithm trains a network without backpropagation: it replaces the forward-then-backward sweep with two forward passes — one on real data, one on fake — and lets every layer learn immediately from its own local 'goodness' objective. What goodness is, why layer normalization is the load-bearing trick, and a live in-browser training race between Forward-Forward and backprop.
+        </div>
+
+        <a href="/forward-forward-algorithm/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/forward-forward-algorithm/">The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One</a></h2>
-
-      <div class="entry">
-        Hinton's Forward-Forward algorithm trains a network without backpropagation: it replaces the forward-then-backward sweep with two forward passes — one on real data, one on fake — and lets every layer learn immediately from its own local 'goodness' objective. What goodness is, why layer normalization is the load-bearing trick, and a live in-browser training race between Forward-Forward and backprop.
-      </div>
-
-      <a href="/forward-forward-algorithm/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">June 23, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Reinforcement Learning</span>
-            
-              <span class="post-category">Machine Learning</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/world-models/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="world-models" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">June 23, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Reinforcement Learning</span>
+              
+                <span class="post-category">Machine Learning</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/world-models/">World Models: Learning to Dream, Then Act</a></h2>
+
+        <div class="note-card-excerpt">
+          A World Models agent splits into a large world model trained unsupervised and a tiny controller trained by evolution: V compresses each frame to a latent vector, M learns to predict the next latent given the action, and C maps that compressed state to an action — small enough to train entirely inside the model's own hallucinated rollouts, then transfer to reality.
+        </div>
+
+        <a href="/world-models/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/world-models/">World Models: Learning to Dream, Then Act</a></h2>
-
-      <div class="entry">
-        A World Models agent splits into a large world model trained unsupervised and a tiny controller trained by evolution: V compresses each frame to a latent vector, M learns to predict the next latent given the action, and C maps that compressed state to an action — small enough to train entirely inside the model's own hallucinated rollouts, then transfer to reality.
-      </div>
-
-      <a href="/world-models/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">June 22, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Information Theory</span>
-            
-              <span class="post-category">Machine Learning</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/temperature-and-entropy-llms/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="temperature-and-entropy-llms" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">June 22, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Information Theory</span>
+              
+                <span class="post-category">Machine Learning</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/temperature-and-entropy-llms/">Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines</a></h2>
+
+        <div class="note-card-excerpt">
+          The temperature parameter in an LLM divides the logits before the softmax. Raise it and the output distribution flattens, so its entropy rises — and that is not a loose analogy but the literal statistical-mechanics relationship: a softmax is a Boltzmann distribution with energy = −logit, and temperature trades expected energy against entropy, monotonically, from a deterministic argmax to the uniform distribution.
+        </div>
+
+        <a href="/temperature-and-entropy-llms/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/temperature-and-entropy-llms/">Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines</a></h2>
-
-      <div class="entry">
-        The temperature parameter in an LLM divides the logits before the softmax. Raise it and the output distribution flattens, so its entropy rises — and that is not a loose analogy but the literal statistical-mechanics relationship: a softmax is a Boltzmann distribution with energy = −logit, and temperature trades expected energy against entropy, monotonically, from a deterministic argmax to the uniform distribution.
-      </div>
-
-      <a href="/temperature-and-entropy-llms/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">June 19, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Finance</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/options-theory-visually/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="options-theory-visually" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">June 19, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Finance</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/options-theory-visually/">Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks</a></h2>
+
+        <div class="note-card-excerpt">
+          The Black–Scholes formula — N(d₁), N(d₂) — is easy to memorise and hard to reconstruct. Rebuilt from the payoff up: an option's price is the discounted, risk-neutral expectation of its payoff, and volatility is what gives it value. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and read the Greeks as slopes and curvature.
+        </div>
+
+        <a href="/options-theory-visually/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/options-theory-visually/">Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks</a></h2>
-
-      <div class="entry">
-        The Black–Scholes formula — N(d₁), N(d₂) — is easy to memorise and hard to reconstruct. Rebuilt from the payoff up: an option's price is the discounted, risk-neutral expectation of its payoff, and volatility is what gives it value. Drag the strike, widen the volatility, watch a Monte-Carlo average crawl onto the Black–Scholes price, and read the Greeks as slopes and curvature.
-      </div>
-
-      <a href="/options-theory-visually/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">June 19, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Statistics</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/how-many-tosses-rigged-coin/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="how-many-tosses-rigged-coin" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">June 19, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Statistics</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/how-many-tosses-rigged-coin/">How Many Coin Tosses to Catch a Rigged Coin?</a></h2>
+
+        <div class="note-card-excerpt">
+          How many flips does it take to confidently tell a rigged coin from a fair one? Flip a coin and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read the exact number off one clean formula — and confirm it with a thousand simulated experiments. The punchline: near-fair coins are expensive to expose, and the cost scales like 1/(p−½)².
+        </div>
+
+        <a href="/how-many-tosses-rigged-coin/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/how-many-tosses-rigged-coin/">How Many Coin Tosses to Catch a Rigged Coin?</a></h2>
-
-      <div class="entry">
-        How many flips does it take to confidently tell a rigged coin from a fair one? Flip a coin and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read the exact number off one clean formula — and confirm it with a thousand simulated experiments. The punchline: near-fair coins are expensive to expose, and the cost scales like 1/(p−½)².
-      </div>
-
-      <a href="/how-many-tosses-rigged-coin/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">June 16, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Information Theory</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/shannon-entropy-visually/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="shannon-entropy-visually" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">June 16, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Information Theory</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/shannon-entropy-visually/">Shannon Entropy, Visually: Surprise, Uncertainty, and Bits</a></h2>
+
+        <div class="note-card-excerpt">
+          Entropy is usually introduced as a formula — −Σ p log p — with the meaning left implicit. Rebuilt from the ground up: entropy is average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy.
+        </div>
+
+        <a href="/shannon-entropy-visually/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/shannon-entropy-visually/">Shannon Entropy, Visually: Surprise, Uncertainty, and Bits</a></h2>
-
-      <div class="entry">
-        Entropy is usually introduced as a formula — −Σ p log p — with the meaning left implicit. Rebuilt from the ground up: entropy is average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy.
-      </div>
-
-      <a href="/shannon-entropy-visually/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">May 30, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Machine Learning</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/boltzmann-machines-visually/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="boltzmann-machines-visually" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">May 30, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Machine Learning</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/boltzmann-machines-visually/">Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons</a></h2>
+
+        <div class="note-card-excerpt">
+          Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM.
+        </div>
+
+        <a href="/boltzmann-machines-visually/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/boltzmann-machines-visually/">Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons</a></h2>
-
-      <div class="entry">
-        Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM.
-      </div>
-
-      <a href="/boltzmann-machines-visually/" class="read-more">Read More →</a>
     </article>
   
-    <article class="post">
-      <div class="post-meta">
-        <span class="post-date">May 21, 2026</span>
-        
-          <span class="post-categories">
-            
-              <span class="post-category">Reinforcement Learning</span>
-            
-              <span class="post-category">Interactive</span>
-            
-          </span>
-        
+    <article class="note-card">
+      <a class="note-thumb" href="/finding-optimal-policies-mdp/" tabindex="-1" aria-hidden="true">
+        <canvas data-slug="finding-optimal-policies-mdp" width="640" height="300"></canvas>
+      </a>
+      <div class="note-card-body">
+        <div class="post-meta">
+          <span class="post-date">May 21, 2026</span>
+          
+            <span class="post-categories">
+              
+                <span class="post-category">Reinforcement Learning</span>
+              
+                <span class="post-category">Interactive</span>
+              
+            </span>
+          
+        </div>
+
+        <h2><a href="/finding-optimal-policies-mdp/">A Day in Luca's Life: Finding Optimal Decisions with MDPs</a></h2>
+
+        <div class="note-card-excerpt">
+          A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?
+        </div>
+
+        <a href="/finding-optimal-policies-mdp/" class="read-more">Read More →</a>
       </div>
-
-      <h2><a href="/finding-optimal-policies-mdp/">A Day in Luca's Life: Finding Optimal Decisions with MDPs</a></h2>
-
-      <div class="entry">
-        A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?
-      </div>
-
-      <a href="/finding-optimal-policies-mdp/" class="read-more">Read More →</a>
     </article>
   
 </div>
 
 
+
+<script>
+(function () {
+  // Each card's thumbnail is a tiny canvas sketch of the note's key
+  // visualization, drawn from the .note-thumb --thumb-* tokens so it
+  // recolors on theme toggle.
+  function tokens(el) {
+    var s = getComputedStyle(el);
+    return {
+      accent: s.getPropertyValue('--thumb-accent').trim(),
+      strong: s.getPropertyValue('--thumb-accent-strong').trim(),
+      soft: s.getPropertyValue('--thumb-soft').trim(),
+      muted: s.getPropertyValue('--thumb-muted').trim(),
+      grid: s.getPropertyValue('--thumb-grid').trim()
+    };
+  }
+
+  function frame(ctx, w, h, t) {
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = t.grid;
+    ctx.lineWidth = 1;
+    for (var x = 40; x < w; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+    }
+    for (var y = 40; y < h; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+  }
+
+  function plot(ctx, w, h, fn, x0, x1, pad) {
+    // fn maps [0,1] -> [0,1]; drawn with pad margins, y up.
+    ctx.beginPath();
+    for (var i = 0; i <= 120; i++) {
+      var u = i / 120;
+      var x = pad + u * (w - 2 * pad);
+      var y = h - pad - fn(x0 + u * (x1 - x0)) * (h - 2 * pad);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+  }
+
+  var sketches = {
+    'self-attention': function (ctx, w, h, t) {
+      var n = 8, cell = Math.min(w, h) * 0.72 / n;
+      var ox = (w - cell * n) / 2, oy = (h - cell * n) / 2;
+      for (var r = 0; r < n; r++) {
+        var row = [], sum = 0;
+        for (var c = 0; c <= r; c++) { row[c] = Math.exp(2.2 * Math.cos(r * 1.7 + c * 2.3)); sum += row[c]; }
+        for (var c = 0; c < n; c++) {
+          if (c > r) {
+            ctx.fillStyle = t.grid;
+            ctx.fillRect(ox + c * cell + 1, oy + r * cell + 1, cell - 2, cell - 2);
+          } else {
+            ctx.globalAlpha = 0.12 + 0.88 * row[c] / sum * Math.min(r + 1, 4);
+            ctx.fillStyle = t.accent;
+            ctx.fillRect(ox + c * cell + 1, oy + r * cell + 1, cell - 2, cell - 2);
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+    },
+    'shannon-entropy': function (ctx, w, h, t) {
+      var H = function (p) {
+        if (p <= 0 || p >= 1) return 0;
+        return -(p * Math.log2(p) + (1 - p) * Math.log2(1 - p));
+      };
+      ctx.fillStyle = t.soft;
+      ctx.beginPath();
+      ctx.moveTo(40, h - 40);
+      for (var i = 0; i <= 120; i++) {
+        var p = i / 120;
+        ctx.lineTo(40 + p * (w - 80), h - 40 - H(p) * (h - 80));
+      }
+      ctx.lineTo(w - 40, h - 40);
+      ctx.fill();
+      ctx.strokeStyle = t.accent; ctx.lineWidth = 2.5;
+      plot(ctx, w, h, H, 0, 1, 40);
+      ctx.fillStyle = t.strong;
+      ctx.beginPath(); ctx.arc(w / 2, 40, 5, 0, Math.PI * 2); ctx.fill();
+    },
+    'boltzmann': function (ctx, w, h, t) {
+      var E = function (x) {
+        return 0.5 - 0.32 * Math.cos(x * Math.PI * 4 - 0.6) - 0.14 * Math.cos(x * Math.PI * 2) + 0.12 * (x - 0.5);
+      };
+      ctx.strokeStyle = t.accent; ctx.lineWidth = 2.5;
+      plot(ctx, w, h, E, 0, 1, 36);
+      var xb = 0.30, yb = E(xb);
+      ctx.fillStyle = t.strong;
+      ctx.beginPath();
+      ctx.arc(36 + xb * (w - 72), h - 36 - yb * (h - 72) - 7, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = t.muted; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(36 + 0.42 * (w - 72), 40);
+      ctx.lineTo(36 + 0.62 * (w - 72), 40);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    },
+    'mdp': function (ctx, w, h, t) {
+      var cols = 5, rows = 3, cell = Math.min(w / (cols + 1), h / (rows + 0.8));
+      var ox = (w - cell * cols) / 2, oy = (h - cell * rows) / 2;
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          ctx.strokeStyle = t.muted; ctx.lineWidth = 1;
+          ctx.strokeRect(ox + c * cell, oy + r * cell, cell, cell);
+        }
+      }
+      ctx.fillStyle = t.soft;
+      ctx.fillRect(ox + 4 * cell, oy, cell, cell);
+      ctx.strokeStyle = t.strong; ctx.lineWidth = 2;
+      ctx.strokeRect(ox + 4 * cell, oy, cell, cell);
+      ctx.strokeStyle = t.accent; ctx.fillStyle = t.accent; ctx.lineWidth = 2;
+      for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < cols; c++) {
+          if (r === 0 && c === 4) continue;
+          var cx = ox + (c + 0.5) * cell, cy = oy + (r + 0.5) * cell;
+          var ang = Math.atan2(oy + 0.5 * cell - cy, ox + 4.5 * cell - cx);
+          var L = cell * 0.26;
+          var ex = cx + Math.cos(ang) * L, ey = cy + Math.sin(ang) * L;
+          ctx.beginPath(); ctx.moveTo(cx - Math.cos(ang) * L, cy - Math.sin(ang) * L); ctx.lineTo(ex, ey); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(ex, ey);
+          ctx.lineTo(ex - Math.cos(ang - 0.5) * 6, ey - Math.sin(ang - 0.5) * 6);
+          ctx.lineTo(ex - Math.cos(ang + 0.5) * 6, ey - Math.sin(ang + 0.5) * 6);
+          ctx.fill();
+        }
+      }
+    },
+    'coin': function (ctx, w, h, t) {
+      var g = function (x, m, s) { return Math.exp(-(x - m) * (x - m) / (2 * s * s)); };
+      ctx.fillStyle = t.soft;
+      ctx.beginPath();
+      ctx.moveTo(30, h - 34);
+      for (var i = 0; i <= 120; i++) {
+        var u = i / 120;
+        ctx.lineTo(30 + u * (w - 60), h - 34 - Math.min(g(u, 0.38, 0.10), g(u, 0.62, 0.10)) * (h - 76));
+      }
+      ctx.lineTo(w - 30, h - 34);
+      ctx.fill();
+      ctx.strokeStyle = t.muted; ctx.lineWidth = 2.5;
+      plot(ctx, w, h, function (u) { return g(u, 0.38, 0.10); }, 0, 1, 32);
+      ctx.strokeStyle = t.accent;
+      plot(ctx, w, h, function (u) { return g(u, 0.62, 0.10); }, 0, 1, 32);
+      ctx.strokeStyle = t.strong; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(w / 2, 30); ctx.lineTo(w / 2, h - 30); ctx.stroke();
+      ctx.setLineDash([]);
+    },
+    'options': function (ctx, w, h, t) {
+      var K = 0.45;
+      ctx.strokeStyle = t.muted; ctx.lineWidth = 2;
+      plot(ctx, w, h, function (u) { return Math.max(u - K, 0) * 1.4 + 0.06; }, 0, 1, 34);
+      ctx.strokeStyle = t.accent; ctx.lineWidth = 2.5;
+      plot(ctx, w, h, function (u) {
+        var payoff = Math.max(u - K, 0) * 1.4;
+        var tv = 0.34 * Math.exp(-(u - K) * (u - K) / 0.09);
+        return payoff + tv + 0.06;
+      }, 0, 1, 34);
+      ctx.strokeStyle = t.strong; ctx.setLineDash([4, 4]); ctx.lineWidth = 1.5;
+      var xk = 34 + K * (w - 68);
+      ctx.beginPath(); ctx.moveTo(xk, 26); ctx.lineTo(xk, h - 26); ctx.stroke();
+      ctx.setLineDash([]);
+    },
+    'temperature': function (ctx, w, h, t) {
+      var logits = [2.1, 0.4, 1.2, -0.5, 0.9, -1.1, 0.1];
+      function softmax(T) {
+        var e = logits.map(function (l) { return Math.exp(l / T); });
+        var s = e.reduce(function (a, b) { return a + b; }, 0);
+        return e.map(function (v) { return v / s; });
+      }
+      var n = logits.length, bw = (w - 80) / n;
+      var hot = softmax(3.5), cold = softmax(0.7);
+      for (var i = 0; i < n; i++) {
+        var x = 40 + i * bw;
+        var hh = hot[i] * (h - 70) * 1.6;
+        ctx.strokeStyle = t.muted; ctx.lineWidth = 1.5;
+        ctx.strokeRect(x + 4, h - 35 - hh, bw - 14, hh);
+        var hc = cold[i] * (h - 70) * 1.6;
+        ctx.fillStyle = t.accent; ctx.globalAlpha = 0.85;
+        ctx.fillRect(x + 4, h - 35 - hc, bw - 14, hc);
+        ctx.globalAlpha = 1;
+      }
+    },
+    'world-models': function (ctx, w, h, t) {
+      var n = 6, cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.33;
+      var pts = [];
+      for (var i = 0; i < n; i++) {
+        var a = -Math.PI / 2 + i / n * Math.PI * 2;
+        pts.push([cx + Math.cos(a) * R * 1.6, cy + Math.sin(a) * R]);
+      }
+      ctx.strokeStyle = t.accent; ctx.lineWidth = 2;
+      for (var i = 0; i < n; i++) {
+        var a = pts[i], b = pts[(i + 1) % n];
+        var mx = (a[0] + b[0]) / 2 + (cx - (a[0] + b[0]) / 2) * -0.18;
+        var my = (a[1] + b[1]) / 2 + (cy - (a[1] + b[1]) / 2) * -0.18;
+        ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.quadraticCurveTo(mx, my, b[0], b[1]); ctx.stroke();
+      }
+      for (var i = 0; i < n; i++) {
+        ctx.fillStyle = i === 0 ? t.strong : t.soft;
+        ctx.strokeStyle = t.accent;
+        ctx.beginPath(); ctx.arc(pts[i][0], pts[i][1], i === 0 ? 11 : 8, 0, Math.PI * 2);
+        ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = t.muted;
+      ctx.font = '600 12px ui-monospace, monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('z₀ → z₁ → z₂ …', cx, cy + 4);
+    },
+    'forward-forward': function (ctx, w, h, t) {
+      var layers = [3, 4, 4, 2], lx = [], gap = (w - 120) / (layers.length - 1);
+      for (var l = 0; l < layers.length; l++) {
+        lx[l] = [];
+        for (var i = 0; i < layers[l]; i++) {
+          lx[l].push([60 + l * gap, h / 2 + (i - (layers[l] - 1) / 2) * 34]);
+        }
+      }
+      ctx.strokeStyle = t.grid; ctx.lineWidth = 1;
+      for (var l = 0; l < layers.length - 1; l++) {
+        for (var i = 0; i < lx[l].length; i++) {
+          for (var j = 0; j < lx[l + 1].length; j++) {
+            ctx.beginPath(); ctx.moveTo(lx[l][i][0], lx[l][i][1]); ctx.lineTo(lx[l + 1][j][0], lx[l + 1][j][1]); ctx.stroke();
+          }
+        }
+      }
+      for (var l = 0; l < layers.length; l++) {
+        for (var i = 0; i < lx[l].length; i++) {
+          ctx.fillStyle = l % 2 ? t.soft : t.accent;
+          ctx.strokeStyle = t.accent;
+          ctx.beginPath(); ctx.arc(lx[l][i][0], lx[l][i][1], 7, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        }
+      }
+      ctx.strokeStyle = t.strong; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(50, 24); ctx.lineTo(w - 60, 24); ctx.lineTo(w - 68, 18); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(50, h - 24); ctx.lineTo(w - 60, h - 24); ctx.lineTo(w - 68, h - 18); ctx.stroke();
+    },
+    'representations': function (ctx, w, h, t) {
+      ctx.strokeStyle = t.muted; ctx.lineWidth = 2;
+      plot(ctx, w, h, function (u) { return 0.5 + 0.32 * Math.sin(u * Math.PI * 3); }, 0, 1, 30);
+      ctx.strokeStyle = t.accent; ctx.lineWidth = 2.5;
+      plot(ctx, w, h, function (u) {
+        return 0.5 + 0.30 * Math.sin(u * Math.PI * 3) + 0.13 * Math.sin(u * Math.PI * 14) + 0.05 * Math.sin(u * Math.PI * 31);
+      }, 0, 1, 30);
+    }
+  };
+
+  function pick(slug) {
+    var keys = Object.keys(sketches);
+    for (var i = 0; i < keys.length; i++) {
+      if (slug.indexOf(keys[i]) !== -1) return sketches[keys[i]];
+    }
+    return sketches['representations'];
+  }
+
+  function drawAll() {
+    var canvases = document.querySelectorAll('.note-thumb canvas');
+    for (var i = 0; i < canvases.length; i++) {
+      var canvas = canvases[i];
+      var ctx = canvas.getContext('2d');
+      if (!ctx) continue;
+      var t = tokens(canvas.parentElement);
+      var w = canvas.width, hh = canvas.height;
+      frame(ctx, w, hh, t);
+      pick(canvas.getAttribute('data-slug') || '')(ctx, w, hh, t);
+    }
+  }
+
+  drawAll();
+  new MutationObserver(drawAll).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+})();
+</script>
 
     </div>
 
@@ -384,6 +706,152 @@
         }
       });
     </script>
+
+    <div class="cmdk-backdrop" id="cmdk" hidden>
+  <div class="cmdk" role="dialog" aria-modal="true" aria-label="Site search">
+    <div class="cmdk-input-row">
+      <i class="fas fa-search" aria-hidden="true"></i>
+      <input id="cmdk-input" type="text" placeholder="Search pages, study notes, projects, publications…" autocomplete="off" spellcheck="false" />
+      <kbd>esc</kbd>
+    </div>
+    <ul class="cmdk-results" id="cmdk-results" role="listbox"></ul>
+    <div class="cmdk-foot">↑ ↓ to navigate &nbsp;·&nbsp; ↵ to open &nbsp;·&nbsp; esc to close</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var backdrop = document.getElementById('cmdk');
+  var input = document.getElementById('cmdk-input');
+  var list = document.getElementById('cmdk-results');
+  var index = null;
+  var results = [];
+  var active = 0;
+
+  function load() {
+    if (index) return Promise.resolve(index);
+    return fetch('/search.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) { index = data; return index; });
+  }
+
+  // Subsequence fuzzy match; contiguous runs and word starts score higher.
+  // Returns {score, positions} or null.
+  function fuzzy(query, text) {
+    var q = query.toLowerCase(), s = text.toLowerCase();
+    var qi = 0, score = 0, run = 0, positions = [];
+    for (var i = 0; i < s.length && qi < q.length; i++) {
+      if (s[i] === q[qi]) {
+        positions.push(i);
+        run++;
+        score += 1 + run * 2 + (i === 0 || s[i - 1] === ' ' ? 4 : 0);
+        qi++;
+      } else {
+        run = 0;
+      }
+    }
+    return qi === q.length ? { score: score, positions: positions } : null;
+  }
+
+  function highlight(title, positions) {
+    var out = '', set = {};
+    positions.forEach(function (p) { set[p] = true; });
+    for (var i = 0; i < title.length; i++) {
+      var ch = title[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      out += set[i] ? '<mark>' + ch + '</mark>' : ch;
+    }
+    return out;
+  }
+
+  function search(query) {
+    if (!index) return;
+    if (!query) {
+      results = index.map(function (item) { return { item: item, positions: [] }; });
+    } else {
+      results = [];
+      index.forEach(function (item) {
+        var m = fuzzy(query, item.title);
+        if (m) {
+          results.push({ item: item, positions: m.positions, score: m.score + 20 });
+        } else if (item.text && fuzzy(query, item.text)) {
+          results.push({ item: item, positions: [], score: 1 });
+        }
+      });
+      results.sort(function (a, b) { return b.score - a.score; });
+    }
+    results = results.slice(0, 12);
+    active = 0;
+    render(query);
+  }
+
+  function render() {
+    if (!results.length) {
+      list.innerHTML = '<div class="cmdk-empty">No matches.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    results.forEach(function (r, i) {
+      var li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.className = i === active ? 'active' : '';
+      li.innerHTML =
+        '<span class="cmdk-title">' + highlight(r.item.title, r.positions) + '</span>' +
+        '<span class="cmdk-type">' + r.item.type + '</span>';
+      li.addEventListener('click', function () { go(r.item); });
+      li.addEventListener('mousemove', function () {
+        if (active !== i) { active = i; render(); }
+      });
+      list.appendChild(li);
+    });
+    var el = list.children[active];
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+  }
+
+  function go(item) {
+    window.location.href = '' + item.url;
+  }
+
+  function open() {
+    backdrop.hidden = false;
+    input.value = '';
+    load().then(function () { search(''); });
+    input.focus();
+  }
+
+  function close() {
+    backdrop.hidden = true;
+  }
+
+  window.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      backdrop.hidden ? open() : close();
+      return;
+    }
+    if (backdrop.hidden) return;
+    if (e.key === 'Escape') {
+      close();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (results.length) { active = (active + 1) % results.length; render(); }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (results.length) { active = (active - 1 + results.length) % results.length; render(); }
+    } else if (e.key === 'Enter') {
+      if (results[active]) go(results[active].item);
+    }
+  });
+
+  input.addEventListener('input', function () { search(input.value.trim()); });
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) close();
+  });
+
+  var navBtn = document.querySelector('.nav-search');
+  if (navBtn) navBtn.addEventListener('click', open);
+})();
+</script>
+
 
     
 <script data-goatcounter="https://alexdruso.goatcounter.com/count"

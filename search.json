@@ -1,0 +1,237 @@
+[
+  
+  {
+    "title": "About Me",
+    "url": "/",
+    "type": "Page",
+    "text": ""
+  },
+  
+  {
+    "title": "Publications",
+    "url": "/publications/",
+    "type": "Page",
+    "text": ""
+  },
+  
+  {
+    "title": "Projects",
+    "url": "/projects/",
+    "type": "Page",
+    "text": ""
+  },
+  
+  {
+    "title": "Study Notes",
+    "url": "/study-notes/",
+    "type": "Page",
+    "text": ""
+  },
+  
+  {
+    "title": "CV",
+    "url": "/cv/",
+    "type": "Page",
+    "text": ""
+  },
+  
+  {
+    "title": "Snake",
+    "url": "/game/",
+    "type": "Page",
+    "text": ""
+  },
+  
+  
+  {
+    "title": "RecSys Challenge 2022 — 11th place",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python TensorFlow LightGBM Recommender Systems"
+  },
+  
+  {
+    "title": "DD2437 — Artificial Neural Networks and Deep Architectures",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python NumPy Jupyter Neural Networks"
+  },
+  
+  {
+    "title": "II2202 — Quantum Ridge Regression on D-Wave",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python D-Wave Quantum ML"
+  },
+  
+  {
+    "title": "HackaTUMeme — gamified movie recommender",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python Django Lenskit TypeScript"
+  },
+  
+  {
+    "title": "ID2222 — Data Mining lab assignments",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Java Jupyter Algorithms"
+  },
+  
+  {
+    "title": "RecSys Challenge 2021 — Trial&Error team",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python LightGBM XGBoost Transformers AWS"
+  },
+  
+  {
+    "title": "Quantum linear regression on Orquestra",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python Orquestra Quantum ML"
+  },
+  
+  {
+    "title": "DB2 — JEE database application",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Java JEE JPA Thymeleaf"
+  },
+  
+  {
+    "title": "CLup — RASD & Design Document",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "LaTeX Alloy Requirements Engineering"
+  },
+  
+  {
+    "title": "Santorini — distributed multiplayer board game",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Java Maven Sockets CircleCI"
+  },
+  
+  {
+    "title": "RecSys Challenge 2020 — PoliMi",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python Cython Recommender Systems GPU"
+  },
+  
+  {
+    "title": "Working-zones address decoder (VHDL)",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "VHDL Vivado Digital Design"
+  },
+  
+  {
+    "title": "API — graph-relationship engine in C",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "C Algorithms Performance"
+  },
+  
+  
+  {
+    "title": "HINT: Learning Complete Human Neural Representations from Limited Viewpoints",
+    "url": "/publications/",
+    "type": "Publication",
+    "text": "IEEE IV"
+  },
+  
+  {
+    "title": "ScatterNeRF: Seeing Through Fog with Physically-Based Inverse Neural Rendering",
+    "url": "/publications/",
+    "type": "Publication",
+    "text": "ICCV"
+  },
+  
+  {
+    "title": "United We Stand, Divided We Fall: Leveraging Ensembles of Recommenders to Compete with Budget Constrained Resources",
+    "url": "/publications/",
+    "type": "Publication",
+    "text": "ACM RecSys Challenge"
+  },
+  
+  {
+    "title": "Lightweight and Scalable Model for Tweet Engagements Predictions in a Resource-constrained Environment",
+    "url": "/publications/",
+    "type": "Publication",
+    "text": "ACM RecSys Challenge"
+  },
+  
+  
+  {
+    "title": "Self-Attention: The Content-Addressed Lookup at the Heart of Transformers",
+    "url": "/self-attention/",
+    "type": "Study Note",
+    "text": "Self-attention computes each token's new representation as a weighted average of every token's value vector, with the weights chosen by content: a softmax over query–key dot products. The 1/√d scaling is literally a softmax temperature, causal masking is a renormalized softmax over the prefix, an..."
+  },
+  
+  {
+    "title": "Implicit Neural Representations: When the Network Is the Image",
+    "url": "/implicit-neural-representations/",
+    "type": "Study Note",
+    "text": "An implicit neural representation stores a signal as a function: a small network maps continuous (x, y) coordinates to RGB, so the image lives in the weights instead of a pixel grid. Why a plain ReLU MLP can only learn a blurry version (spectral bias), how Fourier features and SIREN's sine activa..."
+  },
+  
+  {
+    "title": "The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One",
+    "url": "/forward-forward-algorithm/",
+    "type": "Study Note",
+    "text": "Hinton's Forward-Forward algorithm trains a network without backpropagation: it replaces the forward-then-backward sweep with two forward passes — one on real data, one on fake — and lets every layer learn immediately from its own local 'goodness' objective. What goodness is, why layer normalizat..."
+  },
+  
+  {
+    "title": "World Models: Learning to Dream, Then Act",
+    "url": "/world-models/",
+    "type": "Study Note",
+    "text": "A World Models agent splits into a large world model trained unsupervised and a tiny controller trained by evolution: V compresses each frame to a latent vector, M learns to predict the next latent given the action, and C maps that compressed state to an action — small enough to train entirely in..."
+  },
+  
+  {
+    "title": "Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines",
+    "url": "/temperature-and-entropy-llms/",
+    "type": "Study Note",
+    "text": "The temperature parameter in an LLM divides the logits before the softmax. Raise it and the output distribution flattens, so its entropy rises — and that is not a loose analogy but the literal statistical-mechanics relationship: a softmax is a Boltzmann distribution with energy = −logit, and temp..."
+  },
+  
+  {
+    "title": "Options Theory, Visually: Payoffs, Black–Scholes, and the Greeks",
+    "url": "/options-theory-visually/",
+    "type": "Study Note",
+    "text": "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memorise and hard to reconstruct. Rebuilt from the payoff up: an option's price is the discounted, risk-neutral expectation of its payoff, and volatility is what gives it value. Drag the strike, widen the volatility, watch a Monte-Carlo averag..."
+  },
+  
+  {
+    "title": "How Many Coin Tosses to Catch a Rigged Coin?",
+    "url": "/how-many-tosses-rigged-coin/",
+    "type": "Study Note",
+    "text": "How many flips does it take to confidently tell a rigged coin from a fair one? Flip a coin and watch the evidence pile up, see a p-value light up, push the false-alarm and missed-detection curves apart, then read the exact number off one clean formula — and confirm it with a thousand simulated ex..."
+  },
+  
+  {
+    "title": "Shannon Entropy, Visually: Surprise, Uncertainty, and Bits",
+    "url": "/shannon-entropy-visually/",
+    "type": "Study Note",
+    "text": "Entropy is usually introduced as a formula — −Σ p log p — with the meaning left implicit. Rebuilt from the ground up: entropy is average surprise, measured in yes/no questions. Drag a coin's bias, reshape a distribution, and watch a sampler's running surprise converge onto the entropy."
+  },
+  
+  {
+    "title": "Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons",
+    "url": "/boltzmann-machines-visually/",
+    "type": "Study Note",
+    "text": "Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a ..."
+  },
+  
+  {
+    "title": "A Day in Luca's Life: Finding Optimal Decisions with MDPs",
+    "url": "/finding-optimal-policies-mdp/",
+    "type": "Study Note",
+    "text": "A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?"
+  }
+  
+]
