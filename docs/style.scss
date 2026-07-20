@@ -1347,30 +1347,31 @@ footer {
   }
 }
 
-// Home hero — animated loss-landscape canvas.
+// Home hero — a quiet, borderless animation strip above the intro text.
 // The canvas JS reads the --viz-* custom properties at runtime so the
 // animation recolors itself when .dark-theme toggles (same pattern as the
 // study notes' --sn-* tokens).
 .home-hero {
-  --viz-contour: rgba(34, 88, 165, 0.16);
+  --viz-contour: rgba(34, 88, 165, 0.11);
   --viz-particle: #0891b2;
-  --viz-trail: rgba(8, 145, 178, 0.35);
+  --viz-trail: rgba(8, 145, 178, 0.25);
 
   position: relative;
-  margin-bottom: 3rem;
-  border: 1px solid $lightGray;
-  border-radius: 12px;
+  height: 170px;
+  margin-bottom: 2rem;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(232, 240, 254, 0.55), rgba(255, 255, 255, 0) 70%);
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+
+  @include mobile {
+    height: 120px;
+  }
 }
 
 .dark-theme .home-hero {
-  --viz-contour: rgba(148, 163, 184, 0.22);
+  --viz-contour: rgba(148, 163, 184, 0.15);
   --viz-particle: #22d3ee;
-  --viz-trail: rgba(34, 211, 238, 0.4);
-
-  border-color: $dark-border;
-  background: linear-gradient(180deg, rgba(34, 211, 238, 0.06), rgba(26, 26, 26, 0) 70%);
+  --viz-trail: rgba(34, 211, 238, 0.28);
 }
 
 .home-hero canvas {
@@ -1381,122 +1382,23 @@ footer {
   display: block;
 }
 
-.home-hero-content {
-  position: relative;
-  z-index: 1;
-  padding: 3.5rem 3rem;
-  max-width: 640px;
-  pointer-events: none;
-
-  h1 {
-    margin: 0.3em 0 0.4em;
-    font-size: 2.2em;
-    line-height: 1.25;
-  }
-
-  @include mobile {
-    padding: 2rem 1.5rem;
-
-    h1 {
-      font-size: 1.6em;
-    }
-  }
-}
-
-.home-hero-kicker {
-  margin: 0;
-  font-size: 0.85em;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: $accentBlue;
-}
-
-.home-hero-sub {
-  margin: 0 0 1.5em;
-  color: $gray;
-  font-size: 1.05em;
-}
-
-.home-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  pointer-events: auto;
-
-  a {
-    display: inline-block;
-    padding: 0.6em 1.3em;
-    border-radius: 8px;
-    font-weight: 600;
-    background-color: $accentBlue;
-    color: $white;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background-color: $blue;
-      color: $white;
-      transform: translateY(-2px);
-    }
-
-    &.ghost {
-      background: transparent;
-      color: $accentBlue;
-      box-shadow: inset 0 0 0 1px rgba(34, 88, 165, 0.35);
-
-      &:hover {
-        background: $lightBlue;
-      }
-    }
-  }
-}
-
 .home-hero-caption {
   position: absolute;
-  right: 1.2rem;
-  bottom: 0.8rem;
+  right: 0.4rem;
+  bottom: 1.2rem;
   z-index: 1;
   margin: 0;
-  font-size: 0.72em;
+  font-size: 0.7em;
   color: $gray;
-  opacity: 0.75;
+  opacity: 0.55;
 
   @include mobile {
     display: none;
   }
 }
 
-.dark-theme .home-hero {
-  .home-hero-kicker {
-    color: $dark-accent;
-  }
-
-  .home-hero-sub {
-    color: $dark-gray;
-  }
-
-  .home-hero-actions a {
-    background-color: $dark-accent;
-    color: $dark-bg;
-
-    &:hover {
-      background-color: $dark-accent-hover;
-    }
-
-    &.ghost {
-      background: transparent;
-      color: $dark-accent;
-      box-shadow: inset 0 0 0 1px rgba(100, 181, 246, 0.4);
-
-      &:hover {
-        background: rgba(100, 181, 246, 0.12);
-      }
-    }
-  }
-
-  .home-hero-caption {
-    color: $dark-gray;
-  }
+.dark-theme .home-hero-caption {
+  color: $dark-gray;
 }
 
 // Study-notes index — preview cards with JS-drawn thumbnails.

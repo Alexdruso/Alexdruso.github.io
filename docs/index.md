@@ -5,16 +5,7 @@ layout: page
 
 <div class="home-hero" id="home-hero">
   <canvas id="hero-canvas" aria-hidden="true"></canvas>
-  <div class="home-hero-content">
-    <p class="home-hero-kicker">Software &amp; AI Engineer</p>
-    <h1>I build trading systems by day and interactive ML explainers by night.</h1>
-    <p class="home-hero-sub">Data pipelines and systematic strategies at Optiver — and a growing set of hands-on study notes on machine learning, information theory, and finance.</p>
-    <div class="home-hero-actions">
-      <a href="/study-notes/">Explore the study notes</a>
-      <a href="/public/Alessandro_Sanvito_CV.pdf" class="ghost">Download CV</a>
-    </div>
-  </div>
-  <p class="home-hero-caption">Live demo: gradient descent with momentum on a random loss surface — reload for a new one.</p>
+  <p class="home-hero-caption">gradient descent with momentum on a random loss surface — reload for a new one</p>
 </div>
 
 <script>
@@ -111,7 +102,7 @@ layout: page
     c.stroke();
   }
 
-  var N = 26;
+  var N = 14;
   var particles = [];
   function spawn(p) {
     p = p || {};
@@ -148,7 +139,7 @@ layout: page
       var p = particles[i];
       if (p.trail.length > 1) {
         ctx.strokeStyle = t.trail;
-        ctx.lineWidth = 1.2;
+        ctx.lineWidth = 1;
         for (var k = 1; k < p.trail.length; k++) {
           ctx.globalAlpha = k / p.trail.length * 0.8;
           ctx.beginPath();
@@ -160,7 +151,7 @@ layout: page
       }
       ctx.fillStyle = t.particle;
       ctx.beginPath();
-      ctx.arc(p.x * W, p.y * H, 2.4, 0, Math.PI * 2);
+      ctx.arc(p.x * W, p.y * H, 2, 0, Math.PI * 2);
       ctx.fill();
     }
   }
