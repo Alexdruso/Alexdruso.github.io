@@ -1,4 +1,1002 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-07-20T20:12:30+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">Self-Attention: The Content-Addressed Lookup at the Heart of Transformers</title><link href="https://alexdruso.github.io/self-attention/" rel="alternate" type="text/html" title="Self-Attention: The Content-Addressed Lookup at the Heart of Transformers" /><published>2026-07-18T00:00:00+00:00</published><updated>2026-07-18T00:00:00+00:00</updated><id>https://alexdruso.github.io/self-attention</id><content type="html" xml:base="https://alexdruso.github.io/self-attention/"><![CDATA[<style>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-07-20T21:00:46+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">Tabular Q-Learning, Explained by a Snake</title><link href="https://alexdruso.github.io/q-learning-snake/" rel="alternate" type="text/html" title="Tabular Q-Learning, Explained by a Snake" /><published>2026-07-20T00:00:00+00:00</published><updated>2026-07-20T00:00:00+00:00</updated><id>https://alexdruso.github.io/q-learning-snake</id><content type="html" xml:base="https://alexdruso.github.io/q-learning-snake/"><![CDATA[<style>
+/* ============================================================
+   Study Notes — shared design system
+   Sleek/futuristic: cyan-teal accent, hairline borders, flat
+   single-accent controls, monospace numerals, glow in dark only.
+   Adaptive light + dark via tokens. Every selector is scoped
+   under .study-note so nothing leaks to the rest of the site.
+   ============================================================ */
+.study-note {
+  --sn-accent: #0891b2;
+  --sn-accent-strong: #06b6d4;
+  --sn-accent-soft: rgba(8, 145, 178, 0.10);
+  --sn-accent-line: rgba(8, 145, 178, 0.30);
+  --sn-on-accent: #ffffff;
+
+  --sn-panel: #ffffff;
+  --sn-panel-inset: #f6f8fa;
+  --sn-section: #f7f9fb;
+  --sn-border: rgba(15, 23, 42, 0.08);
+  --sn-grid: rgba(15, 23, 42, 0.10);
+
+  --sn-text: #1f2933;
+  --sn-muted: #64748b;
+
+  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
+  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
+  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
+
+  --sn-radius: 12px;
+  --sn-radius-sm: 8px;
+  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sn-glow: none;
+  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+.dark-theme .study-note {
+  --sn-accent: #22d3ee;
+  --sn-accent-strong: #67e8f9;
+  --sn-accent-soft: rgba(34, 211, 238, 0.12);
+  --sn-accent-line: rgba(34, 211, 238, 0.35);
+  --sn-on-accent: #06141a;
+
+  --sn-panel: #11131c;
+  --sn-panel-inset: #161a26;
+  --sn-section: #14161f;
+  --sn-border: rgba(148, 163, 184, 0.14);
+  --sn-grid: rgba(148, 163, 184, 0.16);
+
+  --sn-text: #e2e8f0;
+  --sn-muted: #94a3b8;
+
+  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
+  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
+  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
+
+  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+/* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
+.study-note sub,
+.study-note sup {
+  font-size: 0.72em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.study-note sup { top: -0.5em; }
+.study-note sub { bottom: -0.22em; }
+
+/* ---- sections / cards ---- */
+.study-note .se-section,
+.study-note .bm-section,
+.study-note .mdp-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: var(--sn-radius);
+  background: var(--sn-section);
+  border: 1px solid var(--sn-border);
+  box-shadow: var(--sn-shadow);
+}
+.study-note .se-section h3,
+.study-note .bm-section h3,
+.study-note .mdp-section h3 {
+  margin-top: 0;
+  color: var(--sn-accent);
+  letter-spacing: -0.01em;
+}
+
+/* ---- equation boxes ---- */
+.study-note .se-equation,
+.study-note .bm-equation,
+.study-note .equation-box {
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  font-size: 1.1rem;
+  text-align: center;
+  overflow-x: auto;
+}
+.study-note .se-equation .big,
+.study-note .bm-equation .big { font-size: 1.25rem; }
+
+/* ---- callout / note ---- */
+.study-note .se-note,
+.study-note .bm-note {
+  background: var(--sn-accent-soft);
+  border-radius: var(--sn-radius-sm);
+  border-left: 3px solid var(--sn-accent);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- example box ---- */
+.study-note .se-example,
+.study-note .bm-example,
+.study-note .example-box {
+  background: var(--sn-panel-inset);
+  border: 1px solid var(--sn-border);
+  border-left: 3px solid var(--sn-warn);
+  border-radius: var(--sn-radius-sm);
+  padding: 1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- chart containers ---- */
+.study-note .se-chartwrap,
+.study-note .bm-chartwrap,
+.study-note .graph-wrap {
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem;
+}
+.study-note .graph-wrap { overflow-x: auto; }
+
+/* ---- primary buttons ---- */
+.study-note .se-btn,
+.study-note .bm-btn,
+.study-note .vi-btn {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--sn-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-on-accent);
+  background: var(--sn-accent);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
+}
+.study-note .se-btn:hover:not(:disabled),
+.study-note .bm-btn:hover:not(:disabled),
+.study-note .vi-btn:hover:not(:disabled) {
+  background: var(--sn-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sn-glow);
+}
+.study-note .se-btn:disabled,
+.study-note .bm-btn:disabled,
+.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* secondary variant */
+.study-note .se-btn.sec,
+.study-note .bm-btn.sec,
+.study-note .vi-btn.sec {
+  background: transparent;
+  color: var(--sn-accent);
+  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
+}
+.study-note .se-btn.sec:hover:not(:disabled),
+.study-note .bm-btn.sec:hover:not(:disabled),
+.study-note .vi-btn.sec:hover:not(:disabled) {
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+}
+
+/* ---- ghost / reset buttons ---- */
+.study-note .se-reset,
+.study-note .bm-reset,
+.study-note .reset-link {
+  background: none;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-muted);
+  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
+}
+.study-note .se-reset:hover,
+.study-note .bm-reset:hover,
+.study-note .reset-link:hover {
+  background: var(--sn-accent-soft);
+  border-color: var(--sn-accent-line);
+  color: var(--sn-accent);
+}
+
+/* ---- range sliders: flat, single-accent ---- */
+.study-note input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+  outline: none;
+  cursor: pointer;
+}
+.study-note input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
+}
+.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.study-note input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+}
+.study-note input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+}
+
+/* ---- status pills ---- */
+.study-note .se-tag,
+.study-note .bm-tag {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
+}
+.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
+.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
+
+/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
+.study-note .se-stat .val,
+.study-note .bm-stat .val,
+.study-note .score-item .sval,
+.study-note .compare-score {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-accent);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.study-note .se-readout,
+.study-note .bm-temp-readout {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sn-accent);
+}
+
+/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
+.study-note svg text { fill: var(--sn-muted); }
+</style>
+
+
+<div class="study-note">
+
+<style>
+/* Note-specific layout only — colors come from tokens, shared components
+   come from study-note-styles.html. */
+.ql-controls { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; margin: 0.75rem 0; }
+
+.ql-boardwrap { text-align: center; }
+.ql-boardwrap svg, .ql-boardwrap canvas {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  background: var(--sn-panel);
+  display: inline-block;
+}
+
+.ql-statebits { display: flex; gap: 0.5rem 0.75rem; flex-wrap: wrap; align-items: center; margin: 0.75rem 0 0.4rem; }
+.ql-bit { display: flex; flex-direction: column; gap: 0.2rem; align-items: flex-start; }
+.ql-bit .blabel { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; font-weight: 700; }
+.ql-key {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.95rem;
+  color: var(--sn-accent);
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-accent-line);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem 0.8rem;
+  display: inline-block;
+  margin-top: 0.5rem;
+}
+
+.ql-calcgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; align-items: start; }
+.ql-scenario { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.ql-scn {
+  padding: 0.45rem 0.9rem;
+  border-radius: var(--sn-radius-sm);
+  border: 1px solid var(--sn-border);
+  background: var(--sn-panel-inset);
+  color: var(--sn-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s var(--sn-ease);
+}
+.ql-scn:hover { border-color: var(--sn-accent-line); }
+.ql-scn.active { background: var(--sn-accent); color: var(--sn-on-accent); border-color: var(--sn-accent); }
+.ql-sliderrow { display: flex; align-items: center; gap: 0.6rem; margin: 0.5rem 0; font-size: 0.88rem; }
+.ql-sliderrow input[type="range"] { flex: 1; min-width: 120px; }
+.ql-calc {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.88rem;
+  line-height: 1.9;
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.85rem 1rem;
+  overflow-x: auto;
+}
+.ql-calc .hl { color: var(--sn-accent); font-weight: 700; }
+.ql-calc .dim { color: var(--sn-muted); }
+
+.ql-stats { display: flex; gap: 1.4rem; flex-wrap: wrap; justify-content: center; margin: 0.75rem 0 0.25rem; }
+.se-stat { text-align: center; }
+.se-stat .val { font-size: 1.45rem; }
+.se-stat .lab { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.55; font-weight: 700; }
+
+.ql-rewards { width: 100%; border-collapse: collapse; font-size: 0.88rem; margin: 0.75rem 0; }
+.ql-rewards th, .ql-rewards td { padding: 0.45rem 0.65rem; border: 1px solid var(--sn-border); text-align: left; }
+.ql-rewards th { background: var(--sn-panel-inset); font-weight: 600; }
+.ql-rewards td.num { font-family: var(--sn-mono); font-variant-numeric: tabular-nums; text-align: center; font-weight: 700; }
+.ql-rewards td.pos { color: var(--sn-good); }
+.ql-rewards td.neg { color: var(--sn-bad); }
+
+.ql-epslabel { font-size: 0.85rem; opacity: 0.7; margin-top: 0.4rem; }
+</style>
+
+<p>
+  <strong>Q-learning</strong> is a model-free reinforcement-learning algorithm: it learns the value of taking each action in each state purely from experienced transitions, without ever knowing the environment's dynamics. The <em>tabular</em> version stores those values in a literal lookup table Q(s,&nbsp;a) and improves them with a one-line temporal-difference update after every single step. The interesting engineering is not the update — it is everything around it: how the state is encoded, how the reward is shaped, and how exploration is scheduled.
+</p>
+
+<div class="se-note">
+  <strong>In one sentence:</strong> after every step, nudge the stored value of the action just taken toward <em>reward received + discounted value of the best action available next</em> — do this enough times, under enough exploration, and the table converges to the values of optimal play.
+</div>
+
+<p>
+  The running example throughout is the Snake agent from this site's <a href="/game/">game page</a>: a snake on a 20×20 grid that must eat food without hitting the walls or its own body. It is a good test case precisely because the naive formulation is hopeless — the raw board has more configurations than atoms in the universe — so every design decision below is forced, not decorative. The final section retrains the same agent from scratch on a smaller board, inside this page.
+</p>
+
+<!-- ==================== STATE ==================== -->
+<div class="se-section">
+  <h3>🧭 What the snake actually sees</h3>
+  <p style="margin-top:0">
+    A tabular method must visit each state many times to learn its values, so the state space has to be tiny. The full board is out: even a modest 20×20 grid has on the order of 10<sup>100</sup> snake configurations. The fix is to describe the situation <em>relative to the snake's head</em>, keeping only what matters for the immediate decision:
+  </p>
+  <ul>
+    <li><strong>Danger bits (3):</strong> would moving straight, turning left, or turning right cause a collision on the very next step?</li>
+    <li><strong>Heading (4):</strong> up, right, down, or left.</li>
+    <li><strong>Food direction (9):</strong> the <em>signs</em> of the food's horizontal and vertical offset from the head — not the distance, just which way.</li>
+  </ul>
+  <p>
+    That is 2³ × 4 × 9 = <strong>288 possible states</strong> (fewer in practice, since some combinations never occur — the trained agent on the game page visits about 250). Actions are relative too: <strong>turn left, go straight, turn right</strong>. With only relative turns available, reversing into the own neck is not even expressible, which removes an entire class of instant deaths from the learning problem.
+  </p>
+  <p>
+    Drive the snake below with the three relative actions and watch the state it perceives. Click any cell to move the food. Note how radically different board positions collapse into the same state key — that collapsing is what makes the table small enough to learn.
+  </p>
+
+  <div class="ql-controls" style="justify-content:center">
+    <button class="se-btn sec" id="enc-left">↰ Turn left</button>
+    <button class="se-btn" id="enc-straight">↑ Straight</button>
+    <button class="se-btn sec" id="enc-right">↱ Turn right</button>
+    <button class="reset-link" id="enc-reset">↺ Reset</button>
+  </div>
+
+  <div class="ql-boardwrap">
+    <svg id="enc-svg" width="330" height="330" viewBox="0 0 286 286"></svg>
+  </div>
+
+  <div class="ql-statebits" id="enc-bits"></div>
+  <div class="ql-key" id="enc-key"></div>
+  <p style="font-size:0.8rem;opacity:0.65;margin-bottom:0">
+    The highlighted cells are the agent's entire sensory field: the square straight ahead (S), to its left (L), and to its right (R). Everything else on the board — including most of its own body — is invisible to it.
+  </p>
+</div>
+
+<!-- ==================== REWARDS ==================== -->
+<div class="se-section">
+  <h3>🍎 Rewards, and why shaping is asymmetric</h3>
+  <p style="margin-top:0">
+    The reward function defines the task. Eating and dying are the obvious signals, but on their own they are too sparse: a random snake takes hundreds of steps to stumble into its first food, and until then every action looks equally worthless. A small <em>shaping</em> reward based on Manhattan distance to the food gives the agent a gradient to follow from step one.
+  </p>
+
+  <table class="ql-rewards">
+    <tr><th>Event</th><th style="text-align:center">Reward</th><th>Purpose</th></tr>
+    <tr><td>Eats the food</td><td class="num pos">+10</td><td>the actual objective</td></tr>
+    <tr><td>Hits a wall or its body</td><td class="num neg">−10</td><td>terminal; ends the episode</td></tr>
+    <tr><td>Too many steps without eating</td><td class="num neg">−10</td><td>starvation cutoff — stops endless wandering episodes</td></tr>
+    <tr><td>Step that moves closer to food</td><td class="num pos">+0.3</td><td>shaping: dense progress signal</td></tr>
+    <tr><td>Step that moves away from food</td><td class="num neg">−0.45</td><td>shaping, deliberately larger — see below</td></tr>
+  </table>
+
+  <p>
+    The asymmetry between +0.3 and −0.45 is not an accident. With symmetric shaping (+0.3 / −0.3), a snake that circles forever near the food breaks even on shaping and never risks the −10 of a crash — so cowardly orbiting becomes a decent policy, and early training gets stuck in it. Making retreat cost 1.5× what approach earns turns any closed loop into a strict net loss: every circle contains equally many approaching and retreating steps, so circling bleeds value and the only way to profit is to actually reach the food.
+  </p>
+  <div class="se-note">
+    Shaping rewards are a scalpel, not free guidance: any shaping term the agent can farm without solving the task <em>will</em> be farmed. The safe question to ask of each term is "what degenerate policy does this make profitable?"
+  </div>
+</div>
+
+<!-- ==================== UPDATE RULE ==================== -->
+<div class="se-section">
+  <h3>📐 The temporal-difference update</h3>
+  <p style="margin-top:0">
+    Q(s,&nbsp;a) estimates the total discounted reward from taking action <em>a</em> in state <em>s</em> and acting optimally afterwards. After each transition (s, a, r, s′) the table is nudged toward a better estimate of itself:
+  </p>
+  <div class="se-equation">
+    Q(s,a) &larr; Q(s,a) + &alpha; [ r + &gamma; &middot; max<sub>a'</sub> Q(s',a') &minus; Q(s,a) ]
+  </div>
+  <p>
+    The bracket is the <strong>TD error</strong>: the gap between what the table predicted, Q(s,a), and the fresher one-step estimate <em>r + γ·max Q(s′,·)</em> — one real reward plus the table's own best guess about the future. The learning rate α controls how far each nudge goes; the discount γ controls how much the future is worth relative to the present. When the transition is terminal (a crash), there is no future: the target is just <em>r</em>.
+  </p>
+  <p>
+    Pick a scenario and drag the sliders to see one concrete update. The snake is in some state s with stored values Q(s,·) = [1.2, <strong>2.4</strong>, −0.5] for [left, straight, right], it goes <strong>straight</strong>, and the best action in the resulting state s′ is worth 4.6.
+  </p>
+
+  <div class="ql-calcgrid">
+    <div>
+      <div class="ql-scenario" id="calc-scenarios"></div>
+      <div class="ql-sliderrow">
+        <span style="width:9.5em">learning rate &alpha; = <span class="se-readout" id="calc-alpha-out">0.15</span></span>
+        <input type="range" id="calc-alpha" min="1" max="100" value="15">
+      </div>
+      <div class="ql-sliderrow">
+        <span style="width:9.5em">discount &gamma; = <span class="se-readout" id="calc-gamma-out">0.90</span></span>
+        <input type="range" id="calc-gamma" min="0" max="100" value="90">
+      </div>
+    </div>
+    <div class="ql-calc" id="calc-out"></div>
+  </div>
+
+  <p style="margin-top:1rem">
+    Two things worth internalizing from playing with it. First, the crash update ignores γ entirely — death has no future to discount, which is why terminal states anchor the whole table: their −10 is ground truth, and it propagates backwards through the max. Second, α is a compromise: at α = 1 each update overwrites the cell with a noisy one-sample estimate; at α → 0 learning stalls. The agent on the game page uses α = 0.15, γ = 0.9.
+  </p>
+</div>
+
+<!-- ==================== EPSILON ==================== -->
+<div class="se-section">
+  <h3>🎲 ε-greedy exploration, on a schedule</h3>
+  <p style="margin-top:0">
+    A greedy agent exploits whatever the half-learned table currently says and can lock into bad habits before ever trying the better move. The standard fix is <strong>ε-greedy</strong>: with probability ε act uniformly at random, otherwise take the argmax action. Crucially, ε is <em>scheduled</em>: it starts at 1.0 (pure random exploration, since the initial table knows nothing worth exploiting) and decays multiplicatively after every episode — ε &larr; max(ε<sub>min</sub>, ε &middot; d) — down to a floor of 0.01 that keeps a sliver of lifelong exploration.
+  </p>
+  <p>
+    Drag the slider to see how the decay constant d shapes the schedule over the first 1000 episodes.
+  </p>
+
+  <div class="ql-sliderrow" style="max-width:460px">
+    <span style="width:11em">decay d = <span class="se-readout" id="eps-decay-out">0.995</span></span>
+    <input type="range" id="eps-decay" min="900" max="999" value="995">
+  </div>
+  <div class="ql-boardwrap" style="text-align:left">
+    <canvas id="eps-canvas" width="460" height="150"></canvas>
+  </div>
+  <div class="ql-epslabel" id="eps-label"></div>
+
+  <p style="margin-top:1rem">
+    The schedule has to match the state space. With ~288 states and 3 actions there are under a thousand table cells, and episodes are short early on, so d = 0.995 (mostly greedy after roughly 500 episodes — under a minute of fast training) is enough to cover the table. A big state space with the same schedule would go greedy long before exploration had touched most of it.
+  </p>
+</div>
+
+<!-- ==================== LIVE TRAINER ==================== -->
+<div class="se-section">
+  <h3>🐍 The full loop, from scratch</h3>
+  <p style="margin-top:0">
+    All four pieces — relative state, shaped rewards, TD updates, decaying ε — assembled into the complete algorithm, running here on a 12×12 board with a fresh, empty table. Press <strong>Start</strong> and switch to fast mode: the early episodes are near-random flailing, then the shaping gradient kicks in, then food-seeking becomes reliable and the rolling average climbs. The curve is the whole story of the algorithm compressed into one line.
+  </p>
+
+  <div class="ql-controls" style="justify-content:center">
+    <button class="se-btn" id="tr-start">▶ Start training</button>
+    <button class="se-btn sec" id="tr-speed1">1×</button>
+    <button class="se-btn sec" id="tr-speed200">200×</button>
+    <button class="reset-link" id="tr-reset">↺ Reset table</button>
+  </div>
+
+  <div class="ql-boardwrap">
+    <canvas id="tr-board" width="264" height="264"></canvas>
+  </div>
+
+  <div class="ql-stats">
+    <div class="se-stat"><div class="val" id="tr-episodes">0</div><div class="lab">Episodes</div></div>
+    <div class="se-stat"><div class="val" id="tr-last">–</div><div class="lab">Last score</div></div>
+    <div class="se-stat"><div class="val" id="tr-best">0</div><div class="lab">Best</div></div>
+    <div class="se-stat"><div class="val" id="tr-avg">–</div><div class="lab">Avg (50)</div></div>
+    <div class="se-stat"><div class="val" id="tr-eps">1.00</div><div class="lab">ε</div></div>
+    <div class="se-stat"><div class="val" id="tr-states">0</div><div class="lab">States seen</div></div>
+  </div>
+
+  <div class="ql-boardwrap" style="text-align:left">
+    <canvas id="tr-curve" width="460" height="130"></canvas>
+  </div>
+  <p style="font-size:0.8rem;opacity:0.65;margin-bottom:0">
+    Score = food eaten per episode. Thin line: raw episodes. Thick line: 20-episode rolling average. The table lives only on this page — reload and it forgets.
+  </p>
+</div>
+
+<p>
+  A few hundred numbers in a lookup table, one line of arithmetic per step, and no knowledge of the rules of Snake beyond what the reward says — that is the entire algorithm. Its limits are equally visible: the relative state cannot see the body's global layout, so the learned policy still traps itself inside its own coils at high scores, and no amount of further training fixes what the state cannot represent. Fixing <em>that</em> is where function approximation and deep Q-networks come in. The persistent version of this agent — same state, same rewards, same update, on the full 20×20 board with its table saved in the browser — lives on the <a href="/game/">game page</a>.
+</p>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---- shared theme plumbing (pattern from the authoring guide) ---- */
+  const SN = document.querySelector(".study-note");
+  const readCols = () => {
+    const cs = getComputedStyle(SN);
+    const c = n => cs.getPropertyValue(n).trim();
+    return {
+      accent: c("--sn-accent"), accentStrong: c("--sn-accent-strong"),
+      accentSoft: c("--sn-accent-soft"), accentLine: c("--sn-accent-line"),
+      good: c("--sn-good"), bad: c("--sn-bad"), badBg: c("--sn-bad-bg"),
+      warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
+      panel: c("--sn-panel"), inset: c("--sn-panel-inset"), text: c("--sn-text")
+    };
+  };
+  let COL = readCols();
+  const redrawFns = [];
+  const onTheme = fn => { redrawFns.push(fn); return fn; };
+  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  const DIRS = ["up", "right", "down", "left"];
+  const DELTA = { up: [0, -1], right: [1, 0], down: [0, 1], left: [-1, 0] };
+  const ARROW = { up: "↑", right: "→", down: "↓", left: "←" };
+  const turnDir = (dir, action) => {
+    const i = DIRS.indexOf(dir);
+    if (action === 0) return DIRS[(i + 3) % 4]; // left
+    if (action === 2) return DIRS[(i + 1) % 4]; // right
+    return dir;
+  };
+  const sgn = v => (v > 0 ? 1 : v < 0 ? -1 : 0);
+
+  /* ============================================================
+     Demo 1 — state encoder: drive the snake, see its state
+     ============================================================ */
+  (function encoder() {
+    const G = 11, CELL = 26, SVGNS = "http://www.w3.org/2000/svg";
+    const svg = document.getElementById("enc-svg");
+    const bitsEl = document.getElementById("enc-bits");
+    const keyEl = document.getElementById("enc-key");
+
+    let snake, dir, food, crashed;
+    const reset = () => {
+      snake = [{ x: 5, y: 5 }, { x: 4, y: 5 }, { x: 3, y: 5 }, { x: 2, y: 5 }];
+      dir = "right"; food = { x: 8, y: 3 }; crashed = false;
+    };
+    reset();
+
+    const el = (tag, attrs) => {
+      const e = document.createElementNS(SVGNS, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      return e;
+    };
+    const collides = c =>
+      c.x < 0 || c.y < 0 || c.x >= G || c.y >= G ||
+      snake.some(s => s.x === c.x && s.y === c.y);
+    const ahead = (from, d) => ({ x: from.x + DELTA[d][0], y: from.y + DELTA[d][1] });
+
+    const sense = () => {
+      const head = snake[0];
+      const cells = {
+        S: ahead(head, dir),
+        L: ahead(head, turnDir(dir, 0)),
+        R: ahead(head, turnDir(dir, 2))
+      };
+      return {
+        cells,
+        danger: { S: collides(cells.S), L: collides(cells.L), R: collides(cells.R) },
+        fx: sgn(food.x - head.x),
+        fy: sgn(food.y - head.y)
+      };
+    };
+
+    function draw() {
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+      // grid + click targets
+      for (let y = 0; y < G; y++) for (let x = 0; x < G; x++) {
+        const r = el("rect", {
+          x: x * CELL, y: y * CELL, width: CELL, height: CELL,
+          fill: "transparent", stroke: COL.grid, "stroke-width": 0.5
+        });
+        r.style.cursor = "pointer";
+        r.addEventListener("click", () => {
+          if (!snake.some(s => s.x === x && s.y === y)) { food = { x: x, y: y }; render(); }
+        });
+        svg.appendChild(r);
+      }
+      // sensed cells
+      const s = sense();
+      for (const k of ["S", "L", "R"]) {
+        const c = s.cells[k], danger = s.danger[k];
+        if (c.x >= 0 && c.y >= 0 && c.x < G && c.y < G) {
+          svg.appendChild(el("rect", {
+            x: c.x * CELL + 1, y: c.y * CELL + 1, width: CELL - 2, height: CELL - 2,
+            fill: danger ? COL.badBg : COL.accentSoft, rx: 3,
+            stroke: danger ? COL.bad : COL.accentLine, "stroke-width": 1.5
+          }));
+        }
+        const tx = Math.min(Math.max(c.x, 0), G - 1) * CELL + CELL / 2;
+        const ty = Math.min(Math.max(c.y, 0), G - 1) * CELL + CELL / 2 + 4;
+        const t = el("text", { x: tx, y: ty, "text-anchor": "middle", "font-size": 11, "font-weight": 700 });
+        t.setAttribute("fill", danger ? COL.bad : COL.accent);
+        t.textContent = k;
+        svg.appendChild(t);
+      }
+      // food
+      svg.appendChild(el("circle", {
+        cx: food.x * CELL + CELL / 2, cy: food.y * CELL + CELL / 2,
+        r: CELL * 0.32, fill: COL.bad
+      }));
+      // snake
+      snake.forEach((c, i) => {
+        svg.appendChild(el("rect", {
+          x: c.x * CELL + 2, y: c.y * CELL + 2, width: CELL - 4, height: CELL - 4,
+          rx: 4, fill: i === 0 ? COL.accentStrong : COL.accent,
+          opacity: i === 0 ? 1 : 0.85
+        }));
+      });
+      // heading arrow on the head
+      const h = snake[0];
+      const t = el("text", {
+        x: h.x * CELL + CELL / 2, y: h.y * CELL + CELL / 2 + 4.5,
+        "text-anchor": "middle", "font-size": 13, "font-weight": 700
+      });
+      t.setAttribute("fill", COL.panel);
+      t.textContent = ARROW[dir];
+      svg.appendChild(t);
+      // border, flashes on crash
+      svg.appendChild(el("rect", {
+        x: 0.5, y: 0.5, width: G * CELL - 1, height: G * CELL - 1,
+        fill: "none", stroke: crashed ? COL.bad : COL.grid, "stroke-width": crashed ? 2.5 : 1
+      }));
+    }
+
+    const tag = (label, text, cls) =>
+      '<div class="ql-bit"><span class="blabel">' + label + '</span>' +
+      '<span class="se-tag ' + cls + '">' + text + "</span></div>";
+    const FOOD_TXT = { "-1": "−1", 0: "0", 1: "+1" };
+
+    function render() {
+      draw();
+      const s = sense();
+      bitsEl.innerHTML =
+        tag("danger straight", s.danger.S ? "1 · danger" : "0 · safe", s.danger.S ? "hot" : "good") +
+        tag("danger left", s.danger.L ? "1 · danger" : "0 · safe", s.danger.L ? "hot" : "good") +
+        tag("danger right", s.danger.R ? "1 · danger" : "0 · safe", s.danger.R ? "hot" : "good") +
+        tag("heading", ARROW[dir] + " " + dir, "") +
+        tag("food Δx sign", FOOD_TXT[s.fx], "warn") +
+        tag("food Δy sign", FOOD_TXT[s.fy], "warn");
+      keyEl.textContent = "state = " +
+        (s.danger.S ? 1 : 0) + "" + (s.danger.L ? 1 : 0) + (s.danger.R ? 1 : 0) +
+        "|" + dir + "|" + s.fx + "," + s.fy + "   — 1 of 288";
+    }
+
+    function step(action) {
+      if (crashed) return;
+      dir = turnDir(dir, action);
+      const next = ahead(snake[0], dir);
+      if (collides(next)) {
+        crashed = true; render();
+        setTimeout(() => { reset(); render(); }, 650);
+        return;
+      }
+      snake.pop(); snake.unshift(next);
+      if (next.x === food.x && next.y === food.y) food = { x: 8, y: 3 };
+      render();
+    }
+
+    document.getElementById("enc-left").addEventListener("click", () => step(0));
+    document.getElementById("enc-straight").addEventListener("click", () => step(1));
+    document.getElementById("enc-right").addEventListener("click", () => step(2));
+    document.getElementById("enc-reset").addEventListener("click", () => { reset(); render(); });
+    onTheme(render);
+    render();
+  })();
+
+  /* ============================================================
+     Demo 2 — one TD update, worked
+     ============================================================ */
+  (function calculator() {
+    const SCN = [
+      { id: "eat", label: "🍎 Ate the food", r: 10, done: false },
+      { id: "closer", label: "↗ Moved closer", r: 0.3, done: false },
+      { id: "farther", label: "↘ Moved away", r: -0.45, done: false },
+      { id: "die", label: "💥 Crashed", r: -10, done: true }
+    ];
+    const Q_SA = 2.4, MAX_NEXT = 4.6;
+    let scn = SCN[0];
+
+    const wrap = document.getElementById("calc-scenarios");
+    const out = document.getElementById("calc-out");
+    const aIn = document.getElementById("calc-alpha"), aOut = document.getElementById("calc-alpha-out");
+    const gIn = document.getElementById("calc-gamma"), gOut = document.getElementById("calc-gamma-out");
+
+    SCN.forEach(s => {
+      const b = document.createElement("button");
+      b.className = "ql-scn" + (s === scn ? " active" : "");
+      b.textContent = s.label;
+      b.addEventListener("click", () => {
+        scn = s;
+        wrap.querySelectorAll(".ql-scn").forEach(x => x.classList.remove("active"));
+        b.classList.add("active");
+        render();
+      });
+      wrap.appendChild(b);
+    });
+
+    const f = (v, d) => (v < 0 ? "−" : "") + Math.abs(v).toFixed(d === undefined ? 2 : d);
+    function render() {
+      const alpha = aIn.value / 100, gamma = gIn.value / 100;
+      aOut.textContent = alpha.toFixed(2);
+      gOut.textContent = gamma.toFixed(2);
+      const target = scn.done ? scn.r : scn.r + gamma * MAX_NEXT;
+      const err = target - Q_SA;
+      const q2 = Q_SA + alpha * err;
+      out.innerHTML =
+        '<span class="dim">r = ' + f(scn.r) + (scn.done
+          ? ' · terminal</span><br>target = r = <span class="hl">' + f(target) + "</span><br>"
+          : "</span><br>target = " + f(scn.r) + " + " + gamma.toFixed(2) + " × " + f(MAX_NEXT) +
+            ' = <span class="hl">' + f(target) + "</span><br>") +
+        "TD error = " + f(target) + " − " + f(Q_SA) + ' = <span class="hl">' + f(err) + "</span><br>" +
+        "Q(s,straight) = " + f(Q_SA) + " + " + alpha.toFixed(2) + " × " + f(err) +
+        ' = <span class="hl">' + f(q2, 3) + "</span>";
+    }
+    aIn.addEventListener("input", render);
+    gIn.addEventListener("input", render);
+    render();
+  })();
+
+  /* ============================================================
+     Demo 3 — ε decay schedule
+     ============================================================ */
+  (function epsilon() {
+    const cv = document.getElementById("eps-canvas"), ctx = cv.getContext("2d");
+    const dIn = document.getElementById("eps-decay"), dOut = document.getElementById("eps-decay-out");
+    const label = document.getElementById("eps-label");
+    const EPS_MIN = 0.01, EPISODES = 1000;
+    const PADL = 34, PADB = 22, PADT = 10, PADR = 8;
+
+    function draw() {
+      const d = dIn.value / 1000;
+      dOut.textContent = d.toFixed(3);
+      const W = cv.width, H = cv.height;
+      const px = ep => PADL + (ep / EPISODES) * (W - PADL - PADR);
+      const py = e => PADT + (1 - e) * (H - PADT - PADB);
+      ctx.clearRect(0, 0, W, H);
+      // axes + gridlines
+      ctx.strokeStyle = COL.grid; ctx.lineWidth = 1;
+      ctx.font = "10px " + getComputedStyle(SN).getPropertyValue("--sn-mono");
+      ctx.fillStyle = COL.muted;
+      [0, 0.5, 1].forEach(v => {
+        ctx.beginPath(); ctx.moveTo(PADL, py(v)); ctx.lineTo(W - PADR, py(v)); ctx.stroke();
+        ctx.fillText(v.toFixed(1), 6, py(v) + 3);
+      });
+      [0, 250, 500, 750, 1000].forEach(ep => ctx.fillText(String(ep), px(ep) - 8, H - 6));
+      // curve
+      let cross = null, e = 1;
+      ctx.strokeStyle = COL.accent; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let ep = 0; ep <= EPISODES; ep++) {
+        if (ep) e = Math.max(EPS_MIN, e * d);
+        if (cross === null && e < 0.1) cross = ep;
+        ep ? ctx.lineTo(px(ep), py(e)) : ctx.moveTo(px(ep), py(e));
+      }
+      ctx.stroke();
+      // mark the ε < 0.1 crossing
+      if (cross !== null) {
+        ctx.strokeStyle = COL.warn; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(px(cross), PADT); ctx.lineTo(px(cross), H - PADB); ctx.stroke();
+        ctx.setLineDash([]);
+        label.innerHTML = "ε drops below 0.1 (90% greedy) after <strong>" + cross +
+          "</strong> episodes; the floor ε = 0.01 keeps 1 step in 100 exploratory forever.";
+      } else {
+        label.textContent = "ε never drops below 0.1 within 1000 episodes at this decay rate.";
+      }
+    }
+    dIn.addEventListener("input", draw);
+    onTheme(draw);
+    draw();
+  })();
+
+  /* ============================================================
+     Demo 4 — live trainer: full Q-learning on a 12×12 board
+     ============================================================ */
+  (function trainer() {
+    const G = 12, CELL = 22;
+    const board = document.getElementById("tr-board"), bctx = board.getContext("2d");
+    const curve = document.getElementById("tr-curve"), cctx = curve.getContext("2d");
+    const $ = id => document.getElementById(id);
+    const startBtn = $("tr-start"), s1 = $("tr-speed1"), s200 = $("tr-speed200");
+
+    const ALPHA = 0.15, GAMMA = 0.9, EPS_MIN = 0.01, EPS_DECAY = 0.995;
+    const STARVE = 120, HISTORY_MAX = 300, BASE_SPS = 8;
+
+    let q, epsilon, episodes, best, history;
+    let snake, dir, food, score, sinceFood;
+    let running = false, speed = 1, carry = 0, lastTs = 0, drawnEpisodes = -1;
+
+    const resetTable = () => { q = {}; epsilon = 1; episodes = 0; best = 0; history = []; };
+    const collides = (c, body) =>
+      c.x < 0 || c.y < 0 || c.x >= G || c.y >= G ||
+      body.some(s => s.x === c.x && s.y === c.y);
+    const ahead = (from, d) => ({ x: from.x + DELTA[d][0], y: from.y + DELTA[d][1] });
+    const placeFood = () => {
+      let f;
+      do { f = { x: (Math.random() * G) | 0, y: (Math.random() * G) | 0 }; }
+      while (snake.some(s => s.x === f.x && s.y === f.y));
+      food = f;
+    };
+    const resetBoard = () => {
+      snake = [{ x: 6, y: 6 }, { x: 5, y: 6 }, { x: 4, y: 6 }];
+      dir = "right"; score = 0; sinceFood = 0; placeFood();
+    };
+
+    const stateKey = () => {
+      const h = snake[0];
+      const dS = collides(ahead(h, dir), snake) ? 1 : 0;
+      const dL = collides(ahead(h, turnDir(dir, 0)), snake) ? 1 : 0;
+      const dR = collides(ahead(h, turnDir(dir, 2)), snake) ? 1 : 0;
+      return dS + "" + dL + dR + "|" + dir + "|" + sgn(food.x - h.x) + "," + sgn(food.y - h.y);
+    };
+    const getQ = s => q[s] || (q[s] = [0, 0, 0]);
+
+    function step() {
+      const s = stateKey(), qs = getQ(s);
+      const a = Math.random() < epsilon
+        ? (Math.random() * 3) | 0
+        : qs.indexOf(Math.max(qs[0], qs[1], qs[2]));
+      dir = turnDir(dir, a);
+      const head = snake[0], next = ahead(head, dir);
+      const distBefore = Math.abs(food.x - head.x) + Math.abs(food.y - head.y);
+
+      let r, done = false;
+      if (collides(next, snake)) { r = -10; done = true; }
+      else {
+        snake.unshift(next);
+        if (next.x === food.x && next.y === food.y) {
+          r = 10; score++; sinceFood = 0; placeFood();
+        } else {
+          snake.pop();
+          sinceFood++;
+          if (sinceFood > STARVE) { r = -10; done = true; }
+          else {
+            const distAfter = Math.abs(food.x - next.x) + Math.abs(food.y - next.y);
+            r = distAfter < distBefore ? 0.3 : -0.45;
+          }
+        }
+      }
+      const target = done ? r : r + GAMMA * Math.max.apply(null, getQ(stateKey()));
+      qs[a] += ALPHA * (target - qs[a]);
+      if (done) {
+        history.push(score);
+        if (history.length > HISTORY_MAX) history.shift();
+        if (score > best) best = score;
+        episodes++;
+        epsilon = Math.max(EPS_MIN, epsilon * EPS_DECAY);
+        resetBoard();
+      }
+    }
+
+    function drawBoard() {
+      bctx.fillStyle = COL.inset;
+      bctx.fillRect(0, 0, board.width, board.height);
+      bctx.fillStyle = COL.bad;
+      bctx.beginPath();
+      bctx.arc(food.x * CELL + CELL / 2, food.y * CELL + CELL / 2, CELL * 0.32, 0, Math.PI * 2);
+      bctx.fill();
+      snake.forEach((c, i) => {
+        bctx.fillStyle = i === 0 ? COL.accentStrong : COL.accent;
+        bctx.fillRect(c.x * CELL + 1, c.y * CELL + 1, CELL - 2, CELL - 2);
+      });
+    }
+
+    function drawCurve() {
+      const W = curve.width, H = curve.height, PADL = 26, PADB = 4, PADT = 8, PADR = 6;
+      cctx.clearRect(0, 0, W, H);
+      cctx.font = "10px " + getComputedStyle(SN).getPropertyValue("--sn-mono");
+      if (history.length < 2) {
+        cctx.fillStyle = COL.muted;
+        cctx.fillText("score per episode appears here once training starts", PADL, H / 2);
+        return;
+      }
+      const max = Math.max(best, 1);
+      const px = i => PADL + (i / (history.length - 1)) * (W - PADL - PADR);
+      const py = v => PADT + (1 - v / max) * (H - PADT - PADB);
+      // best-score gridline
+      cctx.strokeStyle = COL.grid; cctx.setLineDash([3, 4]);
+      cctx.beginPath(); cctx.moveTo(PADL, py(best)); cctx.lineTo(W - PADR, py(best)); cctx.stroke();
+      cctx.setLineDash([]);
+      cctx.fillStyle = COL.muted;
+      cctx.fillText(String(best), 4, py(best) + 3);
+      cctx.fillText("0", 4, py(0) + 3);
+      // raw scores
+      cctx.strokeStyle = COL.accentLine; cctx.lineWidth = 1;
+      cctx.beginPath();
+      history.forEach((v, i) => i ? cctx.lineTo(px(i), py(v)) : cctx.moveTo(px(i), py(v)));
+      cctx.stroke();
+      // rolling average (20)
+      cctx.strokeStyle = COL.accent; cctx.lineWidth = 2;
+      cctx.beginPath();
+      let sum = 0;
+      const win = [];
+      history.forEach((v, i) => {
+        win.push(v); sum += v;
+        if (win.length > 20) sum -= win.shift();
+        const m = sum / win.length;
+        i ? cctx.lineTo(px(i), py(m)) : cctx.moveTo(px(i), py(m));
+      });
+      cctx.stroke();
+    }
+
+    function drawStats() {
+      $("tr-episodes").textContent = episodes;
+      $("tr-last").textContent = history.length ? history[history.length - 1] : "–";
+      $("tr-best").textContent = best;
+      const tail = history.slice(-50);
+      $("tr-avg").textContent = tail.length
+        ? (tail.reduce((a, b) => a + b, 0) / tail.length).toFixed(1) : "–";
+      $("tr-eps").textContent = epsilon.toFixed(2);
+      $("tr-states").textContent = Object.keys(q).length;
+    }
+
+    function frame(ts) {
+      if (!running) return;
+      const dt = Math.min(ts - lastTs, 250);
+      lastTs = ts;
+      carry += (dt / 1000) * BASE_SPS * speed;
+      let n = Math.min(carry | 0, 3000);
+      carry -= n;
+      while (n--) step();
+      drawBoard();
+      drawStats();
+      if (episodes !== drawnEpisodes) { drawCurve(); drawnEpisodes = episodes; }
+      requestAnimationFrame(frame);
+    }
+
+    function setRunning(on) {
+      running = on;
+      startBtn.textContent = on ? "⏸ Pause" : "▶ Start training";
+      if (on) { lastTs = performance.now(); carry = 0; requestAnimationFrame(frame); }
+    }
+    function setSpeed(mult) {
+      speed = mult;
+      s1.classList.toggle("sec", mult !== 1);
+      s200.classList.toggle("sec", mult !== 200);
+    }
+
+    startBtn.addEventListener("click", () => setRunning(!running));
+    s1.addEventListener("click", () => setSpeed(1));
+    s200.addEventListener("click", () => setSpeed(200));
+    $("tr-reset").addEventListener("click", () => {
+      resetTable(); resetBoard(); drawnEpisodes = -1;
+      drawBoard(); drawStats(); drawCurve();
+    });
+
+    onTheme(() => { drawBoard(); drawCurve(); });
+    resetTable();
+    resetBoard();
+    drawBoard();
+    drawStats();
+    drawCurve();
+  })();
+})();
+</script>
+
+</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Q-learning estimates the value of every action in every state directly from experience, with no model of the environment. These notes work through the tabular version end to end — state design, reward shaping, the temporal-difference update, and ε-greedy exploration — using the Snake agent from this site's game page as the running example, retrained from scratch in a live demo.]]></summary></entry><entry><title type="html">Self-Attention: The Content-Addressed Lookup at the Heart of Transformers</title><link href="https://alexdruso.github.io/self-attention/" rel="alternate" type="text/html" title="Self-Attention: The Content-Addressed Lookup at the Heart of Transformers" /><published>2026-07-18T00:00:00+00:00</published><updated>2026-07-18T00:00:00+00:00</updated><id>https://alexdruso.github.io/self-attention</id><content type="html" xml:base="https://alexdruso.github.io/self-attention/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Sleek/futuristic: cyan-teal accent, hairline borders, flat
@@ -10213,1139 +11211,4 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM.]]></summary></entry><entry><title type="html">A Day in Luca’s Life: Finding Optimal Decisions with MDPs</title><link href="https://alexdruso.github.io/finding-optimal-policies-mdp/" rel="alternate" type="text/html" title="A Day in Luca’s Life: Finding Optimal Decisions with MDPs" /><published>2026-05-21T00:00:00+00:00</published><updated>2026-05-21T00:00:00+00:00</updated><id>https://alexdruso.github.io/finding-optimal-policies-mdp</id><content type="html" xml:base="https://alexdruso.github.io/finding-optimal-policies-mdp/"><![CDATA[<style>
-/* ============================================================
-   Study Notes — shared design system
-   Sleek/futuristic: cyan-teal accent, hairline borders, flat
-   single-accent controls, monospace numerals, glow in dark only.
-   Adaptive light + dark via tokens. Every selector is scoped
-   under .study-note so nothing leaks to the rest of the site.
-   ============================================================ */
-.study-note {
-  --sn-accent: #0891b2;
-  --sn-accent-strong: #06b6d4;
-  --sn-accent-soft: rgba(8, 145, 178, 0.10);
-  --sn-accent-line: rgba(8, 145, 178, 0.30);
-  --sn-on-accent: #ffffff;
-
-  --sn-panel: #ffffff;
-  --sn-panel-inset: #f6f8fa;
-  --sn-section: #f7f9fb;
-  --sn-border: rgba(15, 23, 42, 0.08);
-  --sn-grid: rgba(15, 23, 42, 0.10);
-
-  --sn-text: #1f2933;
-  --sn-muted: #64748b;
-
-  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
-  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
-  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
-
-  --sn-radius: 12px;
-  --sn-radius-sm: 8px;
-  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
-  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-  --sn-glow: none;
-  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
-}
-.dark-theme .study-note {
-  --sn-accent: #22d3ee;
-  --sn-accent-strong: #67e8f9;
-  --sn-accent-soft: rgba(34, 211, 238, 0.12);
-  --sn-accent-line: rgba(34, 211, 238, 0.35);
-  --sn-on-accent: #06141a;
-
-  --sn-panel: #11131c;
-  --sn-panel-inset: #161a26;
-  --sn-section: #14161f;
-  --sn-border: rgba(148, 163, 184, 0.14);
-  --sn-grid: rgba(148, 163, 184, 0.16);
-
-  --sn-text: #e2e8f0;
-  --sn-muted: #94a3b8;
-
-  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
-  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
-  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
-
-  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
-}
-
-/* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
-.study-note sub,
-.study-note sup {
-  font-size: 0.72em;
-  line-height: 0;
-  position: relative;
-  vertical-align: baseline;
-}
-.study-note sup { top: -0.5em; }
-.study-note sub { bottom: -0.22em; }
-
-/* ---- sections / cards ---- */
-.study-note .se-section,
-.study-note .bm-section,
-.study-note .mdp-section {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  border-radius: var(--sn-radius);
-  background: var(--sn-section);
-  border: 1px solid var(--sn-border);
-  box-shadow: var(--sn-shadow);
-}
-.study-note .se-section h3,
-.study-note .bm-section h3,
-.study-note .mdp-section h3 {
-  margin-top: 0;
-  color: var(--sn-accent);
-  letter-spacing: -0.01em;
-}
-
-/* ---- equation boxes ---- */
-.study-note .se-equation,
-.study-note .bm-equation,
-.study-note .equation-box {
-  padding: 1rem 1.5rem;
-  margin: 1rem 0;
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
-  border-radius: var(--sn-radius-sm);
-  font-size: 1.1rem;
-  text-align: center;
-  overflow-x: auto;
-}
-.study-note .se-equation .big,
-.study-note .bm-equation .big { font-size: 1.25rem; }
-
-/* ---- callout / note ---- */
-.study-note .se-note,
-.study-note .bm-note {
-  background: var(--sn-accent-soft);
-  border-radius: var(--sn-radius-sm);
-  border-left: 3px solid var(--sn-accent);
-  padding: 0.9rem 1.1rem;
-  font-size: 0.9rem;
-  margin: 1rem 0;
-}
-
-/* ---- example box ---- */
-.study-note .se-example,
-.study-note .bm-example,
-.study-note .example-box {
-  background: var(--sn-panel-inset);
-  border: 1px solid var(--sn-border);
-  border-left: 3px solid var(--sn-warn);
-  border-radius: var(--sn-radius-sm);
-  padding: 1rem;
-  font-size: 0.9rem;
-  margin: 1rem 0;
-}
-
-/* ---- chart containers ---- */
-.study-note .se-chartwrap,
-.study-note .bm-chartwrap,
-.study-note .graph-wrap {
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
-  border-radius: var(--sn-radius-sm);
-  padding: 0.5rem;
-}
-.study-note .graph-wrap { overflow-x: auto; }
-
-/* ---- primary buttons ---- */
-.study-note .se-btn,
-.study-note .bm-btn,
-.study-note .vi-btn {
-  padding: 0.5rem 1.1rem;
-  border: none;
-  border-radius: var(--sn-radius-sm);
-  font-size: 0.9rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  color: var(--sn-on-accent);
-  background: var(--sn-accent);
-  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
-}
-.study-note .se-btn:hover:not(:disabled),
-.study-note .bm-btn:hover:not(:disabled),
-.study-note .vi-btn:hover:not(:disabled) {
-  background: var(--sn-accent-strong);
-  transform: translateY(-1px);
-  box-shadow: var(--sn-glow);
-}
-.study-note .se-btn:disabled,
-.study-note .bm-btn:disabled,
-.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-/* secondary variant */
-.study-note .se-btn.sec,
-.study-note .bm-btn.sec,
-.study-note .vi-btn.sec {
-  background: transparent;
-  color: var(--sn-accent);
-  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
-}
-.study-note .se-btn.sec:hover:not(:disabled),
-.study-note .bm-btn.sec:hover:not(:disabled),
-.study-note .vi-btn.sec:hover:not(:disabled) {
-  background: var(--sn-accent-soft);
-  color: var(--sn-accent);
-}
-
-/* ---- ghost / reset buttons ---- */
-.study-note .se-reset,
-.study-note .bm-reset,
-.study-note .reset-link {
-  background: none;
-  border: 1px solid var(--sn-border);
-  border-radius: var(--sn-radius-sm);
-  padding: 0.4rem 0.85rem;
-  font-size: 0.85rem;
-  font-family: inherit;
-  cursor: pointer;
-  color: var(--sn-muted);
-  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
-}
-.study-note .se-reset:hover,
-.study-note .bm-reset:hover,
-.study-note .reset-link:hover {
-  background: var(--sn-accent-soft);
-  border-color: var(--sn-accent-line);
-  color: var(--sn-accent);
-}
-
-/* ---- range sliders: flat, single-accent ---- */
-.study-note input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--sn-border);
-  outline: none;
-  cursor: pointer;
-}
-.study-note input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--sn-accent);
-  border: none;
-  box-shadow: 0 0 0 4px var(--sn-accent-soft);
-  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
-}
-.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
-.study-note input[type="range"]::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--sn-accent);
-  border: none;
-  box-shadow: 0 0 0 4px var(--sn-accent-soft);
-}
-.study-note input[type="range"]::-moz-range-track {
-  height: 4px;
-  border-radius: 999px;
-  background: var(--sn-border);
-}
-
-/* ---- status pills ---- */
-.study-note .se-tag,
-.study-note .bm-tag {
-  display: inline-block;
-  padding: 0.22rem 0.65rem;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  background: var(--sn-accent-soft);
-  color: var(--sn-accent);
-  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
-}
-.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
-.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
-.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
-
-/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
-.study-note .se-stat .val,
-.study-note .bm-stat .val,
-.study-note .score-item .sval,
-.study-note .compare-score {
-  font-family: var(--sn-mono);
-  font-variant-numeric: tabular-nums;
-  color: var(--sn-accent);
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-.study-note .se-readout,
-.study-note .bm-temp-readout {
-  font-family: var(--sn-mono);
-  font-variant-numeric: tabular-nums;
-  font-weight: 600;
-  color: var(--sn-accent);
-}
-
-/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
-.study-note svg text { fill: var(--sn-muted); }
-</style>
-
-
-<div class="study-note">
-
-<style>
-/* Note-specific layout. Shared components (sections, buttons, equations,
-   example boxes, ghost buttons, numerals, charts) live in study-note-styles.html. */
-.concept-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 0.75rem;
-  margin: 1rem 0;
-}
-.concept-card {
-  padding: 0.9rem;
-  border-radius: var(--sn-radius-sm);
-  border: 1px solid var(--sn-border);
-  border-left: 3px solid var(--sn-accent);
-  background: var(--sn-panel);
-  font-size: 0.9rem;
-}
-.concept-card .clabel {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 700;
-  opacity: 0.55;
-  margin-bottom: 0.4rem;
-}
-
-.state-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.25rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: var(--sn-accent-soft);
-  color: var(--sn-accent);
-  border: 1px solid var(--sn-accent-line);
-  cursor: pointer;
-  transition: all 0.15s var(--sn-ease);
-  font-family: inherit;
-}
-.state-badge:hover, .state-badge.active {
-  background: var(--sn-accent);
-  color: var(--sn-on-accent);
-  border-color: var(--sn-accent);
-}
-
-.action-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 1.1rem;
-  border-radius: var(--sn-radius-sm);
-  border: 1px solid var(--sn-border);
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s var(--sn-ease);
-  background: var(--sn-panel-inset);
-  color: var(--sn-text);
-  font-family: inherit;
-}
-.action-btn:hover:not(:disabled) { border-color: var(--sn-accent-line); }
-.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.action-btn[data-action="0"] { border-color: var(--sn-accent-line); }
-.action-btn[data-action="0"].active { background: var(--sn-accent); color: var(--sn-on-accent); border-color: var(--sn-accent); }
-.action-btn[data-action="1"] { border-color: rgba(180, 84, 75, 0.4); }
-.action-btn[data-action="1"].active { background: var(--sn-bad); color: #fff; border-color: var(--sn-bad); }
-.action-btn[data-action="2"] { border-color: rgba(15, 157, 140, 0.4); }
-.action-btn[data-action="2"].active { background: var(--sn-good); color: #fff; border-color: var(--sn-good); }
-
-.transition-info {
-  margin-top: 0.75rem;
-  padding: 0.85rem 1rem;
-  border-radius: var(--sn-radius-sm);
-  background: var(--sn-accent-soft);
-  border: 1px solid var(--sn-accent-line);
-  min-height: 70px;
-  font-size: 0.9rem;
-}
-
-.prob-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0; }
-.prob-bar { height: 16px; border-radius: 4px; transition: width 0.3s; opacity: 0.85; }
-
-.play-display {
-  text-align: center;
-  padding: 1.25rem;
-  border-radius: var(--sn-radius);
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
-  margin-bottom: 0.75rem;
-  transition: border-color 0.3s;
-}
-.play-emoji { font-size: 3.5rem; line-height: 1; }
-.play-name { font-size: 1.4rem; font-weight: 700; margin: 0.4rem 0 0.2rem; }
-.play-desc { opacity: 0.6; font-size: 0.85rem; }
-
-.score-row {
-  display: flex;
-  justify-content: center;
-  gap: 2.5rem;
-  margin: 0.75rem 0;
-}
-.score-item { text-align: center; }
-.score-item .slabel { font-size: 0.7rem; text-transform: uppercase; opacity: 0.55; }
-.score-item .sval { font-size: 2rem; }
-
-.action-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin: 0.75rem 0; }
-
-.play-log {
-  max-height: 180px;
-  overflow-y: auto;
-  border: 1px solid var(--sn-border);
-  border-radius: var(--sn-radius-sm);
-  padding: 0.4rem 0.6rem;
-  font-size: 0.82rem;
-  font-family: var(--sn-mono);
-}
-.log-entry { padding: 0.15rem 0; border-bottom: 1px solid var(--sn-border); }
-.lg { color: var(--sn-good); font-weight: 600; }
-.lbad { color: var(--sn-bad); }
-
-.vi-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem; }
-
-.vi-chart {
-  display: flex;
-  gap: 0.4rem;
-  align-items: flex-end;
-  height: 160px;
-  padding-bottom: 0.25rem;
-  border-bottom: 1px solid var(--sn-border);
-  margin-bottom: 0.75rem;
-}
-.vi-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
-.vi-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.35s ease, background 0.35s; min-height: 2px; }
-.vi-bv { font-size: 0.72rem; font-weight: 700; text-align: center; font-family: var(--sn-mono); }
-.vi-be { font-size: 1rem; text-align: center; }
-.vi-bn { font-size: 0.62rem; opacity: 0.65; text-align: center; }
-
-.vi-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.5rem; }
-.vi-table th, .vi-table td { padding: 0.35rem 0.5rem; border: 1px solid var(--sn-border); text-align: center; }
-.vi-table th { background: var(--sn-panel-inset); font-weight: 600; }
-.vi-table td.best { background: var(--sn-good-bg); color: var(--sn-good); font-weight: 700; }
-
-.policy-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-.policy-table th, .policy-table td { padding: 0.45rem 0.65rem; border: 1px solid var(--sn-border); text-align: center; }
-.policy-table th { background: var(--sn-panel-inset); }
-.policy-table td:last-child { text-align: left; font-size: 0.78rem; opacity: 0.75; }
-
-.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
-.compare-box { padding: 1rem; border-radius: var(--sn-radius); border: 1px solid var(--sn-border); text-align: center; }
-.compare-box.yours { border-color: rgba(180, 84, 75, 0.45); }
-.compare-box.opt { border-color: rgba(15, 157, 140, 0.45); }
-.compare-score { font-size: 2.5rem; margin: 0.4rem 0; }
-.compare-box.yours .compare-score { color: var(--sn-bad); }
-.compare-box.opt .compare-score { color: var(--sn-good); }
-
-.flex-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-.mb1 { margin-bottom: 0.5rem; }
-
-@keyframes popin { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.popin { animation: popin 0.25s ease; }
-
-.iter-label { font-size: 0.85rem; opacity: 0.65; }
-</style>
-
-<p>
-  A <strong>Markov Decision Process (MDP)</strong> is the standard model for sequential decision-making under uncertainty: an agent in some <em>state</em> chooses an <em>action</em>, collects a <em>reward</em>, and lands in a new state — and the objective is to pick actions that maximize reward accumulated over the long run, not just the reward available right now. The hard part is precisely that tension: a choice that pays off today can leave the agent worse off tomorrow.
-</p>
-
-<p>
-  To keep that abstract definition concrete, the whole note runs on one small example. Luca is 9 and has exactly one decision each afternoon after school: <strong>study, play video games, or take a nap?</strong> For any single afternoon the choice barely matters, but over a whole school year it does. Playing (🎮) costs energy that hurts tomorrow's performance; studying (📚) is boring now but can mean better test scores next week; napping (💤) skips both. Maximizing happiness across the year is exactly the long-run trade-off an MDP captures.
-</p>
-
-<p>
-  The algorithm that solves it — <strong>value iteration</strong> — is short and worth understanding in full. The sections below build up the pieces one at a time, using Luca's afternoon as the running example, and end with a working solver.
-</p>
-
-<!-- ==================== MDP CONCEPT ==================== -->
-<div class="mdp-section">
-  <h3>🧱 The building blocks of an MDP</h3>
-  <p style="margin-top:0">Every MDP is defined by four things. Here's how they map to Luca's life:</p>
-
-  <div class="concept-grid">
-    <div class="concept-card" style="border-left-color:var(--sn-accent)">
-      <div class="clabel">States S</div>
-      Luca's situation, captured as his <strong>energy &amp; grade level</strong>.<br><br>
-      😴 Exhausted &rarr; 😐 Tired &rarr; 🙂 Balanced &rarr; 💪 Focused &rarr; ⭐ Star
-    </div>
-    <div class="concept-card" style="border-left-color:var(--sn-bad)">
-      <div class="clabel">Actions A &amp; Rewards R(s,a)</div>
-      Three choices each afternoon — but the happiness they bring <strong>depends on Luca's state</strong>. A Star Student enjoys everything more:<br><br>
-      <small>
-      <table style="border-collapse:collapse;width:100%;font-size:0.8rem">
-        <tr><th style="text-align:left;padding:2px 4px"></th><th style="padding:2px 4px">📚 Study</th><th style="padding:2px 4px">🎮 Play</th><th style="padding:2px 4px">💤 Rest</th></tr>
-        <tr><td style="padding:2px 4px">😴 Exhausted</td><td style="padding:2px 4px;text-align:center">+2</td><td style="padding:2px 4px;text-align:center">+4</td><td style="padding:2px 4px;text-align:center">0</td></tr>
-        <tr><td style="padding:2px 4px">😐 Tired</td><td style="padding:2px 4px;text-align:center">+3</td><td style="padding:2px 4px;text-align:center">+5</td><td style="padding:2px 4px;text-align:center">+1</td></tr>
-        <tr><td style="padding:2px 4px">🙂 Balanced</td><td style="padding:2px 4px;text-align:center">+5</td><td style="padding:2px 4px;text-align:center">+7</td><td style="padding:2px 4px;text-align:center">+3</td></tr>
-        <tr><td style="padding:2px 4px">💪 Focused</td><td style="padding:2px 4px;text-align:center">+8</td><td style="padding:2px 4px;text-align:center">+10</td><td style="padding:2px 4px;text-align:center">+6</td></tr>
-        <tr><td style="padding:2px 4px">⭐ Star</td><td style="padding:2px 4px;text-align:center"><strong>+12</strong></td><td style="padding:2px 4px;text-align:center"><strong>+14</strong></td><td style="padding:2px 4px;text-align:center"><strong>+10</strong></td></tr>
-      </table>
-      </small>
-    </div>
-    <div class="concept-card" style="border-left-color:var(--sn-warn)">
-      <div class="clabel">Transitions P(s'|s,a)</div>
-      Life is <strong>stochastic</strong>. Studying doesn't guarantee improvement — Luca might be too tired, or the test might be hard. Each action leads to next states with specific <em>probabilities</em>.
-    </div>
-    <div class="concept-card" style="border-left-color:var(--sn-good)">
-      <div class="clabel">Discount factor γ = 0.9</div>
-      Future happiness is worth slightly less than today's — not because it matters less, but because there's uncertainty about reaching that future. A reward tomorrow is worth 0.9× a reward today.
-    </div>
-  </div>
-</div>
-
-<!-- ==================== STATE GRAPH ==================== -->
-<div class="mdp-section">
-  <h3>🗺️ Explore the transition graph</h3>
-  <p style="margin-top:0">Select a <strong>state</strong> (where Luca is) and an <strong>action</strong> (what he does) to see where he might end up — and with what probability.</p>
-
-  <div class="flex-row mb1" id="state-sel"></div>
-  <div class="flex-row mb1" id="action-sel"></div>
-
-  <div class="graph-wrap">
-    <svg id="mdp-svg" width="700" height="250" viewBox="0 0 700 250" style="max-width:100%;display:block;margin:0 auto"></svg>
-  </div>
-  <div class="transition-info" id="trans-info">
-    <span style="opacity:0.45">↑ Select a state and an action above to see the transitions</span>
-  </div>
-</div>
-
-<!-- ==================== BELLMAN ==================== -->
-<div class="mdp-section">
-  <h3>📐 The Bellman equation — what's a state really worth?</h3>
-  <p style="margin-top:0">
-    To find the best policy we need to know the <strong>value</strong> of each state: roughly, "how much total happiness will Luca accumulate from now on, if he plays optimally starting from here?" Call it <em>V*(s)</em>.
-  </p>
-  <p>
-    The key insight (due to Richard Bellman, 1957) is that the value of a state can be defined <em>recursively</em>:
-  </p>
-  <div class="equation-box">
-    V*(s) = max<sub>a</sub> [ R(s,a) + γ &middot; &Sigma;<sub>s'</sub> P(s'|s,a) &middot; V*(s') ]
-  </div>
-  <p>Reading left to right: the value of state <em>s</em> equals the best action <em>a</em> you can take, where "best" means: (immediate reward) + (discount &times; expected value of next state).</p>
-
-  <div class="example-box">
-    <strong>Iteration 1</strong> (V = 0 everywhere): Q(Balanced, 📚 Study) = 5 + 0 = <strong>5</strong>, Q(Balanced, 🎮 Play) = 7 + 0 = <strong>7</strong>, Q(Balanced, 💤 Rest) = 3 + 0 = <strong>3</strong>. Play wins on pure immediate reward.
-    <br><br>
-    <strong>After convergence</strong> (V approximately [74, 84, 96, 107, 114]):
-    <br>
-    Q(Balanced, 📚 Study) = 5 + 0.9&times;(0.1&times;84 + 0.3&times;96 + 0.6&times;107) = 5 + 91.5 = <strong>96.5 ← winner</strong><br>
-    Q(Balanced, 🎮 Play)&nbsp; = 7 + 0.9&times;(0.4&times;84 + 0.4&times;96 + 0.2&times;107) = 7 + 84.4 = <strong>91.4</strong><br>
-    Q(Balanced, 💤 Rest)&nbsp; = 3 + 0.9&times;(0.5&times;96 + 0.4&times;107 + 0.1&times;114) = 3 + 92.2 = <strong>95.2</strong>
-    <br><br>
-    Play's +2 immediate lead is overwhelmed because Study transitions toward Focused and Star — states where the daily reward is 10–14, not 7. The long-term math is decisive.
-  </div>
-</div>
-
-<!-- ==================== PLAY AS LUCA ==================== -->
-<div class="mdp-section">
-  <h3>🎮 Play as Luca — try your own policy</h3>
-  <p style="margin-top:0">Make Luca's choices for <strong>10 days</strong>. Try to maximize his total happiness. Your choices will be compared against the optimal policy afterward!</p>
-
-  <div class="play-display" id="play-display">
-    <div class="play-emoji" id="play-emoji">🙂</div>
-    <div class="play-name" id="play-name">Balanced</div>
-    <div class="play-desc" id="play-desc">Feeling okay, grades fine</div>
-  </div>
-
-  <div class="score-row">
-    <div class="score-item"><div class="slabel">Day</div><div class="sval" id="play-day">1</div></div>
-    <div class="score-item"><div class="slabel">Total Happiness</div><div class="sval" id="play-score">0</div></div>
-  </div>
-
-  <div class="action-row" id="play-btns"></div>
-
-  <div class="play-log" id="play-log"></div>
-  <div id="play-result" style="display:none;margin-top:0.75rem;padding:1rem;border-radius:8px;border:1px solid var(--sn-accent);text-align:center"></div>
-  <div style="margin-top:0.6rem"><button class="reset-link" id="play-reset">↺ Reset</button></div>
-</div>
-
-<!-- ==================== VALUE ITERATION ==================== -->
-<div class="mdp-section">
-  <h3>⚙️ Value iteration — watch V(s) converge</h3>
-  <p style="margin-top:0">Start with V(s) = 0 everywhere. Repeatedly apply the Bellman update. Each step gives a better estimate of how valuable each state truly is — the bar chart shows this live.</p>
-
-  <div class="vi-controls">
-    <button class="vi-btn" id="vi-step">Next iteration →</button>
-    <button class="vi-btn sec" id="vi-run">Run to convergence</button>
-    <button class="reset-link" id="vi-reset">↺ Reset</button>
-    <span class="iter-label" id="vi-label">Iteration 0 &nbsp;|&nbsp; &Delta; = —</span>
-  </div>
-
-  <div class="vi-chart" id="vi-chart"></div>
-
-  <details open>
-    <summary style="cursor:pointer;font-weight:600;margin-bottom:0.5rem">Q-value table (current iteration)</summary>
-    <div id="vi-qtable"></div>
-  </details>
-
-  <div id="vi-policy-wrap" style="display:none;margin-top:1.25rem">
-    <h4 style="margin-bottom:0.6rem">🎯 Optimal policy</h4>
-    <table class="policy-table" id="vi-policy"></table>
-    <p style="font-size:0.8rem;opacity:0.65;margin-top:0.4rem" id="vi-conv-note"></p>
-  </div>
-</div>
-
-<!-- ==================== COMPARISON ==================== -->
-<div class="mdp-section" id="compare-section">
-  <h3>🏆 How did you do vs. the optimal policy?</h3>
-  <p id="compare-hint" style="margin-top:0;opacity:0.65">
-    Complete 10 days above, then run value iteration to convergence — the comparison will appear here automatically.
-  </p>
-  <div id="compare-body" style="display:none">
-    <div class="compare-grid">
-      <div class="compare-box yours">
-        <div style="font-weight:600">Your policy</div>
-        <div class="compare-score" id="c-your"></div>
-        <div style="font-size:0.8rem;opacity:0.65">happiness over 10 days</div>
-      </div>
-      <div class="compare-box opt">
-        <div style="font-weight:600">Optimal policy</div>
-        <div class="compare-score" id="c-opt"></div>
-        <div style="font-size:0.8rem;opacity:0.65">same 10 days</div>
-      </div>
-    </div>
-    <div id="c-table" style="margin-top:1rem;overflow-x:auto"></div>
-    <p id="c-verdict" style="margin-top:0.75rem;font-weight:600;text-align:center"></p>
-  </div>
-</div>
-
-<script>
-// ─────────────────────────────────────────────────────────────
-//  MDP DEFINITION
-// ─────────────────────────────────────────────────────────────
-// theme-aware colors: read CSS tokens, re-read + recolor on light/dark toggle
-const SN = document.querySelector(".study-note");
-const readCols = () => {
-  const cs = getComputedStyle(SN);
-  const c = n => cs.getPropertyValue(n).trim();
-  return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
-           warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
-           softbg: c("--sn-accent-soft") };
-};
-let COL = readCols();
-const redrawFns = [];
-const onTheme = fn => { redrawFns.push(fn); return fn; };
-function updateActionColors() {
-  ACTIONS[0].color = COL.accent;
-  ACTIONS[1].color = COL.bad;
-  ACTIONS[2].color = COL.good;
-}
-new MutationObserver(() => { COL = readCols(); updateActionColors(); redrawFns.forEach(f => f()); })
-  .observe(document.body, { attributes: true, attributeFilter: ["class"] });
-
-const STATES = [
-  { id: 0, name: "Exhausted", emoji: "😴", desc: "Burnt out, grades slipping" },
-  { id: 1, name: "Tired",     emoji: "😐", desc: "Low energy, getting by" },
-  { id: 2, name: "Balanced",  emoji: "🙂", desc: "Feeling okay, grades fine" },
-  { id: 3, name: "Focused",   emoji: "💪", desc: "Full of energy, doing great" },
-  { id: 4, name: "Star",      emoji: "⭐", desc: "Top of the class!" }
-];
-
-const ACTIONS = [
-  { id: 0, name: "Study", emoji: "📚", color: COL.accent },
-  { id: 1, name: "Play",  emoji: "🎮", color: COL.bad },
-  { id: 2, name: "Rest",  emoji: "💤", color: COL.good }
-];
-
-// REWARDS[state][action]: happiness = state wellbeing + action base
-// wellbeing: [0,1,3,6,10] | action base: study=2, play=4, rest=0
-const REWARDS = [
-  [ 2,  4,  0],  // Exhausted
-  [ 3,  5,  1],  // Tired
-  [ 5,  7,  3],  // Balanced
-  [ 8, 10,  6],  // Focused
-  [12, 14, 10]   // Star
-];
-
-const GAMMA = 0.9;
-
-// T[state][action] = [{s, p}]
-const T = [
-  [ // 0: Exhausted
-    [{s:0,p:.6},{s:1,p:.3},{s:2,p:.1}],
-    [{s:0,p:.9},{s:1,p:.1}],
-    [{s:0,p:.2},{s:1,p:.8}]
-  ],
-  [ // 1: Tired
-    [{s:0,p:.1},{s:1,p:.4},{s:2,p:.5}],
-    [{s:0,p:.5},{s:1,p:.4},{s:2,p:.1}],
-    [{s:1,p:.4},{s:2,p:.5},{s:3,p:.1}]
-  ],
-  [ // 2: Balanced
-    [{s:1,p:.1},{s:2,p:.3},{s:3,p:.6}],
-    [{s:1,p:.4},{s:2,p:.4},{s:3,p:.2}],
-    [{s:2,p:.5},{s:3,p:.4},{s:4,p:.1}]
-  ],
-  [ // 3: Focused
-    [{s:2,p:.1},{s:3,p:.3},{s:4,p:.6}],
-    [{s:1,p:.3},{s:2,p:.4},{s:3,p:.3}],
-    [{s:3,p:.4},{s:4,p:.6}]
-  ],
-  [ // 4: Star
-    [{s:3,p:.1},{s:4,p:.9}],
-    [{s:2,p:.3},{s:3,p:.3},{s:4,p:.4}],
-    [{s:3,p:.1},{s:4,p:.9}]
-  ]
-];
-
-const NS = 'http://www.w3.org/2000/svg';
-const POS = [
-  {x:80, y:130}, {x:220,y:130}, {x:360,y:130}, {x:500,y:130}, {x:640,y:130}
-];
-const R = 42; // node radius
-
-// ─────────────────────────────────────────────────────────────
-//  BELLMAN HELPERS
-// ─────────────────────────────────────────────────────────────
-function qValues(V, s) {
-  return ACTIONS.map((a, ai) => {
-    let q = REWARDS[s][ai];
-    for (const {s: sp, p} of T[s][ai]) q += GAMMA * p * V[sp];
-    return q;
-  });
-}
-
-function bellman(V) {
-  return V.map((_, s) => Math.max(...qValues(V, s)));
-}
-
-function policy(V) {
-  return V.map((_, s) => {
-    const qs = qValues(V, s);
-    return qs.indexOf(Math.max(...qs));
-  });
-}
-
-// ─────────────────────────────────────────────────────────────
-//  STATE GRAPH
-// ─────────────────────────────────────────────────────────────
-(function buildGraph() {
-  const svg = document.getElementById('mdp-svg');
-  let selState = null, selAction = null;
-
-  // Arrowhead markers
-  const defs = document.createElementNS(NS, 'defs');
-  [...ACTIONS, {id:'gray', color: COL.muted}].forEach(a => {
-    const m = document.createElementNS(NS, 'marker');
-    m.setAttribute('id', `arr${a.id}`);
-    m.setAttribute('markerWidth','10'); m.setAttribute('markerHeight','7');
-    m.setAttribute('refX','9'); m.setAttribute('refY','3.5');
-    m.setAttribute('orient','auto');
-    const poly = document.createElementNS(NS, 'polygon');
-    poly.setAttribute('points','0 0,10 3.5,0 7');
-    poly.setAttribute('fill', a.color);
-    m.appendChild(poly); defs.appendChild(m);
-  });
-  svg.appendChild(defs);
-
-  const arrowLayer = document.createElementNS(NS, 'g');
-  svg.appendChild(arrowLayer);
-
-  // Draw nodes
-  STATES.forEach(st => {
-    const g = document.createElementNS(NS, 'g');
-    g.style.cursor = 'pointer';
-    g.addEventListener('click', () => pickState(st.id));
-
-    const c = document.createElementNS(NS, 'circle');
-    c.setAttribute('cx', POS[st.id].x); c.setAttribute('cy', POS[st.id].y);
-    c.setAttribute('r', R); c.setAttribute('fill', COL.softbg);
-    c.setAttribute('stroke', COL.accent); c.setAttribute('stroke-width','2');
-    c.setAttribute('id', 'nc'+st.id);
-
-    const em = document.createElementNS(NS, 'text');
-    em.setAttribute('x', POS[st.id].x); em.setAttribute('y', POS[st.id].y - 10);
-    em.setAttribute('text-anchor','middle'); em.setAttribute('dominant-baseline','middle');
-    em.setAttribute('font-size','22'); em.textContent = st.emoji;
-
-    const lbl = document.createElementNS(NS, 'text');
-    lbl.setAttribute('x', POS[st.id].x); lbl.setAttribute('y', POS[st.id].y + 16);
-    lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-size','10');
-    lbl.setAttribute('fill', COL.muted); lbl.setAttribute('id','nl'+st.id);
-    lbl.textContent = st.name;
-
-    g.appendChild(c); g.appendChild(em); g.appendChild(lbl);
-    svg.appendChild(g);
-  });
-
-  // State buttons
-  const sDiv = document.getElementById('state-sel');
-  STATES.forEach(st => {
-    const b = document.createElement('button');
-    b.className = 'state-badge'; b.dataset.id = st.id;
-    b.textContent = `${st.emoji} ${st.name}`;
-    b.addEventListener('click', () => pickState(st.id));
-    sDiv.appendChild(b);
-  });
-
-  // Action buttons
-  const aDiv = document.getElementById('action-sel');
-  ACTIONS.forEach(ac => {
-    const b = document.createElement('button');
-    b.className = 'action-btn'; b.dataset.action = ac.id;
-    b.textContent = `${ac.emoji} ${ac.name}`;
-    b.addEventListener('click', () => pickAction(ac.id));
-    aDiv.appendChild(b);
-  });
-
-  function pickState(id) {
-    selState = id;
-    document.querySelectorAll('#state-sel .state-badge').forEach(b => {
-      b.classList.toggle('active', +b.dataset.id === id);
-    });
-    STATES.forEach(st => {
-      const nc = document.getElementById('nc'+st.id);
-      const nl = document.getElementById('nl'+st.id);
-      if (st.id === id) {
-        nc.setAttribute('fill', COL.accent); nc.setAttribute('stroke', COL.accent);
-        nl.setAttribute('fill','#fff');
-      } else {
-        nc.setAttribute('fill', COL.softbg); nc.setAttribute('stroke', COL.accent);
-        nl.setAttribute('fill', COL.muted);
-      }
-    });
-    render();
-  }
-
-  function pickAction(id) {
-    selAction = id;
-    document.querySelectorAll('#action-sel .action-btn').forEach(b => {
-      b.classList.toggle('active', +b.dataset.action === id);
-    });
-    render();
-  }
-
-  function render() {
-    arrowLayer.innerHTML = '';
-    if (selState === null || selAction === null) return;
-
-    const ac = ACTIONS[selAction];
-    const trans = T[selState][selAction];
-    const from = POS[selState];
-
-    trans.forEach(({s: to, p}) => {
-      const toPos = POS[to];
-      if (to === selState) {
-        drawSelf(from, p, ac);
-      } else {
-        drawEdge(from, toPos, p, ac, to > selState);
-      }
-    });
-
-    // Info panel
-    let html = `<strong>${STATES[selState].emoji} ${STATES[selState].name}</strong> takes action <strong>${ac.emoji} ${ac.name}</strong> (immediate reward: +${REWARDS[selState][selAction]}) and lands in:<br><br>`;
-    trans.forEach(({s: to, p}) => {
-      const pct = Math.round(p*100);
-      html += `<div class="prob-row">
-        <span style="width:130px;font-size:0.88rem">${STATES[to].emoji} ${STATES[to].name}</span>
-        <div class="prob-bar" style="width:${pct*1.8}px;background:${ac.color}"></div>
-        <strong>${pct}%</strong>
-      </div>`;
-    });
-    document.getElementById('trans-info').innerHTML = html;
-  }
-
-  function drawSelf(pos, p, ac) {
-    const path = document.createElementNS(NS, 'path');
-    const r2 = 22;
-    path.setAttribute('d', `M ${pos.x-r2} ${pos.y-R} A ${r2} ${r2} 0 1 1 ${pos.x+r2} ${pos.y-R}`);
-    path.setAttribute('fill','none'); path.setAttribute('stroke', ac.color);
-    path.setAttribute('stroke-width', Math.max(1.5, p*5));
-    path.setAttribute('marker-end', `url(#arr${ac.id})`);
-    path.setAttribute('opacity','0.8');
-    arrowLayer.appendChild(path);
-
-    const lbl = document.createElementNS(NS, 'text');
-    lbl.setAttribute('x', pos.x); lbl.setAttribute('y', pos.y - R - r2*2 - 6);
-    lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-size','11');
-    lbl.setAttribute('fill', ac.color); lbl.setAttribute('font-weight','700');
-    lbl.textContent = Math.round(p*100)+'%';
-    arrowLayer.appendChild(lbl);
-  }
-
-  function drawEdge(from, to, p, ac, goRight) {
-    const dx = to.x-from.x, dy = to.y-from.y;
-    const dist = Math.sqrt(dx*dx+dy*dy);
-    const ux = dx/dist, uy = dy/dist;
-    const sx = from.x + ux*R, sy = from.y + uy*R;
-    const ex = to.x - ux*(R+8), ey = to.y - uy*(R+8);
-    const offset = goRight ? -35 : 35;
-    const mx = (sx+ex)/2 - uy*offset, my = (sy+ey)/2 + ux*offset;
-
-    const path = document.createElementNS(NS, 'path');
-    path.setAttribute('d', `M ${sx} ${sy} Q ${mx} ${my} ${ex} ${ey}`);
-    path.setAttribute('fill','none'); path.setAttribute('stroke', ac.color);
-    path.setAttribute('stroke-width', Math.max(1.5, p*5));
-    path.setAttribute('marker-end', `url(#arr${ac.id})`);
-    path.setAttribute('opacity','0.8');
-    arrowLayer.appendChild(path);
-
-    const t = 0.5;
-    const lx = (1-t)*(1-t)*sx + 2*(1-t)*t*mx + t*t*ex;
-    const ly = (1-t)*(1-t)*sy + 2*(1-t)*t*my + t*t*ey;
-    const lbl = document.createElementNS(NS, 'text');
-    lbl.setAttribute('x', lx); lbl.setAttribute('y', ly - 6);
-    lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-size','11');
-    lbl.setAttribute('fill', ac.color); lbl.setAttribute('font-weight','700');
-    lbl.textContent = Math.round(p*100)+'%';
-    arrowLayer.appendChild(lbl);
-  }
-
-  onTheme(() => {
-    ACTIONS.forEach(a => { const poly = document.querySelector(`#arr${a.id} polygon`); if (poly) poly.setAttribute('fill', a.color); });
-    const gpoly = document.querySelector('#arrgray polygon'); if (gpoly) gpoly.setAttribute('fill', COL.muted);
-    STATES.forEach(st => {
-      const nc = document.getElementById('nc'+st.id);
-      const nl = document.getElementById('nl'+st.id);
-      if (st.id === selState) { nc.setAttribute('fill', COL.accent); nc.setAttribute('stroke', COL.accent); nl.setAttribute('fill', '#fff'); }
-      else { nc.setAttribute('fill', COL.softbg); nc.setAttribute('stroke', COL.accent); nl.setAttribute('fill', COL.muted); }
-    });
-    render();
-  });
-})();
-
-// ─────────────────────────────────────────────────────────────
-//  PLAY AS LUCA
-// ─────────────────────────────────────────────────────────────
-const play = { state: 2, day: 1, score: 0, done: false, hist: [] };
-
-function sample(s, a) {
-  let r = Math.random(), cum = 0;
-  for (const {s: sp, p} of T[s][a]) { cum += p; if (r < cum) return sp; }
-  return T[s][a][T[s][a].length-1].s;
-}
-
-function updatePlayUI() {
-  const st = STATES[play.state];
-  document.getElementById('play-emoji').textContent = st.emoji;
-  document.getElementById('play-name').textContent = st.name;
-  document.getElementById('play-desc').textContent = st.desc;
-  document.getElementById('play-day').textContent = play.day;
-  document.getElementById('play-score').textContent = play.score;
-}
-
-function makeMove(aId) {
-  if (play.done) return;
-  const ac = ACTIONS[aId];
-  const from = play.state;
-  const next = sample(from, aId);
-  const reward = REWARDS[from][aId];
-  play.score += reward;
-  play.hist.push({s: from, a: aId, ns: next, r: reward});
-
-  const log = document.getElementById('play-log');
-  const entry = document.createElement('div');
-  entry.className = 'log-entry popin';
-  const dir = next > from ? ' ↑' : next < from ? ` <span class="lbad">↓</span>` : '';
-  entry.innerHTML = `<strong>Day ${play.day}</strong>: ${STATES[from].emoji}→${ac.emoji}→${STATES[next].emoji} <span class="lg">+${reward}</span>${dir}`;
-  log.prepend(entry);
-
-  play.state = next;
-  play.day++;
-  if (play.day > 10) {
-    play.done = true;
-    document.querySelectorAll('#play-btns .action-btn').forEach(b => b.disabled = true);
-    const res = document.getElementById('play-result');
-    res.style.display = 'block';
-    res.innerHTML = `<strong>10 days done!</strong> Your total happiness: <span style="font-size:1.5rem;font-weight:700;color:${COL.accent}">${play.score}</span><br><span style="opacity:0.65;font-size:0.88rem">Run value iteration to convergence below, then scroll down to see how you compare!</span>`;
-    tryShowComparison();
-  }
-  updatePlayUI();
-}
-
-// Inject play buttons
-const pBtns = document.getElementById('play-btns');
-ACTIONS.forEach(ac => {
-  const b = document.createElement('button');
-  b.className = 'action-btn'; b.dataset.action = ac.id;
-  b.style.fontSize = '1rem'; b.style.padding = '0.65rem 1.3rem';
-  b.innerHTML = `${ac.emoji} ${ac.name}`;
-  b.addEventListener('click', () => makeMove(ac.id));
-  pBtns.appendChild(b);
-});
-
-document.getElementById('play-reset').addEventListener('click', () => {
-  Object.assign(play, {state:2, day:1, score:0, done:false, hist:[]});
-  document.getElementById('play-log').innerHTML = '';
-  document.getElementById('play-result').style.display = 'none';
-  document.getElementById('compare-body').style.display = 'none';
-  document.getElementById('compare-hint').style.display = '';
-  document.querySelectorAll('#play-btns .action-btn').forEach(b => b.disabled = false);
-  updatePlayUI();
-});
-
-updatePlayUI();
-
-// ─────────────────────────────────────────────────────────────
-//  VALUE ITERATION
-// ─────────────────────────────────────────────────────────────
-const vi = { V: new Array(5).fill(0), iter: 0, done: false };
-
-function viStep() {
-  if (vi.done) return;
-  const newV = bellman(vi.V);
-  const delta = Math.max(...newV.map((v,i) => Math.abs(v - vi.V[i])));
-  vi.V = newV; vi.iter++;
-  vi.done = delta < 0.001;
-
-  document.getElementById('vi-label').innerHTML =
-    `Iteration ${vi.iter} &nbsp;|&nbsp; &Delta; = ${delta.toFixed(4)}${vi.done ? ' &nbsp;✓ Converged!' : ''}`;
-
-  renderChart(); renderQTable(); renderPolicy();
-
-  if (vi.done) {
-    document.getElementById('vi-step').disabled = true;
-    document.getElementById('vi-run').disabled = true;
-    document.getElementById('vi-conv-note').textContent =
-      `Converged after ${vi.iter} iterations (Δ < 0.001).`;
-    tryShowComparison();
-  }
-}
-
-function renderChart() {
-  const chart = document.getElementById('vi-chart');
-  const maxV = Math.max(...vi.V, 0.01);
-  const pol = policy(vi.V);
-  chart.innerHTML = '';
-  STATES.forEach((st, i) => {
-    const g = document.createElement('div');
-    g.className = 'vi-bar-group';
-    const bar = document.createElement('div');
-    bar.className = 'vi-bar';
-    bar.style.height = Math.max((vi.V[i]/maxV)*130, 2) + 'px';
-    bar.style.background = ACTIONS[pol[i]].color;
-    const bv = document.createElement('div'); bv.className = 'vi-bv'; bv.textContent = vi.V[i].toFixed(1);
-    const be = document.createElement('div'); be.className = 'vi-be'; be.textContent = st.emoji;
-    const bn = document.createElement('div'); bn.className = 'vi-bn'; bn.textContent = st.name;
-    g.appendChild(bar); g.appendChild(bv); g.appendChild(be); g.appendChild(bn);
-    chart.appendChild(g);
-  });
-}
-
-function renderQTable() {
-  const pol = policy(vi.V);
-  let html = `<table class="vi-table"><thead><tr>
-    <th>State</th>${ACTIONS.map(a=>`<th>${a.emoji} ${a.name}</th>`).join('')}<th>V*(s)</th>
-  </tr></thead><tbody>`;
-  STATES.forEach((st, s) => {
-    const qs = qValues(vi.V, s);
-    const best = pol[s];
-    html += `<tr><td>${st.emoji} ${st.name}</td>
-      ${qs.map((q,a)=>`<td class="${a===best?'best':''}">${q.toFixed(2)}</td>`).join('')}
-      <td><strong>${vi.V[s].toFixed(2)}</strong></td></tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('vi-qtable').innerHTML = html;
-}
-
-function renderPolicy() {
-  const pol = policy(vi.V);
-  const wrap = document.getElementById('vi-policy-wrap');
-  wrap.style.display = 'block';
-  const qs_all = STATES.map((_, s) => qValues(vi.V, s));
-
-  let html = `<thead><tr><th>State</th><th>Best action</th><th>Why (from Q-values)</th></tr></thead><tbody>`;
-  STATES.forEach((st, s) => {
-    const a = pol[s];
-    const ac = ACTIONS[a];
-    const qs = qs_all[s];
-    const sorted = [...qs].map((q,i)=>({q,i})).sort((a,b)=>b.q-a.q);
-    const margin = sorted[0].q - sorted[1].q;
-    html += `<tr>
-      <td>${st.emoji} ${st.name}</td>
-      <td><strong>${ac.emoji} ${ac.name}</strong></td>
-      <td>Q = ${qs[a].toFixed(2)}, leads by ${margin.toFixed(2)} over next best</td>
-    </tr>`;
-  });
-  html += '</tbody>';
-  document.getElementById('vi-policy').innerHTML = html;
-}
-
-document.getElementById('vi-step').addEventListener('click', viStep);
-document.getElementById('vi-run').addEventListener('click', () => {
-  document.getElementById('vi-run').disabled = true;
-  document.getElementById('vi-step').disabled = true;
-  const tick = setInterval(() => { viStep(); if (vi.done) clearInterval(tick); }, 55);
-});
-document.getElementById('vi-reset').addEventListener('click', () => {
-  Object.assign(vi, {V: new Array(5).fill(0), iter: 0, done: false});
-  document.getElementById('vi-label').innerHTML = 'Iteration 0 &nbsp;|&nbsp; &Delta; = —';
-  document.getElementById('vi-step').disabled = false;
-  document.getElementById('vi-run').disabled = false;
-  document.getElementById('vi-conv-note').textContent = '';
-  document.getElementById('vi-policy-wrap').style.display = 'none';
-  renderChart(); renderQTable();
-});
-
-renderChart(); renderQTable();
-onTheme(() => { renderChart(); renderQTable(); if (vi.iter > 0) renderPolicy(); });
-
-// ─────────────────────────────────────────────────────────────
-//  COMPARISON
-// ─────────────────────────────────────────────────────────────
-function tryShowComparison() {
-  if (!play.done || !vi.done) return;
-  const pol = policy(vi.V);
-
-  let optScore = 0;
-  const rows = play.hist.map((h, i) => {
-    const oa = pol[h.s];
-    const or = REWARDS[h.s][oa];
-    optScore += or;
-    return {day: i+1, s: h.s, ya: h.a, oa, ns: h.ns, yr: h.r, or};
-  });
-
-  document.getElementById('compare-hint').style.display = 'none';
-  document.getElementById('compare-body').style.display = 'block';
-  document.getElementById('c-your').textContent = play.score;
-  document.getElementById('c-opt').textContent = optScore;
-
-  const diff = optScore - play.score;
-  const verdict = document.getElementById('c-verdict');
-  if (diff <= 0) {
-    verdict.textContent = `🎉 You matched or beat the optimal policy! (by ${Math.abs(diff)} points)`;
-    verdict.style.color = COL.good;
-  } else if (diff <= 6) {
-    verdict.textContent = `👏 Very close! The optimal policy earned just ${diff} more points.`;
-    verdict.style.color = COL.warn;
-  } else {
-    verdict.textContent = `💡 The optimal policy earned ${diff} more points — look at which states it handled differently.`;
-    verdict.style.color = COL.bad;
-  }
-
-  let html = `<table class="vi-table"><thead><tr>
-    <th>Day</th><th>State</th><th>You</th><th>Optimal</th><th>Your reward</th><th>Opt reward</th>
-  </tr></thead><tbody>`;
-  rows.forEach(row => {
-    const changed = row.oa !== row.ya;
-    html += `<tr>
-      <td>${row.day}</td>
-      <td>${STATES[row.s].emoji} ${STATES[row.s].name}</td>
-      <td>${ACTIONS[row.ya].emoji} ${ACTIONS[row.ya].name}</td>
-      <td class="${changed?'best':''}">${ACTIONS[row.oa].emoji} ${ACTIONS[row.oa].name}</td>
-      <td>+${row.yr}</td>
-      <td>${row.or > row.yr ? `<strong style="color:${COL.good}">+${row.or}</strong>` : `+${row.or}`}</td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  document.getElementById('c-table').innerHTML = html;
-}
-</script>
-
-</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Interactive" /><summary type="html"><![CDATA[A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?]]></summary></entry></feed>
+</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Hopfield networks slide downhill into the nearest memory — and get stuck. Add a single ingredient, temperature, and that deterministic descent becomes a Boltzmann machine that samples, escapes local minima, and learns. A hands-on, visual walk-through with live energy landscapes, annealing, and a trainable RBM.]]></summary></entry></feed>

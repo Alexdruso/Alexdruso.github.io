@@ -165,6 +165,13 @@
   
   
   {
+    "title": "Tabular Q-Learning, Explained by a Snake",
+    "url": "/q-learning-snake/",
+    "type": "Study Note",
+    "text": "Q-learning estimates the value of every action in every state directly from experience, with no model of the environment. These notes work through the tabular version end to end — state design, reward shaping, the temporal-difference update, and ε-greedy exploration — using the Snake agent from t..."
+  },
+  
+  {
     "title": "Self-Attention: The Content-Addressed Lookup at the Heart of Transformers",
     "url": "/self-attention/",
     "type": "Study Note",
