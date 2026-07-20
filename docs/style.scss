@@ -1347,60 +1347,6 @@ footer {
   }
 }
 
-// Home hero — a quiet, borderless animation strip above the intro text.
-// The canvas JS reads the --viz-* custom properties at runtime so the
-// animation recolors itself when .dark-theme toggles (same pattern as the
-// study notes' --sn-* tokens).
-.home-hero {
-  --viz-contour: rgba(34, 88, 165, 0.11);
-  --viz-particle: #0891b2;
-  --viz-trail: rgba(8, 145, 178, 0.25);
-
-  position: relative;
-  height: 170px;
-  margin-bottom: 2rem;
-  overflow: hidden;
-  mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
-  -webkit-mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
-
-  @include mobile {
-    height: 120px;
-  }
-}
-
-.dark-theme .home-hero {
-  --viz-contour: rgba(148, 163, 184, 0.15);
-  --viz-particle: #22d3ee;
-  --viz-trail: rgba(34, 211, 238, 0.28);
-}
-
-.home-hero canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.home-hero-caption {
-  position: absolute;
-  right: 0.4rem;
-  bottom: 1.2rem;
-  z-index: 1;
-  margin: 0;
-  font-size: 0.7em;
-  color: $gray;
-  opacity: 0.55;
-
-  @include mobile {
-    display: none;
-  }
-}
-
-.dark-theme .home-hero-caption {
-  color: $dark-gray;
-}
-
 // Study-notes index — preview cards with JS-drawn thumbnails.
 // Thumbnails use the study-note cyan (--thumb-*) so the cards visually
 // belong to the notes' design system; JS reads these tokens at runtime.
