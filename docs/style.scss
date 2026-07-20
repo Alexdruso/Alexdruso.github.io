@@ -1346,3 +1346,491 @@ footer {
     font-size: 0.8em;
   }
 }
+
+// Home hero — animated loss-landscape canvas.
+// The canvas JS reads the --viz-* custom properties at runtime so the
+// animation recolors itself when .dark-theme toggles (same pattern as the
+// study notes' --sn-* tokens).
+.home-hero {
+  --viz-contour: rgba(34, 88, 165, 0.16);
+  --viz-particle: #0891b2;
+  --viz-trail: rgba(8, 145, 178, 0.35);
+
+  position: relative;
+  margin-bottom: 3rem;
+  border: 1px solid $lightGray;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(232, 240, 254, 0.55), rgba(255, 255, 255, 0) 70%);
+}
+
+.dark-theme .home-hero {
+  --viz-contour: rgba(148, 163, 184, 0.22);
+  --viz-particle: #22d3ee;
+  --viz-trail: rgba(34, 211, 238, 0.4);
+
+  border-color: $dark-border;
+  background: linear-gradient(180deg, rgba(34, 211, 238, 0.06), rgba(26, 26, 26, 0) 70%);
+}
+
+.home-hero canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.home-hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 3.5rem 3rem;
+  max-width: 640px;
+  pointer-events: none;
+
+  h1 {
+    margin: 0.3em 0 0.4em;
+    font-size: 2.2em;
+    line-height: 1.25;
+  }
+
+  @include mobile {
+    padding: 2rem 1.5rem;
+
+    h1 {
+      font-size: 1.6em;
+    }
+  }
+}
+
+.home-hero-kicker {
+  margin: 0;
+  font-size: 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $accentBlue;
+}
+
+.home-hero-sub {
+  margin: 0 0 1.5em;
+  color: $gray;
+  font-size: 1.05em;
+}
+
+.home-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  pointer-events: auto;
+
+  a {
+    display: inline-block;
+    padding: 0.6em 1.3em;
+    border-radius: 8px;
+    font-weight: 600;
+    background-color: $accentBlue;
+    color: $white;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: $blue;
+      color: $white;
+      transform: translateY(-2px);
+    }
+
+    &.ghost {
+      background: transparent;
+      color: $accentBlue;
+      box-shadow: inset 0 0 0 1px rgba(34, 88, 165, 0.35);
+
+      &:hover {
+        background: $lightBlue;
+      }
+    }
+  }
+}
+
+.home-hero-caption {
+  position: absolute;
+  right: 1.2rem;
+  bottom: 0.8rem;
+  z-index: 1;
+  margin: 0;
+  font-size: 0.72em;
+  color: $gray;
+  opacity: 0.75;
+
+  @include mobile {
+    display: none;
+  }
+}
+
+.dark-theme .home-hero {
+  .home-hero-kicker {
+    color: $dark-accent;
+  }
+
+  .home-hero-sub {
+    color: $dark-gray;
+  }
+
+  .home-hero-actions a {
+    background-color: $dark-accent;
+    color: $dark-bg;
+
+    &:hover {
+      background-color: $dark-accent-hover;
+    }
+
+    &.ghost {
+      background: transparent;
+      color: $dark-accent;
+      box-shadow: inset 0 0 0 1px rgba(100, 181, 246, 0.4);
+
+      &:hover {
+        background: rgba(100, 181, 246, 0.12);
+      }
+    }
+  }
+
+  .home-hero-caption {
+    color: $dark-gray;
+  }
+}
+
+// Study-notes index — preview cards with JS-drawn thumbnails.
+// Thumbnails use the study-note cyan (--thumb-*) so the cards visually
+// belong to the notes' design system; JS reads these tokens at runtime.
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.8rem;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.note-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $lightGray;
+  border-radius: 12px;
+  overflow: hidden;
+  background: $white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  }
+}
+
+.note-thumb {
+  --thumb-accent: #0891b2;
+  --thumb-accent-strong: #06b6d4;
+  --thumb-soft: rgba(8, 145, 178, 0.12);
+  --thumb-muted: rgba(15, 23, 42, 0.35);
+  --thumb-grid: rgba(15, 23, 42, 0.08);
+
+  display: block;
+  background: #f6f8fa;
+  border-bottom: 1px solid $lightGray;
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 150px;
+    border-radius: 0;
+  }
+}
+
+.note-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.1rem 1.3rem 1.2rem;
+
+  .post-meta {
+    margin-bottom: 0.4em;
+    font-size: 0.8em;
+  }
+
+  h2 {
+    margin: 0 0 0.4em;
+    font-size: 1.15em;
+    line-height: 1.35;
+
+    a {
+      color: $darkerGray;
+
+      &:hover {
+        color: $blue;
+      }
+    }
+  }
+}
+
+.note-card-excerpt {
+  flex: 1;
+  margin: 0 0 0.8em;
+  font-size: 0.88em;
+  line-height: 1.6;
+  color: $gray;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  p {
+    margin: 0;
+    display: inline;
+  }
+}
+
+.dark-theme {
+  .note-card {
+    background: #11131c;
+    border-color: $dark-border;
+
+    &:hover {
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  .note-thumb {
+    --thumb-accent: #22d3ee;
+    --thumb-accent-strong: #67e8f9;
+    --thumb-soft: rgba(34, 211, 238, 0.14);
+    --thumb-muted: rgba(148, 163, 184, 0.55);
+    --thumb-grid: rgba(148, 163, 184, 0.14);
+
+    background: #161a26;
+    border-bottom-color: $dark-border;
+  }
+
+  .note-card-body h2 a {
+    color: $dark-text;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+
+  .note-card-excerpt {
+    color: $dark-gray;
+  }
+}
+
+// Command palette (⌘K)
+.nav-search {
+  margin-left: 30px;
+  padding: 0.35em 0.7em;
+  border: 1px solid $lightGray;
+  border-radius: 8px;
+  background: transparent;
+  color: $gray;
+  font-family: $helveticaNeue;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  i {
+    margin-right: 6px;
+  }
+
+  kbd {
+    font-family: inherit;
+    font-size: 0.85em;
+    padding: 0.1em 0.4em;
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+    background: $white;
+  }
+
+  &:hover {
+    border-color: $accentBlue;
+    color: $accentBlue;
+  }
+
+  @include mobile {
+    margin: 10px 0 0;
+  }
+}
+
+.dark-theme .nav-search {
+  border-color: $dark-border;
+  color: $dark-gray;
+
+  kbd {
+    border-color: $dark-border;
+    background: $dark-bg;
+  }
+
+  &:hover {
+    border-color: $dark-accent;
+    color: $dark-accent;
+  }
+}
+
+.cmdk-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 20px 20px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.cmdk {
+  width: 100%;
+  max-width: 620px;
+  background: $white;
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.35);
+  overflow: hidden;
+}
+
+.cmdk-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid $lightGray;
+  color: $gray;
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: $helveticaNeue;
+    font-size: 1.05em;
+    color: $darkerGray;
+  }
+
+  kbd {
+    font-size: 0.75em;
+    padding: 0.15em 0.5em;
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+    color: $gray;
+  }
+}
+
+.cmdk-results {
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  max-height: 46vh;
+  overflow-y: auto;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+
+    &.active {
+      background: $lightBlue;
+    }
+
+    mark {
+      background: none;
+      color: $accentBlue;
+      font-weight: 700;
+    }
+  }
+}
+
+.cmdk-title {
+  flex: 1;
+  color: $darkerGray;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cmdk-type {
+  flex-shrink: 0;
+  font-size: 0.72em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15em 0.55em;
+  border-radius: 999px;
+  background: $lightBlue;
+  color: $accentBlue;
+}
+
+.cmdk-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: $gray;
+}
+
+.cmdk-foot {
+  padding: 0.5rem 1.1rem;
+  border-top: 1px solid $lightGray;
+  font-size: 0.75em;
+  color: $gray;
+}
+
+.dark-theme {
+  .cmdk {
+    background: #11131c;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  }
+
+  .cmdk-input-row {
+    border-bottom-color: $dark-border;
+    color: $dark-gray;
+
+    input {
+      color: $dark-text;
+    }
+
+    kbd {
+      border-color: $dark-border;
+      color: $dark-gray;
+    }
+  }
+
+  .cmdk-results li {
+    &.active {
+      background: rgba(100, 181, 246, 0.12);
+    }
+
+    mark {
+      color: $dark-accent;
+    }
+  }
+
+  .cmdk-title {
+    color: $dark-text;
+  }
+
+  .cmdk-type {
+    background: rgba(100, 181, 246, 0.14);
+    color: $dark-accent;
+  }
+
+  .cmdk-empty,
+  .cmdk-foot {
+    color: $dark-gray;
+  }
+
+  .cmdk-foot {
+    border-top-color: $dark-border;
+  }
+}

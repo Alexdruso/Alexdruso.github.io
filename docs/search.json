@@ -1,0 +1,37 @@
+---
+layout: null
+---
+[
+  {% for item in site.data.navigation %}
+  {
+    "title": {{ item.title | jsonify }},
+    "url": {{ item.url | jsonify }},
+    "type": "Page",
+    "text": ""
+  },
+  {% endfor %}
+  {% for project in site.data.projects %}
+  {
+    "title": {{ project.title | jsonify }},
+    "url": "/projects/",
+    "type": "Project",
+    "text": {{ project.tags | join: " " | jsonify }}
+  },
+  {% endfor %}
+  {% for pub in site.data.publications %}
+  {
+    "title": {{ pub.title | jsonify }},
+    "url": "/publications/",
+    "type": "Publication",
+    "text": {{ pub.venue | default: "" | jsonify }}
+  },
+  {% endfor %}
+  {% for post in site.posts %}
+  {
+    "title": {{ post.title | jsonify }},
+    "url": {{ post.url | jsonify }},
+    "type": "Study Note",
+    "text": {{ post.excerpt | strip_html | strip_newlines | truncate: 300 | jsonify }}
+  }{% unless forloop.last %},{% endunless %}
+  {% endfor %}
+]
