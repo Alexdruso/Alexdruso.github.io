@@ -222,7 +222,14 @@ nav {
   font-size: 18px;
 
   @include mobile {
-    margin: 15px 0 0;
+    // Flex + gap keeps every row of links on the same vertical rhythm, and lets
+    // the search button claim a row of its own (see .nav-search).
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 24px;
+    margin: 18px 0 0;
     font-size: 16px;
   }
 
@@ -235,7 +242,7 @@ nav {
     transition: color 0.2s ease;
 
     @include mobile {
-      margin: 0 15px;
+      margin: 0;
       color: $blue;
     }
 
@@ -1705,13 +1712,48 @@ footer {
     background: $white;
   }
 
+  // The word "Search" is only spelled out on touch layouts, where the ⌘K hint
+  // is meaningless; on desktop the icon + shortcut carry the meaning.
+  .nav-search-label {
+    display: none;
+  }
+
   &:hover {
     border-color: $accentBlue;
     color: $accentBlue;
   }
 
   @include mobile {
-    margin: 10px 0 0;
+    // Own full-width row under the links, so it stops interrupting the grid of
+    // nav items and gets a proper touch target.
+    flex: 0 0 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    min-height: 44px;
+    margin: 2px auto 0;
+    padding: 0 1em;
+    border-radius: 10px;
+    background: rgba(65, 131, 196, 0.06);
+    border-color: rgba(65, 131, 196, 0.25);
+    color: $gray;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+
+    i {
+      margin-right: 0;
+    }
+
+    kbd {
+      display: none;
+    }
+
+    .nav-search-label {
+      display: inline;
+    }
   }
 }
 
@@ -1727,6 +1769,11 @@ footer {
   &:hover {
     border-color: $dark-accent;
     color: $dark-accent;
+  }
+
+  @include mobile {
+    background: rgba(100, 181, 246, 0.08);
+    border-color: rgba(100, 181, 246, 0.28);
   }
 }
 
