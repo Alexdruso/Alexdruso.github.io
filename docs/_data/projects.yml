@@ -1,8 +1,73 @@
 # Source of truth for the website's projects page.
 # Curated list of GitHub repositories Alessandro meaningfully contributed to —
-# mostly coursework from PoliMi and KTH, two ACM RecSys Challenge entries,
-# and one hackathon. Forks and throwaway sandboxes are intentionally excluded.
-# Sorted reverse-chronologically; the projects page sorts by `year` anyway.
+# Kaggle Playground Series entries, coursework from PoliMi and KTH, two ACM
+# RecSys Challenge entries, a hackathon, and this site itself. Forks and
+# throwaway sandboxes are intentionally excluded.
+# Sorted reverse-chronologically; the projects page renders this order as-is.
+
+- title: "Kaggle Playground S6E7 — Predicting Student Health Risk"
+  repo: "https://github.com/Alexdruso/data-science-stuff/tree/main/playground-series-s6e7"
+  year: 2026
+  role: "Solo"
+  context: "Kaggle Playground Series S6E7 (in progress)"
+  description: "Three-class health-risk classification over 690k rows with missing values in every feature column and an 86/8/6 class split, scored on balanced accuracy. A decision-corrected LightGBM/XGBoost/CatBoost blend sits at 0.9497 on the public board; adversarial-validation-weighted OOF is used to veto candidates — including an MLP — whose apparent gains live entirely outside the test-like region."
+  tags: ["Python", "LightGBM", "XGBoost", "CatBoost", "Polars"]
+
+- title: "alexdruso.github.io — personal site and interactive study notes"
+  repo: "https://github.com/Alexdruso/Alexdruso.github.io"
+  year: 2026
+  role: "Solo"
+  context: "Independent project"
+  description: "This site. A Jekyll 4 static site with a deliberately dependency-free front end: eleven interactive study notes whose SVG and canvas visualisations are hand-written vanilla JS and redraw on theme toggle, a Snake game with an in-browser tabular Q-learning agent, a command palette and client-side search, and a GitHub Actions pipeline that compiles the CV from LaTeX with xelatex before deploying to Pages."
+  tags: ["Jekyll", "JavaScript", "SCSS", "LaTeX", "GitHub Actions"]
+
+- title: "Implicit neural representations — images as functions"
+  repo: "https://github.com/Alexdruso/data-science-stuff/tree/main/implicit_neural_representations"
+  year: 2026
+  role: "Solo"
+  context: "Independent project"
+  description: "Self-contained study of coordinate networks that fit an image as f(x, y) → RGB. A plain ReLU MLP recovers only a blurry version — the spectral bias of neural networks — while random Fourier features and SIREN fit it sharply; the continuous representation is then sampled at 2.5× and 4× for arbitrary-scale upscaling, with an honest comparison against bicubic. Companion code to the study note of the same name."
+  tags: ["PyTorch", "NumPy", "Jupyter", "Neural Fields"]
+
+- title: "Kaggle Playground S6E6 — Predicting Stellar Class (12th / 2,817)"
+  repo: "https://github.com/Alexdruso/data-science-stuff/tree/main/playground-series-s6e6"
+  year: 2026
+  role: "Solo"
+  context: "Kaggle Playground Series S6E6"
+  description: "12th place on the private leaderboard out of 2,817 teams, up from 407th on the public one. A stack of gradient-boosted trees plateaued at 0.9662 CV; what broke it was difference rather than strength — a 240-feature model with fold-safe quantile-bin target encoding, a from-scratch RealMLP trained on a logit-adjusted loss, and a two-stage QSO/STAR cascade — reaching ~0.9705. Final submissions were chosen by cross-validation rather than public rank, and the tempting higher-public candidate turned out to transfer worst."
+  tags: ["Python", "LightGBM", "XGBoost", "CatBoost", "PyTorch", "Stacking"]
+
+- title: "Kaggle Playground S6E5 — F1 pit-stop prediction"
+  repo: "https://github.com/Alexdruso/data-science-stuff/tree/main/playground-series-s6e5"
+  year: 2026
+  role: "Solo"
+  context: "Kaggle Playground Series S6E5"
+  description: "Predicting whether a Formula 1 driver pits on the next lap across 439k laps, scored on AUC. The dataset hides a labelling anomaly — 2023 has a 0.96% pit rate against ~28% elsewhere — so the final model is a conditional ensemble that fits separate Nelder-Mead blend weights either side of that split over tuned LightGBM, XGBoost, CatBoost and MLP bases, reaching 0.9508 OOF. Supported by adversarial validation, SHAP attribution, and an autoregressive within-stint \"overdue\" feature."
+  tags: ["Python", "LightGBM", "XGBoost", "CatBoost", "PyTorch", "Optuna"]
+
+- title: "Kaggle Playground S6E4 — Predicting Irrigation Need"
+  repo: "https://github.com/Alexdruso/data-science-stuff/tree/main/playground-series-s6e4"
+  year: 2026
+  role: "Solo"
+  context: "Kaggle Playground Series S6E4"
+  description: "Three-class irrigation-need classification on synthetic agronomic data. Built around the community-reconstructed multinomial-logit formula behind the generator (credit: Chris Deotte) — threshold indicators on soil moisture, temperature, rainfall, wind and crop growth stage — used both as a standalone predictor and as a feature and residual base for LightGBM, with decision-threshold tuning and error analysis on top."
+  tags: ["Python", "LightGBM", "Polars", "scikit-learn"]
+
+- title: "data-science-stuff — ML monorepo and Kaggle toolkit"
+  repo: "https://github.com/Alexdruso/data-science-stuff"
+  year: 2026
+  role: "Solo"
+  context: "Independent project"
+  description: "The umbrella repository behind the Kaggle entries above. Its installable `data_science_stuff.kaggle` package holds the machinery every competition shares — the cross-validation fold loop, Nelder-Mead blend weights, fold-safe target encoding, stacking with Caruana selection, threshold and cost-matrix decision rules, and a LightGBM CUDA probe — so competition scripts import it rather than copy it. Gated in CI by ruff, mypy --strict, bandit and 80% coverage across Python 3.9–3.11."
+  tags: ["Python", "Polars", "PyTorch", "uv", "CI"]
+
+- title: "Kaggle Playground Series — 2025 season"
+  repo: "https://github.com/Alexdruso/data-science-stuff"
+  year: 2025
+  role: "Solo"
+  context: "Kaggle Playground Series S5E1, S5E5 and S5E6"
+  description: "The first three Playground entries, where the workflow that later hardened into the shared toolkit took shape: per-series time-series forecasting of sticker sales (S5E1), calorie-expenditure regression via automated model comparison over Polars preprocessing (S5E5), and fertilizer recommendation scored on MAP@3 with logistic, XGBoost and PyCaret baselines (S5E6)."
+  tags: ["Python", "Polars", "PyCaret", "XGBoost"]
 
 - title: "RecSys Challenge 2022 — 11th place"
   repo: "https://github.com/Alexdruso/recsys2022"
