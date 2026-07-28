@@ -86,6 +86,27 @@ layout: default
   }
 
   var sketches = {
+    /* An induction head: mass on the stripe one step after each earlier match,
+       plus the attention sink in column 0. */
+    'attention-heads': function (ctx, w, h, t) {
+      var n = 10, cell = Math.min(w, h) * 0.72 / n;
+      var ox = (w - cell * n) / 2, oy = (h - cell * n) / 2, half = n / 2;
+      for (var r = 0; r < n; r++) {
+        for (var c = 0; c < n; c++) {
+          var a;
+          if (c > r) { ctx.fillStyle = t.grid; a = 1; }
+          else {
+            a = 0.06;
+            if (c === 0) a = 0.4;
+            if (r >= half && c === r - half + 1) a = 1;
+            ctx.fillStyle = t.accent;
+          }
+          ctx.globalAlpha = a;
+          ctx.fillRect(ox + c * cell + 1, oy + r * cell + 1, cell - 2, cell - 2);
+          ctx.globalAlpha = 1;
+        }
+      }
+    },
     'self-attention': function (ctx, w, h, t) {
       var n = 8, cell = Math.min(w, h) * 0.72 / n;
       var ox = (w - cell * n) / 2, oy = (h - cell * n) / 2;
