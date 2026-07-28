@@ -44,6 +44,62 @@
   
   
   {
+    "title": "Kaggle Playground S6E7 — Predicting Student Health Risk",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python LightGBM XGBoost CatBoost Polars"
+  },
+  
+  {
+    "title": "alexdruso.github.io — personal site and interactive study notes",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Jekyll JavaScript SCSS LaTeX GitHub Actions"
+  },
+  
+  {
+    "title": "Implicit neural representations — images as functions",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "PyTorch NumPy Jupyter Neural Fields"
+  },
+  
+  {
+    "title": "Kaggle Playground S6E6 — Predicting Stellar Class (12th / 2,817)",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python LightGBM XGBoost CatBoost PyTorch Stacking"
+  },
+  
+  {
+    "title": "Kaggle Playground S6E5 — F1 pit-stop prediction",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python LightGBM XGBoost CatBoost PyTorch Optuna"
+  },
+  
+  {
+    "title": "Kaggle Playground S6E4 — Predicting Irrigation Need",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python LightGBM Polars scikit-learn"
+  },
+  
+  {
+    "title": "data-science-stuff — ML monorepo and Kaggle toolkit",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python Polars PyTorch uv CI"
+  },
+  
+  {
+    "title": "Kaggle Playground Series — 2025 season",
+    "url": "/projects/",
+    "type": "Project",
+    "text": "Python Polars PyCaret XGBoost"
+  },
+  
+  {
     "title": "RecSys Challenge 2022 — 11th place",
     "url": "/projects/",
     "type": "Project",
