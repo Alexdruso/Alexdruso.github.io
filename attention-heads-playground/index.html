@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Software Engineer at Optiver">
+    <meta name="author" content="Alessandro Sanvito">
+    <title>Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer – Alessandro Sanvito</title>
+
+        <link rel="canonical" href="https://alexdruso.github.io/attention-heads-playground/" />
+    <meta property="og:url" content="https://alexdruso.github.io/attention-heads-playground/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:image" content="https://alexdruso.github.io/images/me.jpg" />
+    <meta name="twitter:card" content="summary" />
+
+    
+    <meta name="description" content="Nothing in a transformer specifies what any attention head should look at — the query and key matrices start as random noise and every pattern is a fit to the training task. Train a two-layer transformer from scratch on a repeated-sequence task and the canonical circuit appears: a previous-token head in layer 0 writing each position's predecessor into the residual stream, and an induction head in layer 1 using it to complete the copy. Knock out either one and accuracy collapses from 99.9% to chance." />
+    <meta property="og:description" content="Nothing in a transformer specifies what any attention head should look at — the query and key matrices start as random noise and every pattern is a fit to the training task. Train a two-layer transformer from scratch on a repeated-sequence task and the canonical circuit appears: a previous-token head in layer 0 writing each position's predecessor into the residual stream, and an induction head in layer 1 using it to complete the copy. Knock out either one and accuracy collapses from 99.9% to chance." />
+    
+    <meta name="author" content="Alessandro Sanvito" />
+
+    
+    <meta property="og:title" content="Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer" />
+    <meta property="twitter:title" content="Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer" />
+    
+
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link rel="alternate" type="application/rss+xml" title="Alessandro Sanvito - Software Engineer at Optiver" href="/feed.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  </head>
+
+  <body>
+    <div class="wrapper-masthead">
+      <div class="container">
+        <header class="masthead clearfix">
+          <a href="/" class="site-avatar"><img src="/images/me.jpg" alt="Alessandro Sanvito" /></a>
+
+          <div class="site-info">
+            <h1 class="site-name"><a href="/">Alessandro Sanvito</a></h1>
+            <p class="site-description">Software Engineer at Optiver</p>
+          </div>
+
+          <nav>
+            
+              <a href="/" >
+                <i class="fas fa-user"></i>
+                About Me
+              </a>
+            
+              <a href="/publications/" >
+                <i class="fas fa-graduation-cap"></i>
+                Publications
+              </a>
+            
+              <a href="/projects/" >
+                <i class="fas fa-code-branch"></i>
+                Projects
+              </a>
+            
+              <a href="/study-notes/" >
+                <i class="fas fa-book-open"></i>
+                Study Notes
+              </a>
+            
+              <a href="/cv/" >
+                <i class="fas fa-file-alt"></i>
+                CV
+              </a>
+            
+              <a href="/game/" >
+                <i class="fas fa-gamepad"></i>
+                Snake
+              </a>
+            
+            <button class="nav-search" aria-label="Search the site (Ctrl+K or ⌘K)">
+              <i class="fas fa-search"></i><span class="nav-search-label">Search</span><kbd>⌘K</kbd>
+            </button>
+          </nav>
+        </header>
+      </div>
+    </div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <h1>Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer</h1>
+
+  <div class="entry">
+    <style>
+/* ============================================================
+   Study Notes — shared design system
+   Sleek/futuristic: cyan-teal accent, hairline borders, flat
+   single-accent controls, monospace numerals, glow in dark only.
+   Adaptive light + dark via tokens. Every selector is scoped
+   under .study-note so nothing leaks to the rest of the site.
+   ============================================================ */
+.study-note {
+  --sn-accent: #0891b2;
+  --sn-accent-strong: #06b6d4;
+  --sn-accent-soft: rgba(8, 145, 178, 0.10);
+  --sn-accent-line: rgba(8, 145, 178, 0.30);
+  --sn-on-accent: #ffffff;
+
+  --sn-panel: #ffffff;
+  --sn-panel-inset: #f6f8fa;
+  --sn-section: #f7f9fb;
+  --sn-border: rgba(15, 23, 42, 0.08);
+  --sn-grid: rgba(15, 23, 42, 0.10);
+
+  --sn-text: #1f2933;
+  --sn-muted: #64748b;
+
+  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
+  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
+  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
+
+  --sn-radius: 12px;
+  --sn-radius-sm: 8px;
+  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sn-glow: none;
+  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+.dark-theme .study-note {
+  --sn-accent: #22d3ee;
+  --sn-accent-strong: #67e8f9;
+  --sn-accent-soft: rgba(34, 211, 238, 0.12);
+  --sn-accent-line: rgba(34, 211, 238, 0.35);
+  --sn-on-accent: #06141a;
+
+  --sn-panel: #11131c;
+  --sn-panel-inset: #161a26;
+  --sn-section: #14161f;
+  --sn-border: rgba(148, 163, 184, 0.14);
+  --sn-grid: rgba(148, 163, 184, 0.16);
+
+  --sn-text: #e2e8f0;
+  --sn-muted: #94a3b8;
+
+  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
+  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
+  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
+
+  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+/* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
+.study-note sub,
+.study-note sup {
+  font-size: 0.72em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.study-note sup { top: -0.5em; }
+.study-note sub { bottom: -0.22em; }
+
+/* ---- sections / cards ---- */
+.study-note .se-section,
+.study-note .bm-section,
+.study-note .mdp-section {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: var(--sn-radius);
+  background: var(--sn-section);
+  border: 1px solid var(--sn-border);
+  box-shadow: var(--sn-shadow);
+}
+.study-note .se-section h3,
+.study-note .bm-section h3,
+.study-note .mdp-section h3 {
+  margin-top: 0;
+  color: var(--sn-accent);
+  letter-spacing: -0.01em;
+}
+
+/* ---- equation boxes ---- */
+.study-note .se-equation,
+.study-note .bm-equation,
+.study-note .equation-box {
+  padding: 1rem 1.5rem;
+  margin: 1rem 0;
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  font-size: 1.1rem;
+  text-align: center;
+  overflow-x: auto;
+}
+.study-note .se-equation .big,
+.study-note .bm-equation .big { font-size: 1.25rem; }
+
+/* ---- callout / note ---- */
+.study-note .se-note,
+.study-note .bm-note {
+  background: var(--sn-accent-soft);
+  border-radius: var(--sn-radius-sm);
+  border-left: 3px solid var(--sn-accent);
+  padding: 0.9rem 1.1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- example box ---- */
+.study-note .se-example,
+.study-note .bm-example,
+.study-note .example-box {
+  background: var(--sn-panel-inset);
+  border: 1px solid var(--sn-border);
+  border-left: 3px solid var(--sn-warn);
+  border-radius: var(--sn-radius-sm);
+  padding: 1rem;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- chart containers ---- */
+.study-note .se-chartwrap,
+.study-note .bm-chartwrap,
+.study-note .graph-wrap {
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem;
+}
+.study-note .graph-wrap { overflow-x: auto; }
+
+/* ---- primary buttons ---- */
+.study-note .se-btn,
+.study-note .bm-btn,
+.study-note .vi-btn {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--sn-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-on-accent);
+  background: var(--sn-accent);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
+}
+.study-note .se-btn:hover:not(:disabled),
+.study-note .bm-btn:hover:not(:disabled),
+.study-note .vi-btn:hover:not(:disabled) {
+  background: var(--sn-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sn-glow);
+}
+.study-note .se-btn:disabled,
+.study-note .bm-btn:disabled,
+.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* secondary variant */
+.study-note .se-btn.sec,
+.study-note .bm-btn.sec,
+.study-note .vi-btn.sec {
+  background: transparent;
+  color: var(--sn-accent);
+  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
+}
+.study-note .se-btn.sec:hover:not(:disabled),
+.study-note .bm-btn.sec:hover:not(:disabled),
+.study-note .vi-btn.sec:hover:not(:disabled) {
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+}
+
+/* ---- ghost / reset buttons ---- */
+.study-note .se-reset,
+.study-note .bm-reset,
+.study-note .reset-link {
+  background: none;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-muted);
+  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
+}
+.study-note .se-reset:hover,
+.study-note .bm-reset:hover,
+.study-note .reset-link:hover {
+  background: var(--sn-accent-soft);
+  border-color: var(--sn-accent-line);
+  color: var(--sn-accent);
+}
+
+/* ---- range sliders: flat, single-accent ---- */
+.study-note input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+  outline: none;
+  cursor: pointer;
+}
+.study-note input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
+}
+.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.study-note input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+}
+.study-note input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+}
+
+/* ---- status pills ---- */
+.study-note .se-tag,
+.study-note .bm-tag {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
+}
+.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
+.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
+
+/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
+.study-note .se-stat .val,
+.study-note .bm-stat .val,
+.study-note .score-item .sval,
+.study-note .compare-score {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-accent);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.study-note .se-readout,
+.study-note .bm-temp-readout {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sn-accent);
+}
+
+/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
+.study-note svg text { fill: var(--sn-muted); }
+</style>
+
+
+<div class="study-note">
+
+<style>
+/* Note-specific LAYOUT only — every colour comes from the --sn-* tokens. */
+.ah-panel { border: 1px solid var(--sn-border); border-radius: var(--sn-radius);
+  background: var(--sn-panel-inset); padding: 0.85rem 0.95rem; margin: 0.9rem 0; }
+.ah-row { display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: flex-start; }
+.ah-ctl { display: flex; flex-direction: column; gap: 0.28rem; min-width: 0; }
+.ah-ctl > span:first-child { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--sn-muted); }
+.ah-seg { display: inline-flex; border: 1px solid var(--sn-border); border-radius: var(--sn-radius-sm);
+  overflow: hidden; background: var(--sn-panel); }
+.ah-seg button { border: 0; background: transparent; color: var(--sn-muted); cursor: pointer;
+  padding: 0.32rem 0.6rem; font: 600 0.82rem/1 inherit; transition: background 0.18s var(--sn-ease), color 0.18s var(--sn-ease); }
+.ah-seg button + button { border-left: 1px solid var(--sn-border); }
+.ah-seg button.on { background: var(--sn-accent); color: var(--sn-on-accent); }
+.ah-seg button:hover:not(.on) { background: var(--sn-accent-soft); color: var(--sn-text); }
+.ah-check { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; }
+.ah-transport { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin: 0.2rem 0 0.7rem; }
+.ah-stats { display: flex; flex-wrap: wrap; gap: 1.3rem; margin-left: auto; }
+.ah-stat { display: flex; flex-direction: column; line-height: 1.15; }
+.ah-stat b { font: 1.05rem var(--sn-mono); font-variant-numeric: tabular-nums; color: var(--sn-accent); }
+.ah-stat span { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sn-muted); }
+.ah-grid { display: grid; gap: 0.7rem; margin-top: 0.4rem;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+.ah-head { border: 1px solid var(--sn-border); border-radius: var(--sn-radius-sm);
+  background: var(--sn-panel); padding: 0.5rem; display: flex; flex-direction: column; gap: 0.35rem; }
+.ah-head.dead { opacity: 0.45; }
+.ah-head canvas { width: 100%; aspect-ratio: 1 / 1; display: block; border-radius: 3px; }
+.ah-head-top { display: flex; align-items: center; justify-content: space-between; gap: 0.3rem; }
+.ah-head-id { font: 600 0.72rem var(--sn-mono); color: var(--sn-muted); }
+.ah-kill { border: 1px solid var(--sn-border); background: transparent; color: var(--sn-muted);
+  border-radius: 4px; cursor: pointer; font-size: 0.7rem; line-height: 1; padding: 0.16rem 0.32rem; }
+.ah-kill.on { background: var(--sn-bad-bg); color: var(--sn-bad); border-color: transparent; }
+.ah-label { font-size: 0.73rem; color: var(--sn-text); min-height: 2.1em; }
+.ah-label i { color: var(--sn-muted); font-style: normal; }
+.ah-seq { display: flex; flex-wrap: wrap; gap: 3px; margin: 0.5rem 0 0.2rem; }
+.ah-tok { min-width: 1.7rem; text-align: center; padding: 0.24rem 0.1rem; border-radius: 4px;
+  border: 1px solid var(--sn-border); background: var(--sn-panel); cursor: pointer;
+  font: 600 0.8rem var(--sn-mono); transition: background 0.15s var(--sn-ease); }
+.ah-tok:hover { background: var(--sn-accent-soft); }
+.ah-tok.pred { border-color: transparent; }
+.ah-tok.ok { background: var(--sn-good-bg); color: var(--sn-good); }
+.ah-tok.no { background: var(--sn-bad-bg); color: var(--sn-bad); }
+.ah-tok.mute { opacity: 0.4; cursor: default; }
+.ah-legend { font-size: 0.76rem; color: var(--sn-muted); margin-top: 0.35rem; }
+.ah-gallery { display: grid; gap: 0.7rem; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); }
+.ah-gallery figure { margin: 0; text-align: center; }
+.ah-gallery canvas { width: 100%; aspect-ratio: 1 / 1; border-radius: 4px;
+  border: 1px solid var(--sn-border); display: block; }
+.ah-gallery figcaption { font-size: 0.72rem; color: var(--sn-muted); margin-top: 0.3rem; }
+.ah-tbl { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 0.6rem 0; }
+.ah-tbl th, .ah-tbl td { text-align: left; padding: 0.36rem 0.5rem; border-bottom: 1px solid var(--sn-border); }
+.ah-tbl th { font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--sn-muted); }
+.ah-tbl td.num { font: 0.86rem var(--sn-mono); font-variant-numeric: tabular-nums; }
+.ah-diag { display: block; max-width: 100%; height: auto; margin: 0.5rem auto; }
+.ah-diag .box { fill: var(--sn-panel); stroke: var(--sn-border); }
+.ah-diag .hot { fill: var(--sn-accent-soft); stroke: var(--sn-accent-line); }
+.ah-diag .lbl { fill: var(--sn-text); font-size: 11px; }
+.ah-diag .sub { fill: var(--sn-muted); font-size: 9.5px; }
+.ah-diag .wire { stroke: var(--sn-grid); fill: none; }
+.ah-diag .flow { stroke: var(--sn-accent); fill: none; }
+@media (max-width: 560px) { .ah-stats { margin-left: 0; } }
+</style>
+
+<p>
+  <strong>An attention head is a learned lookup</strong>: a query vector at one position is
+  compared against key vectors at every earlier position, the scores are softmaxed into a
+  distribution, and the head returns the corresponding weighted average of value vectors.
+  Nothing in that definition says <em>what</em> a head should look at. The matrices that
+  produce queries and keys start as random noise, and every recognisable pattern a trained
+  transformer displays — attending to the previous token, to the matching token, to
+  position zero — is a fit to the training task, not a design decision.
+</p>
+
+<div class="se-note">
+  <strong>One-sentence summary.</strong> Attention patterns are learned parameters, so the
+  right way to understand them is to train a transformer small enough to watch and see
+  which heads appear, which task forced each one, and what breaks when you delete it.
+</div>
+
+<p>
+  This note assumes the mechanism itself — queries, keys, values, the
+  <span class="se-tag">1/&radic;d</span> scaling, causal masking, multi-head splitting.
+  Those are covered in
+  <a href="/self-attention/">Self-Attention: The Content-Addressed Lookup at the
+  Heart of Transformers</a>. What follows is the other half: what those matrices become once
+  gradient descent is finished with them.
+</p>
+
+<!-- ============================================================ -->
+<!-- 1. THE MODEL                                                  -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🔬 The model on the table</h3>
+  <p style="margin-top:0">
+    The transformer below is a real decoder-only model — token and positional embeddings, a
+    stack of pre-LayerNorm blocks each holding multi-head causal self-attention and a GELU
+    feed-forward layer, then a final LayerNorm and an unembedding into logits. It is trained
+    with Adam on a cross-entropy next-token loss. The only unusual thing about it is the
+    size: about 18,000 parameters at the default settings, which is small enough that the
+    forward pass, the backward pass, and the optimiser all run in a few milliseconds of
+    plain JavaScript.
+  </p>
+
+  <div class="se-equation">
+    <span class="big">A<sub>ℓh</sub> = softmax( Q<sub>ℓh</sub>K<sub>ℓh</sub><sup>⊤</sup> / &radic;d<sub>head</sub> + mask )</span>
+  </div>
+
+  <svg class="ah-diag" viewBox="0 0 560 168" width="560" role="img"
+       aria-label="Two-layer decoder-only transformer: embeddings, two blocks of attention plus feed-forward with residual connections, then unembedding.">
+    <rect class="box" x="6" y="58" width="72" height="46" rx="6"/>
+    <text class="lbl" x="42" y="78" text-anchor="middle">embed</text>
+    <text class="sub" x="42" y="92" text-anchor="middle">token + pos</text>
+
+    <g>
+      <rect class="box" x="104" y="20" width="150" height="122" rx="8"/>
+      <text class="sub" x="179" y="36" text-anchor="middle">block 0</text>
+      <rect class="hot" x="116" y="44" width="126" height="38" rx="5"/>
+      <text class="lbl" x="179" y="63" text-anchor="middle">multi-head attention</text>
+      <text class="sub" x="179" y="75" text-anchor="middle">the only cross-position step</text>
+      <rect class="box" x="116" y="94" width="126" height="34" rx="5"/>
+      <text class="lbl" x="179" y="115" text-anchor="middle">feed-forward</text>
+    </g>
+    <g>
+      <rect class="box" x="280" y="20" width="150" height="122" rx="8"/>
+      <text class="sub" x="355" y="36" text-anchor="middle">block 1</text>
+      <rect class="hot" x="292" y="44" width="126" height="38" rx="5"/>
+      <text class="lbl" x="355" y="63" text-anchor="middle">multi-head attention</text>
+      <text class="sub" x="355" y="75" text-anchor="middle">reads what block 0 wrote</text>
+      <rect class="box" x="292" y="94" width="126" height="34" rx="5"/>
+      <text class="lbl" x="355" y="115" text-anchor="middle">feed-forward</text>
+    </g>
+
+    <rect class="box" x="456" y="58" width="82" height="46" rx="6"/>
+    <text class="lbl" x="497" y="78" text-anchor="middle">unembed</text>
+    <text class="sub" x="497" y="92" text-anchor="middle">→ logits</text>
+
+    <path class="flow" d="M78 81 H104" marker-end="url(#ahArrow)"/>
+    <path class="flow" d="M254 81 H280" marker-end="url(#ahArrow)"/>
+    <path class="flow" d="M430 81 H456" marker-end="url(#ahArrow)"/>
+    <path class="wire" d="M110 152 H424" stroke-dasharray="3 3"/>
+    <text class="sub" x="267" y="164" text-anchor="middle">residual stream — every block reads it and adds to it</text>
+    <defs>
+      <marker id="ahArrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L8 4 L0 8 z" fill="var(--sn-accent)"/>
+      </marker>
+    </defs>
+  </svg>
+
+  <p>
+    Two structural facts drive everything below. First, <strong>attention is the only
+    operation that moves information between positions</strong> — the feed-forward layers
+    and LayerNorms act on each position independently. Second, <strong>a layer-0 key can
+    only depend on its own token and its own position</strong>, because nothing has written
+    to the residual stream yet. Any pattern that requires knowing what sits <em>next to</em>
+    a key position therefore cannot exist in layer 0, and needs a second layer to read what
+    the first one deposited. That constraint turns out to be visible in the demo.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. THE PLAYGROUND                                             -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🎮 The playground</h3>
+  <p style="margin-top:0">
+    Pick a task, pick a shape, and press run. Each square below is one head's attention
+    matrix on a single held-out example: row <em>i</em> is the distribution the query at
+    position <em>i</em> puts over key positions <em>j</em>, so brighter means more attention
+    and the black upper triangle is the causal mask. The matrices are redrawn as training
+    proceeds, and each head is labelled by whichever canonical pattern its attention mass
+    best matches.
+  </p>
+
+  <div class="ah-panel">
+    <div class="ah-row" style="margin-bottom:0.75rem">
+      <label class="ah-ctl"><span>Task</span>
+        <span class="ah-seg" id="ah-task">
+          <button data-v="induction" class="on">Induction</button><button data-v="reverse">Reverse</button><button data-v="sort">Sort</button><button data-v="majority">Majority</button>
+        </span>
+      </label>
+      <label class="ah-ctl"><span>Layers</span>
+        <span class="ah-seg" id="ah-layers"><button data-v="1">1</button><button data-v="2" class="on">2</button></span>
+      </label>
+      <label class="ah-ctl"><span>Heads / layer</span>
+        <span class="ah-seg" id="ah-heads"><button data-v="1">1</button><button data-v="2" class="on">2</button><button data-v="4">4</button></span>
+      </label>
+      <label class="ah-ctl"><span>d<sub>model</sub></span>
+        <span class="ah-seg" id="ah-dmodel"><button data-v="16">16</button><button data-v="32" class="on">32</button><button data-v="64">64</button></span>
+      </label>
+      <label class="ah-ctl"><span>Speed</span>
+        <span class="ah-seg" id="ah-speed"><button data-v="1" class="on">1×</button><button data-v="4">4×</button><button data-v="12">12×</button></span>
+      </label>
+    </div>
+    <div class="ah-row">
+      <label class="ah-ctl"><span>Learning rate <b id="ah-lr-out" style="color:var(--sn-accent);font-family:var(--sn-mono)">0.003</b></span>
+        <input type="range" class="se-slider" id="ah-lr" min="-3.7" max="-1.7" step="0.1" value="-2.52" style="width:150px">
+      </label>
+      <label class="ah-ctl"><span>Batch <b id="ah-bs-out" style="color:var(--sn-accent);font-family:var(--sn-mono)">16</b></span>
+        <input type="range" class="se-slider" id="ah-bs" min="4" max="32" step="4" value="16" style="width:130px">
+      </label>
+      <label class="ah-ctl"><span>Seed <b id="ah-seed-out" style="color:var(--sn-accent);font-family:var(--sn-mono)">1</b></span>
+        <input type="range" class="se-slider" id="ah-seed" min="1" max="12" step="1" value="1" style="width:110px">
+      </label>
+      <label class="ah-ctl"><span>Inputs</span>
+        <span style="display:flex;gap:0.9rem;padding-top:0.25rem">
+          <label class="ah-check"><input type="checkbox" id="ah-pos" checked> positional embeddings</label>
+          <label class="ah-check"><input type="checkbox" id="ah-causal" checked> causal mask</label>
+        </span>
+      </label>
+    </div>
+  </div>
+
+  <div class="ah-transport">
+    <button class="se-btn" id="ah-run">▶ Run</button>
+    <button class="se-btn sec" id="ah-step">⏭ 50 steps</button>
+    <button class="se-reset" id="ah-reset">↻ Reset weights</button>
+    <div class="ah-stats">
+      <div class="ah-stat"><b id="ah-s-step">0</b><span>step</span></div>
+      <div class="ah-stat"><b id="ah-s-loss">—</b><span>loss</span></div>
+      <div class="ah-stat"><b id="ah-s-acc">—</b><span>held-out acc</span></div>
+      <div class="ah-stat"><b id="ah-s-rate">—</b><span>steps/s</span></div>
+    </div>
+  </div>
+
+  <div class="graph-wrap"><svg id="ah-chart" viewBox="0 0 640 190" width="100%"
+    role="img" aria-label="Training loss and held-out accuracy against step count."></svg></div>
+
+  <div class="ah-grid" id="ah-heads-grid"></div>
+
+  <div class="ah-panel" style="margin-top:0.9rem">
+    <div class="ah-row" style="align-items:center;gap:0.7rem">
+      <strong style="font-size:0.85rem">Held-out example</strong>
+      <button class="se-btn sec" id="ah-newex" style="padding:0.25rem 0.6rem;font-size:0.78rem">⟳ New example</button>
+      <span class="ah-legend" style="margin:0">Click a token to change it and watch the heads react.</span>
+    </div>
+    <div class="ah-seq" id="ah-seq"></div>
+    <div class="ah-seq" id="ah-pred"></div>
+    <div class="ah-legend" id="ah-explain"></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. READING A HEAD                                             -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🗺️ Reading a head</h3>
+  <p style="margin-top:0">
+    A head's label is not a judgement call: each canonical pattern is a specific set of cells
+    in the attention matrix, and the score is simply how much probability mass lands there,
+    averaged over query positions and over the batch. The head is named after whichever score
+    wins, provided the winner clears 0.4.
+  </p>
+
+  <div class="ah-gallery" id="ah-gallery"></div>
+
+  <table class="ah-tbl">
+    <thead><tr><th>Pattern</th><th>Cells scored</th><th>What it computes</th></tr></thead>
+    <tbody>
+      <tr><td>previous-token</td><td class="num">A[i, i−1]</td><td>Copies each position's predecessor into the residual stream.</td></tr>
+      <tr><td>induction</td><td class="num">A[i, m+1]</td><td>Where <em>m</em> is the last earlier position holding the same token — so the head reads what followed that token last time.</td></tr>
+      <tr><td>matching</td><td class="num">A[i, m]</td><td>Finds the earlier copy itself rather than its successor.</td></tr>
+      <tr><td>mirror</td><td class="num">A[i, T−1−i]</td><td>The anti-diagonal — position <em>i</em> reads the position reflected about the centre.</td></tr>
+      <tr><td>attention sink</td><td class="num">A[i, 0]</td><td>Dumps mass on position 0, a way of attending to nothing in particular.</td></tr>
+      <tr><td>offset −δ</td><td class="num">A[i, i−δ]</td><td>A fixed stride, for the best δ.</td></tr>
+      <tr><td>position-<em>j</em></td><td class="num">A[·, j]</td><td>Always looks at one absolute position, whatever the content.</td></tr>
+      <tr><td>uniform</td><td class="num">H(A[i, ·])</td><td>Normalised entropy near 1 — a flat average over everything visible.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="se-note">
+    The position-<em>j</em> score exists to keep the induction score honest. On a task where
+    the answer happens to sit in a narrow window of the sequence, a head that stares at one
+    fixed position scores highly for induction without doing anything content-dependent.
+    Making the two compete for the label is what separates them.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. DEPTH                                                      -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🔁 Why induction needs two layers</h3>
+  <p style="margin-top:0">
+    The induction task is a sequence of distinct tokens followed by the same tokens again in a
+    rotated order, so every token in the second half has exactly one earlier copy, and the
+    answer at each position is whatever followed that copy the first time. Because the
+    rotation is random the answer sits at no fixed position and no fixed offset — content
+    matching is the only route.
+  </p>
+  <p>
+    Solving it requires composing two heads. A query at position <em>i</em> wants the position
+    <em>m+1</em>, where <em>m</em> holds the same token as <em>i</em>. But matching on content
+    finds <em>m</em>, not <em>m+1</em>, and the key at <em>m+1</em> has no idea which token
+    precedes it. So a head in layer 0 first copies each position's predecessor one step
+    forward — the <strong>previous-token head</strong>. Now the key at <em>m+1</em> carries
+    <em>m</em>'s identity, and a layer-1 head can match position <em>i</em>'s token against it
+    directly: the <strong>induction head</strong>.
+  </p>
+
+  <div class="se-example">
+    <strong>Watch it happen.</strong> Set the task to Induction and press run with two layers.
+    Loss sits near ln 7 ≈ 1.95 for several hundred steps while nothing much appears, then a
+    previous-token head sharpens in layer 0, an induction head snaps into place in layer 1,
+    and accuracy climbs past 90% around step 650. Then drop to one layer and run again: it
+    stalls around 15–25%, barely above the one-in-seven chance floor, and going to four heads
+    does not rescue it. Depth is doing something width cannot.
+  </div>
+
+  <p>
+    Ablation makes the composition concrete. Switching off a single head with the
+    <span class="se-tag">⊘</span> button zeroes that head's contribution while leaving
+    everything else trained and intact. On the converged default model — two layers, two
+    heads, seed 1, 2500 steps:
+  </p>
+
+  <table class="ah-tbl">
+    <thead><tr><th>Head switched off</th><th>Label</th><th>Held-out accuracy</th></tr></thead>
+    <tbody>
+      <tr><td class="num">—</td><td><i>intact</i></td><td class="num">99.7%</td></tr>
+      <tr><td class="num">L0 H0</td><td>previous-token head <i>0.42</i></td><td class="num">22.8%</td></tr>
+      <tr><td class="num">L1 H0</td><td>induction head <i>0.81</i></td><td class="num">22.4%</td></tr>
+      <tr><td class="num">L0 H1</td><td><i>no clear pattern</i></td><td class="num">35.7%</td></tr>
+      <tr><td class="num">L1 H1</td><td>attention sink <i>0.53</i></td><td class="num">99.7%</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Both links in the chain are load-bearing and the sink is free. This is the same
+    prev-token-plus-induction circuit that
+    <a href="https://transformer-circuits.pub/2021/framework/index.html" rel="noopener">Elhage et al. (2021)</a>
+    identified in two-layer attention-only transformers, and that
+    <a href="https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html" rel="noopener">Olsson et al. (2022)</a>
+    tied to the sharp phase change in in-context learning that real language models show
+    early in training. Getting it to appear here takes about eighteen thousand parameters.
+  </p>
+
+  <div class="se-note">
+    <strong>The circuit is not guaranteed.</strong> Move the seed slider and run again. Across
+    twelve seeds at these settings, all twelve pass 90% accuracy but only about a third grow a
+    prev-token head and an induction head crisp enough to name — the rest solve the task with
+    attention spread thinly across all four heads, and training ten times longer does not
+    consolidate them. Clean, nameable circuits are one solution among several, not the
+    destination gradient descent is aiming for. Seeds 1, 4, 10 and 11 land on the tidy version.
+  </div>
+
+  <div class="se-note">
+    <strong>The task has to be built carefully.</strong> An earlier version of this demo
+    repeated a fixed-length prefix, which a <em>one-layer</em> model solved perfectly — with a
+    constant period, "look back 6" is a fixed offset and needs no matching at all. A second
+    version placed the repeated block near the start, and one-layer models scored 94% by
+    staring at absolute positions 3 and 4. Both look like induction until you plot where the
+    attention mass actually goes. Randomising the rotation is what makes content matching the
+    only strategy that generalises.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. POSITION AS A REMOVABLE INPUT                              -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>📍 Position is an input you can remove</h3>
+  <p style="margin-top:0">
+    Self-attention is permutation-equivariant: a softmax over dot products has no notion of
+    order, and position enters only because it is added to the embeddings. Turning
+    <span class="se-tag">positional embeddings</span> off makes that dependence measurable,
+    and different tasks respond very differently.
+  </p>
+
+  <p>
+    Accuracy after 2000 steps, averaged over eight seeds, with the per-seed values shown
+    because the spread is the point:
+  </p>
+
+  <table class="ah-tbl">
+    <thead><tr><th>Task</th><th>With positions</th><th>Without</th><th>Per-seed, without</th></tr></thead>
+    <tbody>
+      <tr><td>Reverse</td><td class="num">100%</td><td class="num">73%</td>
+        <td class="num">91 · 42 · 94 · 91 · 93 · 87 · 43 · 45</td></tr>
+      <tr><td>Majority</td><td class="num">100%</td><td class="num">100%</td>
+        <td class="num">100 · 100 · 100 · 100 · 100</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Majority does not notice, which is what a bag-of-tokens task should do. Reverse is the
+    interesting one, and not because it collapses — it does not. The outcome is
+    <strong>bimodal</strong>: some seeds recover to around 90%, others stall in the mid-40s,
+    and the average of 73% describes no individual run. Even the bad runs sit far above the
+    1-in-6 chance floor.
+  </p>
+  <p>
+    Position is not actually gone when the embeddings are removed, because <strong>the causal
+    mask leaks it</strong>. Position <em>i</em> can attend to exactly <em>i+1</em> keys, so a
+    uniform head returns an average carrying weight 1/(i+1) — a usable positional signal, and
+    a uniform head is exactly what the model grows here (its uniformity score pins at 0.99).
+    Removing positional embeddings makes order expensive and unreliable to recover rather than
+    unavailable. Switching the causal mask off as well takes the last of it away.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. CLOSING                                                    -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🎯 Consequences worth remembering</h3>
+  <ul>
+    <li><strong>Heads are fitted, not specified.</strong> The same architecture grows a mirror
+      head on reverse, a uniform counting head on majority, and a prev-token/induction pair on
+      the copy task. Only the data changed.</li>
+    <li><strong>Run it more than once.</strong> Single runs here were misleading in both
+      directions — the induction circuit appears in roughly a third of seeds, and removing
+      positional embeddings gives anything from 42% to 94% on the same task. Every number in
+      this note that comes from one run is labelled as such.</li>
+    <li><strong>Layer 0 keys are content-blind about their neighbours.</strong> Any pattern
+      that needs to know what is adjacent to a key position costs an extra layer, which is why
+      induction is a two-layer circuit and not a one-layer one.</li>
+    <li><strong>Ablation is the test that matters.</strong> A pretty attention picture is a
+      hypothesis. Deleting the head and watching accuracy fall from 99.9% to 15.8% is
+      evidence.</li>
+    <li><strong>Toy tasks leak.</strong> Three of this note's task designs were solvable by a
+      shortcut that looked like the real circuit in the heatmap. The diagnostic that saved it
+      was making a fixed-position detector compete with the induction score.</li>
+    <li><strong>Redundancy is normal.</strong> On majority, ablating any single head changes
+      nothing — several heads compute the same average, so no one of them is necessary.</li>
+    <li><strong>Interpretability is not free.</strong> Every seed here learns the task; only
+      some learn it in a form that can be read off a heatmap. A model being understandable is
+      a property of the particular solution it landed in, not of the architecture.</li>
+  </ul>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var SN = document.querySelector(".study-note");
+
+  /* ---------- theme tokens: read at runtime, redraw on toggle ---------- */
+  function readCols() {
+    var cs = getComputedStyle(SN), c = function (n) { return cs.getPropertyValue(n).trim(); };
+    return { accent: c("--sn-accent"), grid: c("--sn-grid"), muted: c("--sn-muted"),
+             text: c("--sn-text"), good: c("--sn-good"), bad: c("--sn-bad"),
+             panel: c("--sn-panel-inset"), border: c("--sn-border") };
+  }
+  var COL = readCols(), redrawFns = [];
+  new MutationObserver(function () { COL = readCols(); RGB = {}; redrawFns.forEach(function (f) { f(); }); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  var RGB = {};
+  function toRgb(col) {
+    if (RGB[col]) return RGB[col];
+    var out = [0, 0, 0], m;
+    if (col.charAt(0) === "#") {
+      var h = col.slice(1);
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      out = [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    } else if ((m = col.match(/rgba?\(([^)]+)\)/))) {
+      var p = m[1].split(",");
+      out = [parseFloat(p[0]), parseFloat(p[1]), parseFloat(p[2])];
+    }
+    RGB[col] = out; return out;
+  }
+  function mix(a, b, t) {
+    var A = toRgb(a), B = toRgb(b);
+    return "rgb(" + Math.round(A[0] + (B[0] - A[0]) * t) + "," +
+                    Math.round(A[1] + (B[1] - A[1]) * t) + "," +
+                    Math.round(A[2] + (B[2] - A[2]) * t) + ")";
+  }
+
+  /* ================================================================
+     Tiny decoder-only transformer: forward, hand-written backward, Adam.
+     The backward pass was checked against central finite differences in
+     double precision (worst relative error ~3e-8) before being used here.
+     ================================================================ */
+  var AR = Float32Array;
+  var GC = Math.sqrt(2 / Math.PI);
+  function gelu(x) { return 0.5 * x * (1 + Math.tanh(GC * (x + 0.044715 * x * x * x))); }
+  function dgelu(x) {
+    var u = GC * (x + 0.044715 * x * x * x), t = Math.tanh(u);
+    return 0.5 * (1 + t) + 0.5 * x * (1 - t * t) * GC * (1 + 3 * 0.044715 * x * x);
+  }
+  function makeRng(seed) {
+    var s = seed >>> 0;
+    return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  function makeGauss(rng) {
+    var spare = null;
+    return function () {
+      if (spare !== null) { var r = spare; spare = null; return r; }
+      var u, v, s2;
+      do { u = rng() * 2 - 1; v = rng() * 2 - 1; s2 = u * u + v * v; } while (s2 >= 1 || s2 === 0);
+      var mul = Math.sqrt(-2 * Math.log(s2) / s2);
+      spare = v * mul; return u * mul;
+    };
+  }
+  /* W is [outD, inD] row-major */
+  function linF(X, W, b, N, inD, outD, Y) {
+    for (var n = 0; n < N; n++) {
+      var xo = n * inD, yo = n * outD;
+      for (var o = 0; o < outD; o++) {
+        var s = b[o], wo = o * inD;
+        for (var k = 0; k < inD; k++) s += W[wo + k] * X[xo + k];
+        Y[yo + o] = s;
+      }
+    }
+  }
+  function linB(X, W, dY, N, inD, outD, gW, gb, dX) {
+    for (var n = 0; n < N; n++) {
+      var xo = n * inD, yo = n * outD;
+      for (var o = 0; o < outD; o++) {
+        var g = dY[yo + o];
+        if (g === 0) continue;
+        gb[o] += g;
+        var wo = o * inD;
+        for (var k = 0; k < inD; k++) { gW[wo + k] += g * X[xo + k]; dX[xo + k] += g * W[wo + k]; }
+      }
+    }
+  }
+  function lnF(X, g, b, N, D, Y, mu, rs, hat) {
+    for (var n = 0; n < N; n++) {
+      var o = n * D, s = 0, d;
+      for (d = 0; d < D; d++) s += X[o + d];
+      var m = s / D; s = 0;
+      for (d = 0; d < D; d++) { var t = X[o + d] - m; s += t * t; }
+      var r = 1 / Math.sqrt(s / D + 1e-5);
+      mu[n] = m; rs[n] = r;
+      for (d = 0; d < D; d++) { var h = (X[o + d] - m) * r; hat[o + d] = h; Y[o + d] = g[d] * h + b[d]; }
+    }
+  }
+  function lnB(dY, hat, rs, g, N, D, gg, gb, dX) {
+    for (var n = 0; n < N; n++) {
+      var o = n * D, s1 = 0, s2 = 0, d, dh;
+      for (d = 0; d < D; d++) {
+        var dy = dY[o + d];
+        gg[d] += dy * hat[o + d]; gb[d] += dy;
+        dh = dy * g[d]; s1 += dh; s2 += dh * hat[o + d];
+      }
+      s1 /= D; s2 /= D;
+      var r = rs[n];
+      for (d = 0; d < D; d++) { dh = dY[o + d] * g[d]; dX[o + d] += r * (dh - s1 - hat[o + d] * s2); }
+    }
+  }
+  function newParam(n) { return { p: new AR(n), g: new AR(n), m: new AR(n), v: new AR(n) }; }
+
+  function makeModel(cfg) {
+    var c = { V: cfg.V, T: cfg.T, D: cfg.D, H: cfg.H, L: cfg.L, dff: cfg.dff || 2 * cfg.D,
+              causal: cfg.causal !== false, usePos: cfg.usePos !== false, seed: cfg.seed || 1 };
+    var rng = makeRng(c.seed * 7919 + 13), gauss = makeGauss(rng);
+    var m = { cfg: c, params: [], layers: [], t: 0, Dh: c.D / c.H };
+    function reg(x) { m.params.push(x); return x; }
+    function init(par, std) { for (var i = 0; i < par.p.length; i++) par.p[i] = gauss() * std; }
+    m.E = reg(newParam(c.V * c.D)); init(m.E, 0.02);
+    m.Pos = reg(newParam(c.T * c.D)); init(m.Pos, 0.02);
+    var s = 1 / Math.sqrt(c.D);
+    for (var l = 0; l < c.L; l++) {
+      var L = {
+        ln1g: reg(newParam(c.D)), ln1b: reg(newParam(c.D)),
+        Wq: reg(newParam(c.D * c.D)), bq: reg(newParam(c.D)),
+        /* bk is kept for symmetry but its gradient is exactly zero: adding a constant
+           to every key shifts a whole softmax row equally, which changes nothing. */
+        Wk: reg(newParam(c.D * c.D)), bk: reg(newParam(c.D)),
+        Wv: reg(newParam(c.D * c.D)), bv: reg(newParam(c.D)),
+        Wo: reg(newParam(c.D * c.D)), bo: reg(newParam(c.D)),
+        ln2g: reg(newParam(c.D)), ln2b: reg(newParam(c.D)),
+        W1: reg(newParam(c.dff * c.D)), b1: reg(newParam(c.dff)),
+        W2: reg(newParam(c.D * c.dff)), b2: reg(newParam(c.D))
+      };
+      L.ln1g.p.fill(1); L.ln2g.p.fill(1);
+      init(L.Wq, s); init(L.Wk, s); init(L.Wv, s); init(L.Wo, s);
+      init(L.W1, s); init(L.W2, 1 / Math.sqrt(c.dff));
+      m.layers.push(L);
+    }
+    m.lnfg = reg(newParam(c.D)); m.lnfg.p.fill(1);
+    m.lnfb = reg(newParam(c.D));
+    m.Wu = reg(newParam(c.V * c.D)); init(m.Wu, s);
+    m.bu = reg(newParam(c.V));
+    m.nParams = 0;
+    for (var i = 0; i < m.params.length; i++) m.nParams += m.params[i].p.length;
+    return m;
+  }
+
+  function makeCache(m, B) {
+    var c = m.cfg, T = c.T, D = c.D, H = c.H, dff = c.dff, V = c.V, N = B * T;
+    var ca = { B: B, N: N, toks: new Int32Array(N), tgts: new Int32Array(N),
+      x: new AR(N * D), layers: [],
+      lnf: new AR(N * D), lnfmu: new AR(N), lnfrs: new AR(N), lnfhat: new AR(N * D),
+      logits: new AR(N * V), dlogits: new AR(N * V),
+      dres: new AR(N * D), dln: new AR(N * D), dq: new AR(N * D), dk: new AR(N * D),
+      dv: new AR(N * D), dof: new AR(N * D), dh1: new AR(N * dff),
+      tmpT: new AR(T), tmpV: new AR(V) };
+    for (var l = 0; l < c.L; l++) ca.layers.push({
+      ln1: new AR(N * D), ln1mu: new AR(N), ln1rs: new AR(N), ln1hat: new AR(N * D),
+      q: new AR(N * D), k: new AR(N * D), v: new AR(N * D),
+      att: new AR(B * H * T * T), o: new AR(N * D), ao: new AR(N * D), x1: new AR(N * D),
+      ln2: new AR(N * D), ln2mu: new AR(N), ln2rs: new AR(N), ln2hat: new AR(N * D),
+      z1: new AR(N * dff), h1: new AR(N * dff), mo: new AR(N * D), x2: new AR(N * D)
+    });
+    return ca;
+  }
+
+  function forward(m, ca, ablate) {
+    var c = m.cfg, B = ca.B, T = c.T, D = c.D, H = c.H, Dh = m.Dh, dff = c.dff, V = c.V, N = ca.N;
+    var scale = 1 / Math.sqrt(Dh), tmp = ca.tmpT, b, t, d, i, j, l, h;
+    for (b = 0; b < B; b++) for (t = 0; t < T; t++) {
+      var xo = (b * T + t) * D, eo = ca.toks[b * T + t] * D, po = t * D;
+      for (d = 0; d < D; d++) ca.x[xo + d] = m.E.p[eo + d] + (c.usePos ? m.Pos.p[po + d] : 0);
+    }
+    var inp = ca.x;
+    for (l = 0; l < c.L; l++) {
+      var L = m.layers[l], C = ca.layers[l];
+      lnF(inp, L.ln1g.p, L.ln1b.p, N, D, C.ln1, C.ln1mu, C.ln1rs, C.ln1hat);
+      linF(C.ln1, L.Wq.p, L.bq.p, N, D, D, C.q);
+      linF(C.ln1, L.Wk.p, L.bk.p, N, D, D, C.k);
+      linF(C.ln1, L.Wv.p, L.bv.p, N, D, D, C.v);
+      for (b = 0; b < B; b++) for (h = 0; h < H; h++) {
+        var ab = ((b * H) + h) * T * T, hd = h * Dh;
+        for (i = 0; i < T; i++) {
+          var jmax = c.causal ? i : T - 1, qo = (b * T + i) * D + hd, mx = -Infinity, s;
+          for (j = 0; j <= jmax; j++) {
+            var ko = (b * T + j) * D + hd; s = 0;
+            for (d = 0; d < Dh; d++) s += C.q[qo + d] * C.k[ko + d];
+            s *= scale; tmp[j] = s; if (s > mx) mx = s;
+          }
+          var sum = 0;
+          for (j = 0; j <= jmax; j++) { var e = Math.exp(tmp[j] - mx); tmp[j] = e; sum += e; }
+          for (j = 0; j <= jmax; j++) C.att[ab + i * T + j] = tmp[j] / sum;
+          for (j = jmax + 1; j < T; j++) C.att[ab + i * T + j] = 0;
+          var oo = (b * T + i) * D + hd, off = (ablate && ablate[l] && ablate[l][h]) ? 1 : 0;
+          for (d = 0; d < Dh; d++) {
+            var acc = 0;
+            for (j = 0; j <= jmax; j++) acc += C.att[ab + i * T + j] * C.v[(b * T + j) * D + hd + d];
+            C.o[oo + d] = off ? 0 : acc;
+          }
+        }
+      }
+      linF(C.o, L.Wo.p, L.bo.p, N, D, D, C.ao);
+      for (i = 0; i < N * D; i++) C.x1[i] = inp[i] + C.ao[i];
+      lnF(C.x1, L.ln2g.p, L.ln2b.p, N, D, C.ln2, C.ln2mu, C.ln2rs, C.ln2hat);
+      linF(C.ln2, L.W1.p, L.b1.p, N, D, dff, C.z1);
+      for (i = 0; i < N * dff; i++) C.h1[i] = gelu(C.z1[i]);
+      linF(C.h1, L.W2.p, L.b2.p, N, dff, D, C.mo);
+      for (i = 0; i < N * D; i++) C.x2[i] = C.x1[i] + C.mo[i];
+      inp = C.x2;
+    }
+    lnF(inp, m.lnfg.p, m.lnfb.p, N, D, ca.lnf, ca.lnfmu, ca.lnfrs, ca.lnfhat);
+    linF(ca.lnf, m.Wu.p, m.bu.p, N, D, V, ca.logits);
+    return ca.logits;
+  }
+
+  function lossGrad(m, ca, grad) {
+    var V = m.cfg.V, N = ca.N, tmp = ca.tmpV, n, c2, nv = 0, loss = 0, correct = 0;
+    for (n = 0; n < N; n++) if (ca.tgts[n] >= 0) nv++;
+    if (grad) ca.dlogits.fill(0);
+    if (nv === 0) return { loss: 0, acc: 0, n: 0 };
+    for (n = 0; n < N; n++) {
+      var tg = ca.tgts[n];
+      if (tg < 0) continue;
+      var o = n * V, mx = -Infinity, best = 0;
+      for (c2 = 0; c2 < V; c2++) if (ca.logits[o + c2] > mx) { mx = ca.logits[o + c2]; best = c2; }
+      var sum = 0;
+      for (c2 = 0; c2 < V; c2++) { var e = Math.exp(ca.logits[o + c2] - mx); tmp[c2] = e; sum += e; }
+      loss += -(ca.logits[o + tg] - mx - Math.log(sum));
+      if (best === tg) correct++;
+      if (grad) for (c2 = 0; c2 < V; c2++) ca.dlogits[o + c2] = (tmp[c2] / sum - (c2 === tg ? 1 : 0)) / nv;
+    }
+    return { loss: loss / nv, acc: correct / nv, n: nv };
+  }
+
+  function backward(m, ca) {
+    var c = m.cfg, B = ca.B, T = c.T, D = c.D, H = c.H, Dh = m.Dh, dff = c.dff, V = c.V, N = ca.N;
+    var scale = 1 / Math.sqrt(Dh), tmp = ca.tmpT, b, d, i, j, l, h, idx;
+    ca.dln.fill(0);
+    linB(ca.lnf, m.Wu.p, ca.dlogits, N, D, V, m.Wu.g, m.bu.g, ca.dln);
+    ca.dres.fill(0);
+    lnB(ca.dln, ca.lnfhat, ca.lnfrs, m.lnfg.p, N, D, m.lnfg.g, m.lnfb.g, ca.dres);
+    for (l = c.L - 1; l >= 0; l--) {
+      var L = m.layers[l], C = ca.layers[l];
+      ca.dh1.fill(0);
+      linB(C.h1, L.W2.p, ca.dres, N, dff, D, L.W2.g, L.b2.g, ca.dh1);
+      for (idx = 0; idx < N * dff; idx++) ca.dh1[idx] *= dgelu(C.z1[idx]);
+      ca.dln.fill(0);
+      linB(C.ln2, L.W1.p, ca.dh1, N, D, dff, L.W1.g, L.b1.g, ca.dln);
+      lnB(ca.dln, C.ln2hat, C.ln2rs, L.ln2g.p, N, D, L.ln2g.g, L.ln2b.g, ca.dres);
+      ca.dof.fill(0);
+      linB(C.o, L.Wo.p, ca.dres, N, D, D, L.Wo.g, L.bo.g, ca.dof);
+      ca.dq.fill(0); ca.dk.fill(0); ca.dv.fill(0);
+      for (b = 0; b < B; b++) for (h = 0; h < H; h++) {
+        var ab = ((b * H) + h) * T * T, hd = h * Dh;
+        for (i = 0; i < T; i++) {
+          var jmax = c.causal ? i : T - 1, io = (b * T + i) * D + hd, dot = 0;
+          for (j = 0; j <= jmax; j++) {
+            var jo = (b * T + j) * D + hd, a = C.att[ab + i * T + j], da = 0;
+            for (d = 0; d < Dh; d++) { var g = ca.dof[io + d]; da += g * C.v[jo + d]; ca.dv[jo + d] += a * g; }
+            tmp[j] = da; dot += a * da;
+          }
+          for (j = 0; j <= jmax; j++) {
+            var ds = C.att[ab + i * T + j] * (tmp[j] - dot) * scale;
+            if (ds === 0) continue;
+            var jo2 = (b * T + j) * D + hd;
+            for (d = 0; d < Dh; d++) { ca.dq[io + d] += ds * C.k[jo2 + d]; ca.dk[jo2 + d] += ds * C.q[io + d]; }
+          }
+        }
+      }
+      ca.dln.fill(0);
+      linB(C.ln1, L.Wq.p, ca.dq, N, D, D, L.Wq.g, L.bq.g, ca.dln);
+      linB(C.ln1, L.Wk.p, ca.dk, N, D, D, L.Wk.g, L.bk.g, ca.dln);
+      linB(C.ln1, L.Wv.p, ca.dv, N, D, D, L.Wv.g, L.bv.g, ca.dln);
+      lnB(ca.dln, C.ln1hat, C.ln1rs, L.ln1g.p, N, D, L.ln1g.g, L.ln1b.g, ca.dres);
+    }
+    for (b = 0; b < B; b++) for (i = 0; i < T; i++) {
+      var xo = (b * T + i) * D, eo = ca.toks[b * T + i] * D, po = i * D;
+      for (d = 0; d < D; d++) {
+        var gv = ca.dres[xo + d];
+        m.E.g[eo + d] += gv;
+        if (c.usePos) m.Pos.g[po + d] += gv;
+      }
+    }
+  }
+
+  function trainStep(m, ca, lr) {
+    forward(m, ca, null);
+    var r = lossGrad(m, ca, true);
+    var i, j;
+    for (i = 0; i < m.params.length; i++) m.params[i].g.fill(0);
+    backward(m, ca);
+    var s = 0;
+    for (i = 0; i < m.params.length; i++) { var g = m.params[i].g; for (j = 0; j < g.length; j++) s += g[j] * g[j]; }
+    var nrm = Math.sqrt(s);
+    if (nrm > 1) { var f = 1 / nrm; for (i = 0; i < m.params.length; i++) { var g2 = m.params[i].g; for (j = 0; j < g2.length; j++) g2[j] *= f; } }
+    m.t++;
+    var b1 = 0.9, b2 = 0.999, eps = 1e-8, c1 = 1 - Math.pow(b1, m.t), c2 = 1 - Math.pow(b2, m.t);
+    for (var pi = 0; pi < m.params.length; pi++) {
+      var P = m.params[pi], p = P.p, gg = P.g, mm = P.m, vv = P.v;
+      for (i = 0; i < p.length; i++) {
+        var gi = gg[i];
+        mm[i] = b1 * mm[i] + (1 - b1) * gi;
+        vv[i] = b2 * vv[i] + (1 - b2) * gi * gi;
+        p[i] -= lr * (mm[i] / c1) / (Math.sqrt(vv[i] / c2) + eps);
+      }
+    }
+    return r;
+  }
+
+  /* ---------------- tasks ---------------- */
+  function shuffled(rng, n) {
+    var a = [], i;
+    for (i = 0; i < n; i++) a.push(i);
+    for (i = n - 1; i > 0; i--) { var q = (rng() * (i + 1)) | 0, t = a[i]; a[i] = a[q]; a[q] = t; }
+    return a;
+  }
+  var TASKS = {
+    induction: {
+      label: "Induction", V: 16, T: 14, chance: 1 / 7,
+      blurb: "First half: distinct tokens. Second half: the same tokens rotated by a random amount. " +
+             "The answer at each scored position is whatever followed that token the first time.",
+      sample: function (rng, toks, tgts, off, T) {
+        var half = T >> 1, pool = shuffled(rng, 16), r = (rng() * half) | 0, i;
+        for (i = 0; i < half; i++) toks[off + i] = pool[i];
+        for (i = 0; i < half; i++) toks[off + half + i] = pool[(i + r) % half];
+        for (i = 0; i < T; i++) tgts[off + i] = (i >= half && i < T - 1) ? toks[off + i + 1] : -1;
+      }
+    },
+    reverse: {
+      label: "Reverse", V: 7, T: 12, sep: 6, chance: 1 / 6,
+      blurb: "Six tokens, a separator, then the same six in reverse. The answer at each scored " +
+             "position is the mirror position in the first half.",
+      sample: function (rng, toks, tgts, off, T) {
+        var half = T >> 1, i, s = [];
+        for (i = 0; i < half; i++) { s.push((rng() * 6) | 0); toks[off + i] = s[i]; }
+        toks[off + half] = 6;
+        for (i = 1; i < half; i++) toks[off + half + i] = s[half - i];
+        for (i = 0; i < T; i++) tgts[off + i] = (i >= half && i < T - 1) ? toks[off + i + 1] : -1;
+      }
+    },
+    sort: {
+      label: "Sort", V: 9, T: 12, sep: 8, chance: 1 / 8,
+      blurb: "Six distinct tokens, a separator, then the same tokens in ascending order.",
+      sample: function (rng, toks, tgts, off, T) {
+        var half = T >> 1, i, pool = shuffled(rng, 8), s = pool.slice(0, half);
+        for (i = 0; i < half; i++) toks[off + i] = s[i];
+        var sorted = s.slice().sort(function (a, b) { return a - b; });
+        toks[off + half] = 8;
+        for (i = 1; i < half; i++) toks[off + half + i] = sorted[i - 1];
+        for (i = 0; i < T; i++) tgts[off + i] = (i >= half && i < T - 1) ? toks[off + i + 1] : -1;
+      }
+    },
+    majority: {
+      label: "Majority", V: 3, T: 12, chance: 1 / 3,
+      blurb: "Three symbols. At every position the answer is whichever symbol has occurred most " +
+             "often so far, skipping ties.",
+      sample: function (rng, toks, tgts, off, T) {
+        var cnt = [0, 0, 0], i, c;
+        for (i = 0; i < T; i++) {
+          var tk = (rng() * 3) | 0;
+          toks[off + i] = tk; cnt[tk]++;
+          var best = -1, bc = -1, tie = false;
+          for (c = 0; c < 3; c++) { if (cnt[c] > bc) { bc = cnt[c]; best = c; tie = false; } else if (cnt[c] === bc) tie = true; }
+          tgts[off + i] = (i >= 2 && !tie) ? best : -1;
+        }
+      }
+    }
+  };
+  function fillBatch(task, rng, ca, T) {
+    for (var b = 0; b < ca.B; b++) task.sample(rng, ca.toks, ca.tgts, b * T, T);
+  }
+  var ALPHA = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  function tokLabel(task, id) { return (task.sep !== undefined && id === task.sep) ? "|" : ALPHA.charAt(id); }
+
+  /* ---------------- head diagnostics ---------------- */
+  function headScores(m, ca, l, h) {
+    var c = m.cfg, T = c.T, H = c.H, B = ca.B, att = ca.layers[l].att;
+    var self = 0, first = 0, mirror = 0, ind = 0, match = 0, ent = 0, nAll = 0, nInd = 0;
+    var off2 = new Float64Array(T), nOff = new Float64Array(T);
+    var absP = new Float64Array(T), nAbs = new Float64Array(T);
+    for (var b = 0; b < B; b++) {
+      var ab = ((b * H) + h) * T * T, base = b * T;
+      for (var i = 1; i < T; i++) {
+        var row = ab + i * T, j;
+        self += att[row + i]; first += att[row];
+        var mj = T - 1 - i;
+        if (mj <= i) mirror += att[row + mj];
+        var e = 0;
+        for (j = 0; j <= i; j++) { var a = att[row + j]; if (a > 1e-12) e -= a * Math.log(a); absP[j] += a; nAbs[j]++; }
+        ent += e / Math.log(i + 1);
+        for (var dlt = 1; dlt <= i; dlt++) { off2[dlt] += att[row + i - dlt]; nOff[dlt]++; }
+        var cur = ca.toks[base + i], prevPos = -1;
+        for (j = i - 1; j >= 0; j--) if (ca.toks[base + j] === cur) { prevPos = j; break; }
+        if (prevPos >= 0) { match += att[row + prevPos]; ind += att[row + prevPos + 1]; nInd++; }
+        nAll++;
+      }
+    }
+    var bestOff = 1, bestOffV = 0, bestAbs = 0, bestAbsV = 0, dd;
+    for (dd = 1; dd < T; dd++) if (nOff[dd] > 0 && off2[dd] / nOff[dd] > bestOffV) { bestOffV = off2[dd] / nOff[dd]; bestOff = dd; }
+    for (dd = 0; dd < T; dd++) if (nAbs[dd] > 0 && absP[dd] / nAbs[dd] > bestAbsV) { bestAbsV = absP[dd] / nAbs[dd]; bestAbs = dd; }
+    return { prev: nOff[1] ? off2[1] / nOff[1] : 0, self: self / nAll, first: first / nAll,
+             mirror: mirror / nAll, induction: nInd ? ind / nInd : 0, match: nInd ? match / nInd : 0,
+             uniform: ent / nAll, offset: bestOff, offsetVal: bestOffV,
+             absPos: bestAbs, absPosVal: bestAbsV };
+  }
+  function nameHead(s) {
+    var cands = [["induction head", s.induction], ["matching head", s.match],
+      ["previous-token head", s.prev], ["mirror head", s.mirror], ["attention sink", s.first],
+      ["self head", s.self], ["offset −" + s.offset + " head", s.offsetVal],
+      ["position-" + s.absPos + " head", s.absPosVal]];
+    var best = cands[0];
+    for (var i = 1; i < cands.length; i++) if (cands[i][1] > best[1]) best = cands[i];
+    if (best[1] < 0.4 && s.uniform > 0.9) return { name: "uniform head", score: s.uniform, weak: false };
+    /* Below 0.4 the pattern is only a leaning, not a match — still worth showing so the
+       score can be watched sharpening during training, but flagged as tentative. */
+    return { name: best[0], score: best[1], weak: best[1] < 0.4 };
+  }
+
+  /* ================================================================
+     UI
+     ================================================================ */
+  var $ = function (id) { return document.getElementById(id); };
+  var UI = { task: "induction", L: 2, H: 2, D: 32, speed: 1, lr: 3e-3, B: 16, seed: 1,
+             usePos: true, causal: true };
+  var model = null, cache = null, evalCache = null, dataRng = null;
+  var ablate = [[false, false, false, false], [false, false, false, false]];
+  var hist = [], running = false, stepCount = 0, lastAcc = null, lastLoss = null, rateEMA = 0, rateWin = [];
+  var probeSeq = null, probeScored = null, visible = true;
+
+  function build() {
+    var task = TASKS[UI.task];
+    model = makeModel({ V: task.V, T: task.T, D: UI.D, H: UI.H, L: UI.L,
+                        causal: UI.causal, usePos: UI.usePos, seed: UI.seed });
+    cache = makeCache(model, UI.B);
+    evalCache = makeCache(model, 16);
+    dataRng = makeRng(UI.seed * 104729 + 7);
+    var erng = makeRng(20260728);
+    fillBatch(task, erng, evalCache, task.T);
+    hist = []; stepCount = 0; lastAcc = null; lastLoss = null; rateEMA = 0; rateWin = [];
+    ablate = [[false, false, false, false], [false, false, false, false]];
+    newProbe();
+    buildHeadPanels();
+    refreshAll();
+  }
+
+  function newProbe() {
+    var task = TASKS[UI.task], T = task.T, i;
+    probeSeq = new Int32Array(T);
+    var tmpT = new Int32Array(T), tmpG = new Int32Array(T);
+    task.sample(makeRng((Math.random() * 1e9) | 0), tmpT, tmpG, 0, T);
+    probeSeq.set(tmpT);
+    /* Which positions the task actually scores. The first half of most of these
+       sequences is unpredictable by construction, so marking those predictions wrong
+       would be misleading — they are simply not part of the problem. */
+    probeScored = new Uint8Array(T);
+    for (i = 0; i < T; i++) probeScored[i] = tmpG[i] >= 0 ? 1 : 0;
+  }
+
+  /* ---------------- head panels ---------------- */
+  var headEls = [];
+  function buildHeadPanels() {
+    var grid = $("ah-heads-grid");
+    grid.innerHTML = ""; headEls = [];
+    for (var l = 0; l < UI.L; l++) for (var h = 0; h < UI.H; h++) {
+      var d = document.createElement("div");
+      d.className = "ah-head";
+      var top = document.createElement("div");
+      top.className = "ah-head-top";
+      var id = document.createElement("span");
+      id.className = "ah-head-id"; id.textContent = "L" + l + " H" + h;
+      var kill = document.createElement("button");
+      kill.className = "ah-kill"; kill.textContent = "⊘";
+      kill.title = "Switch this head off (ablate)";
+      kill.setAttribute("aria-label", "Ablate head L" + l + " H" + h);
+      (function (ll, hh, btn, panel) {
+        btn.addEventListener("click", function () {
+          ablate[ll][hh] = !ablate[ll][hh];
+          btn.classList.toggle("on", ablate[ll][hh]);
+          panel.classList.toggle("dead", ablate[ll][hh]);
+          refreshAll();
+        });
+      })(l, h, kill, d);
+      top.appendChild(id); top.appendChild(kill);
+      var cv = document.createElement("canvas");
+      var lab = document.createElement("div");
+      lab.className = "ah-label";
+      d.appendChild(top); d.appendChild(cv); d.appendChild(lab);
+      grid.appendChild(d);
+      headEls.push({ l: l, h: h, canvas: cv, label: lab, panel: d, kill: kill });
+    }
+  }
+
+  function drawHeatmap(cv, att, base, T, gamma) {
+    var ctx = cv.getContext("2d"), dpr = window.devicePixelRatio || 1;
+    var size = Math.max(40, cv.clientWidth);
+    if (cv.width !== Math.round(size * dpr)) { cv.width = Math.round(size * dpr); cv.height = Math.round(size * dpr); }
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.fillStyle = COL.panel;
+    ctx.fillRect(0, 0, size, size);
+    var cell = size / T;
+    for (var i = 0; i < T; i++) for (var j = 0; j < T; j++) {
+      var a = att[base + i * T + j];
+      if (a <= 0.001) continue;
+      ctx.fillStyle = mix(COL.panel, COL.accent, Math.pow(Math.min(1, a), gamma || 0.55));
+      ctx.fillRect(j * cell, i * cell, cell + 0.6, cell + 0.6);
+    }
+    ctx.strokeStyle = COL.border; ctx.lineWidth = 1;
+    ctx.strokeRect(0.5, 0.5, size - 1, size - 1);
+  }
+
+  function drawHeads(stats) {
+    var T = TASKS[UI.task].T;
+    for (var q = 0; q < headEls.length; q++) {
+      var E = headEls[q], base = ((0 * UI.H) + E.h) * T * T;
+      drawHeatmap(E.canvas, evalCache.layers[E.l].att, base, T);
+      var nm = nameHead(stats[q]), txt = nm.name + " " + nm.score.toFixed(2);
+      E.label.innerHTML = ablate[E.l][E.h] ? "<i>switched off</i>"
+        : (nm.weak ? "<i>" + txt + "</i>" : nm.name + " <i>" + nm.score.toFixed(2) + "</i>");
+    }
+  }
+
+  /* ---------------- probe strip ---------------- */
+  function drawProbe(pred) {
+    var task = TASKS[UI.task], T = task.T;
+    var seqEl = $("ah-seq"), predEl = $("ah-pred");
+    seqEl.innerHTML = ""; predEl.innerHTML = "";
+    for (var i = 0; i < T; i++) {
+      var b = document.createElement("button");
+      b.className = "ah-tok"; b.textContent = tokLabel(task, probeSeq[i]);
+      b.title = "position " + i + " — click to change";
+      (function (pos) {
+        b.addEventListener("click", function () {
+          probeSeq[pos] = (probeSeq[pos] + 1) % TASKS[UI.task].V;
+          refreshAll();
+        });
+      })(i);
+      seqEl.appendChild(b);
+      var p = document.createElement("span");
+      p.className = "ah-tok pred";
+      if (i < T - 1 && probeScored[i]) {
+        p.textContent = tokLabel(task, pred[i]);
+        p.className += pred[i] === probeSeq[i + 1] ? " ok" : " no";
+        p.title = "predicted next token at position " + i;
+      } else {
+        p.textContent = i < T - 1 ? tokLabel(task, pred[i]) : "·";
+        p.className += " mute";
+        p.title = "not scored — nothing at this position determines the next token";
+      }
+      predEl.appendChild(p);
+    }
+    $("ah-explain").innerHTML = "Top row: the input sequence. Bottom row: the model's most likely " +
+      "next token at each position — green where it matches, red where it misses, and greyed at " +
+      "positions the task does not score because nothing seen so far determines the answer. " +
+      task.blurb;
+  }
+
+  /* ---------------- loss chart ---------------- */
+  function drawChart() {
+    var svg = $("ah-chart"), W = 640, Ht = 190, pad = 34;
+    var maxStep = Math.max(200, stepCount);
+    var maxLoss = 0.5, i;
+    for (i = 0; i < hist.length; i++) if (hist[i].loss > maxLoss) maxLoss = hist[i].loss;
+    var PX = function (s) { return pad + s / maxStep * (W - pad - 12); };
+    var PYl = function (v) { return Ht - 26 - Math.min(1, v / maxLoss) * (Ht - 48); };
+    var PYa = function (v) { return Ht - 26 - v * (Ht - 48); };
+    var g = "";
+    g += '<line x1="' + pad + '" y1="' + (Ht - 26) + '" x2="' + (W - 12) + '" y2="' + (Ht - 26) + '" stroke="' + COL.grid + '"/>';
+    g += '<line x1="' + pad + '" y1="22" x2="' + pad + '" y2="' + (Ht - 26) + '" stroke="' + COL.grid + '"/>';
+    for (i = 1; i <= 4; i++) {
+      var y = 22 + (Ht - 48) * i / 4;
+      g += '<line x1="' + pad + '" y1="' + y + '" x2="' + (W - 12) + '" y2="' + y + '" stroke="' + COL.grid + '" stroke-dasharray="2 4"/>';
+    }
+    if (hist.length > 1) {
+      var lp = "", ap = "";
+      for (i = 0; i < hist.length; i++) {
+        lp += PX(hist[i].step).toFixed(1) + "," + PYl(hist[i].loss).toFixed(1) + " ";
+        ap += PX(hist[i].step).toFixed(1) + "," + PYa(hist[i].acc).toFixed(1) + " ";
+      }
+      g += '<polyline points="' + ap + '" fill="none" stroke="' + COL.good + '" stroke-width="1.6" opacity="0.85"/>';
+      g += '<polyline points="' + lp + '" fill="none" stroke="' + COL.accent + '" stroke-width="2"/>';
+    }
+    g += '<text x="' + pad + '" y="14" fill="' + COL.accent + '" font-size="11">loss</text>';
+    g += '<text x="' + (pad + 40) + '" y="14" fill="' + COL.good + '" font-size="11">held-out accuracy</text>';
+    g += '<text x="' + (W - 12) + '" y="' + (Ht - 10) + '" fill="' + COL.muted + '" font-size="10" text-anchor="end">' + maxStep + ' steps</text>';
+    g += '<text x="' + (pad - 6) + '" y="26" fill="' + COL.muted + '" font-size="10" text-anchor="end">' + maxLoss.toFixed(1) + '</text>';
+    g += '<text x="' + (pad - 6) + '" y="' + (Ht - 26) + '" fill="' + COL.muted + '" font-size="10" text-anchor="end">0</text>';
+    svg.innerHTML = g;
+  }
+
+  function refreshStats() {
+    $("ah-s-step").textContent = stepCount;
+    $("ah-s-loss").textContent = lastLoss === null ? "—" : lastLoss.toFixed(3);
+    $("ah-s-acc").textContent = lastAcc === null ? "—" : (lastAcc * 100).toFixed(1) + "%";
+    $("ah-s-rate").textContent = rateEMA ? rateEMA.toFixed(0) : "—";
+  }
+
+  /* One refresh = exactly two forward passes: one over the held-out batch (loss,
+     accuracy, head diagnostics) and one over the probe sequence (heatmaps,
+     predictions). Everything drawn is derived from those. */
+  function refreshAll() {
+    if (!model) return;
+    var task = TASKS[UI.task], T = task.T, V = task.V, i, c;
+    fillBatch(task, makeRng(20260728), evalCache, T);
+    forward(model, evalCache, ablate);
+    var ev = lossGrad(model, evalCache, false);
+    lastAcc = ev.acc; lastLoss = ev.loss;
+    var stats = [];
+    for (i = 0; i < headEls.length; i++) stats.push(headScores(model, evalCache, headEls[i].l, headEls[i].h));
+
+    for (i = 0; i < T; i++) evalCache.toks[i] = probeSeq[i];
+    forward(model, evalCache, ablate);
+    var pred = [];
+    for (i = 0; i < T; i++) {
+      var o = i * V, mx = -Infinity, best = 0;
+      for (c = 0; c < V; c++) if (evalCache.logits[o + c] > mx) { mx = evalCache.logits[o + c]; best = c; }
+      pred.push(best);
+    }
+    drawHeads(stats); drawProbe(pred); drawChart(); refreshStats();
+    return ev;
+  }
+
+  /* ---------------- training loop ---------------- */
+  function frame() {
+    if (!running) return;
+    if (!visible) { requestAnimationFrame(frame); return; }
+    var task = TASKS[UI.task], budget = 13 * UI.speed, t0 = performance.now(), n = 0;
+    while (performance.now() - t0 < budget) {
+      fillBatch(task, dataRng, cache, task.T);
+      trainStep(model, cache, UI.lr);
+      stepCount++; n++;
+    }
+    /* wall-clock throughput over a 2s window — includes the redraw cost, so it is
+       what actually shows up on screen rather than the inner-loop rate. */
+    var now = performance.now();
+    rateWin.push([now, stepCount]);
+    while (rateWin.length > 2 && rateWin[0][0] < now - 2000) rateWin.shift();
+    var span = now - rateWin[0][0];
+    if (span > 300) rateEMA = (stepCount - rateWin[0][1]) / span * 1000;
+
+    var ev = refreshAll();
+    if (ev) {
+      hist.push({ step: stepCount, loss: ev.loss, acc: ev.acc });
+      if (hist.length > 400) hist = hist.filter(function (_, i) { return i % 2 === 0; });
+    }
+    requestAnimationFrame(frame);
+  }
+  function setRunning(v) {
+    running = v;
+    $("ah-run").textContent = v ? "⏸ Pause" : "▶ Run";
+    if (v) requestAnimationFrame(frame);
+  }
+
+  /* ---------------- wiring ---------------- */
+  function seg(id, key, cast, after) {
+    var host = $(id);
+    host.addEventListener("click", function (e) {
+      var b = e.target.closest("button");
+      if (!b) return;
+      var kids = host.querySelectorAll("button");
+      for (var i = 0; i < kids.length; i++) kids[i].classList.toggle("on", kids[i] === b);
+      UI[key] = cast(b.getAttribute("data-v"));
+      if (after) after();
+    });
+  }
+  seg("ah-task", "task", String, function () { setRunning(false); build(); });
+  seg("ah-layers", "L", Number, function () { setRunning(false); build(); });
+  seg("ah-heads", "H", Number, function () { setRunning(false); build(); });
+  seg("ah-dmodel", "D", Number, function () { setRunning(false); build(); });
+  seg("ah-speed", "speed", Number, null);
+
+  $("ah-lr").addEventListener("input", function () {
+    UI.lr = Math.pow(10, +this.value);
+    $("ah-lr-out").textContent = UI.lr.toFixed(UI.lr < 0.001 ? 5 : 4);
+  });
+  $("ah-bs").addEventListener("input", function () {
+    UI.B = +this.value; $("ah-bs-out").textContent = UI.B;
+    setRunning(false); build();
+  });
+  $("ah-seed").addEventListener("input", function () {
+    UI.seed = +this.value; $("ah-seed-out").textContent = UI.seed;
+    setRunning(false); build();
+  });
+  $("ah-pos").addEventListener("change", function () { UI.usePos = this.checked; setRunning(false); build(); });
+  $("ah-causal").addEventListener("change", function () { UI.causal = this.checked; setRunning(false); build(); });
+  $("ah-run").addEventListener("click", function () { setRunning(!running); });
+  $("ah-reset").addEventListener("click", function () { setRunning(false); build(); });
+  $("ah-newex").addEventListener("click", function () { newProbe(); refreshAll(); });
+  $("ah-step").addEventListener("click", function () {
+    var task = TASKS[UI.task];
+    for (var i = 0; i < 50; i++) { fillBatch(task, dataRng, cache, task.T); trainStep(model, cache, UI.lr); stepCount++; }
+    var ev = refreshAll();
+    if (ev) hist.push({ step: stepCount, loss: ev.loss, acc: ev.acc });
+  });
+
+  /* pause training when the playground scrolls out of view */
+  if (window.IntersectionObserver) {
+    new IntersectionObserver(function (es) { visible = es[0].isIntersecting; }, { rootMargin: "200px" })
+      .observe($("ah-heads-grid"));
+  }
+
+  /* ---------------- pattern gallery ---------------- */
+  var GALLERY = [
+    ["previous-token", function (i, j, T) { return j === i - 1 ? 1 : 0; }],
+    ["induction", function (i, j, T) { var h = T >> 1; return (i >= h && j === i - h + 1) ? 1 : 0; }],
+    ["mirror", function (i, j, T) { return j === T - 1 - i ? 1 : 0; }],
+    ["attention sink", function (i, j, T) { return j === 0 ? 1 : 0; }],
+    ["uniform", function (i, j, T) { return j <= i ? 1 / (i + 1) : 0; }],
+    ["position-3", function (i, j, T) { return j === 3 ? 1 : 0; }]
+  ];
+  function drawGallery() {
+    var host = $("ah-gallery");
+    if (!host.childNodes.length) {
+      for (var g = 0; g < GALLERY.length; g++) {
+        var fig = document.createElement("figure");
+        var cv = document.createElement("canvas");
+        var cap = document.createElement("figcaption");
+        cap.textContent = GALLERY[g][0];
+        fig.appendChild(cv); fig.appendChild(cap); host.appendChild(fig);
+      }
+    }
+    var T = 12, figs = host.querySelectorAll("canvas");
+    for (var q = 0; q < GALLERY.length; q++) {
+      var f = GALLERY[q][1], m = new Float32Array(T * T);
+      for (var i = 0; i < T; i++) {
+        var row = 0, j;
+        for (j = 0; j <= i; j++) row += f(i, j, T);
+        for (j = 0; j <= i; j++) m[i * T + j] = row > 0 ? f(i, j, T) / row : (j === i ? 1 : 0);
+      }
+      drawHeatmap(figs[q], m, 0, T, 0.7);
+    }
+  }
+
+  redrawFns.push(function () { if (model) refreshAll(); drawGallery(); });
+  build();
+  drawGallery();
+  window.addEventListener("resize", function () { if (model) refreshAll(); drawGallery(); });
+})();
+</script>
+
+</div>
+
+  </div>
+
+  <div class="date">
+    Written on July 28, 2026
+  </div>
+</article>
+
+    </div>
+
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          
+<a href="mailto:alessandro.sanvito@gmail.com"><i class="svg-icon email"></i></a>
+
+
+<a href="https://github.com/Alexdruso"><i class="svg-icon github"></i></a>
+
+<a href="https://www.linkedin.com/in/alessandro-sanvito-07706114b"><i class="svg-icon linkedin"></i></a>
+
+<a href="/feed.xml"><i class="svg-icon rss"></i></a>
+
+
+
+
+        </footer>
+      </div>
+    </div>
+
+    <button class="theme-toggle" aria-label="Toggle dark mode">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
+    <script>
+      // Theme switcher
+      const themeToggle = document.querySelector('.theme-toggle');
+      const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+      
+      // Check for saved theme preference or use system preference
+      const currentTheme = localStorage.getItem('theme') || 
+        (prefersDarkScheme.matches ? 'dark' : 'light');
+      
+      // Apply theme on load
+      if (currentTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+
+      // Toggle theme
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.body.classList.toggle('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+
+      // Listen for system theme changes
+      prefersDarkScheme.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+          document.body.classList.toggle('dark-theme', e.matches);
+        }
+      });
+    </script>
+
+    <div class="cmdk-backdrop" id="cmdk" hidden>
+  <div class="cmdk" role="dialog" aria-modal="true" aria-label="Site search">
+    <div class="cmdk-input-row">
+      <i class="fas fa-search" aria-hidden="true"></i>
+      <input id="cmdk-input" type="text" placeholder="Search pages, study notes, projects, publications…" autocomplete="off" spellcheck="false" />
+      <kbd>esc</kbd>
+    </div>
+    <ul class="cmdk-results" id="cmdk-results" role="listbox"></ul>
+    <div class="cmdk-foot">↑ ↓ to navigate &nbsp;·&nbsp; ↵ to open &nbsp;·&nbsp; esc to close</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var backdrop = document.getElementById('cmdk');
+  var input = document.getElementById('cmdk-input');
+  var list = document.getElementById('cmdk-results');
+  var index = null;
+  var results = [];
+  var active = 0;
+
+  function load() {
+    if (index) return Promise.resolve(index);
+    return fetch('/search.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) { index = data; return index; });
+  }
+
+  // Subsequence fuzzy match; contiguous runs and word starts score higher.
+  // Returns {score, positions} or null.
+  function fuzzy(query, text) {
+    var q = query.toLowerCase(), s = text.toLowerCase();
+    var qi = 0, score = 0, run = 0, positions = [];
+    for (var i = 0; i < s.length && qi < q.length; i++) {
+      if (s[i] === q[qi]) {
+        positions.push(i);
+        run++;
+        score += 1 + run * 2 + (i === 0 || s[i - 1] === ' ' ? 4 : 0);
+        qi++;
+      } else {
+        run = 0;
+      }
+    }
+    return qi === q.length ? { score: score, positions: positions } : null;
+  }
+
+  function highlight(title, positions) {
+    var out = '', set = {};
+    positions.forEach(function (p) { set[p] = true; });
+    for (var i = 0; i < title.length; i++) {
+      var ch = title[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      out += set[i] ? '<mark>' + ch + '</mark>' : ch;
+    }
+    return out;
+  }
+
+  function search(query) {
+    if (!index) return;
+    if (!query) {
+      results = index.map(function (item) { return { item: item, positions: [] }; });
+    } else {
+      results = [];
+      index.forEach(function (item) {
+        var m = fuzzy(query, item.title);
+        if (m) {
+          results.push({ item: item, positions: m.positions, score: m.score + 20 });
+        } else if (item.text && fuzzy(query, item.text)) {
+          results.push({ item: item, positions: [], score: 1 });
+        }
+      });
+      results.sort(function (a, b) { return b.score - a.score; });
+    }
+    results = results.slice(0, 12);
+    active = 0;
+    render(query);
+  }
+
+  function render() {
+    if (!results.length) {
+      list.innerHTML = '<div class="cmdk-empty">No matches.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    results.forEach(function (r, i) {
+      var li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.className = i === active ? 'active' : '';
+      li.innerHTML =
+        '<span class="cmdk-title">' + highlight(r.item.title, r.positions) + '</span>' +
+        '<span class="cmdk-type">' + r.item.type + '</span>';
+      li.addEventListener('click', function () { go(r.item); });
+      li.addEventListener('mousemove', function () {
+        if (active !== i) { active = i; render(); }
+      });
+      list.appendChild(li);
+    });
+    var el = list.children[active];
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+  }
+
+  function go(item) {
+    window.location.href = '' + item.url;
+  }
+
+  function open() {
+    backdrop.hidden = false;
+    input.value = '';
+    load().then(function () { search(''); });
+    input.focus();
+  }
+
+  function close() {
+    backdrop.hidden = true;
+  }
+
+  window.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      backdrop.hidden ? open() : close();
+      return;
+    }
+    if (backdrop.hidden) return;
+    if (e.key === 'Escape') {
+      close();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (results.length) { active = (active + 1) % results.length; render(); }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (results.length) { active = (active - 1 + results.length) % results.length; render(); }
+    } else if (e.key === 'Enter') {
+      if (results[active]) go(results[active].item);
+    }
+  });
+
+  input.addEventListener('input', function () { search(input.value.trim()); });
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) close();
+  });
+
+  var navBtn = document.querySelector('.nav-search');
+  if (navBtn) navBtn.addEventListener('click', open);
+})();
+</script>
+
+
+    
+<script data-goatcounter="https://alexdruso.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+
+
+  </body>
+</html>

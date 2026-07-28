@@ -221,6 +221,13 @@
   
   
   {
+    "title": "Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer",
+    "url": "/attention-heads-playground/",
+    "type": "Study Note",
+    "text": "Nothing in a transformer specifies what any attention head should look at — the query and key matrices start as random noise and every pattern is a fit to the training task. Train a two-layer transformer from scratch on a repeated-sequence task and the canonical circuit appears: a previous-token ..."
+  },
+  
+  {
     "title": "Tabular Q-Learning, Explained by a Snake",
     "url": "/q-learning-snake/",
     "type": "Study Note",
