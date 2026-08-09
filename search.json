@@ -221,6 +221,13 @@
   
   
   {
+    "title": "Graph Neural Networks: Learning by Passing Messages Along Edges",
+    "url": "/graph-neural-networks/",
+    "type": "Study Note",
+    "text": "A graph neural network updates every node from its own features and an order-invariant aggregate of its neighbours' — the only form a layer can take when node indices carry no meaning. That single constraint produces message passing, message passing produces the GCN layer, the choice of aggregato..."
+  },
+  
+  {
     "title": "Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer",
     "url": "/attention-heads-playground/",
     "type": "Study Note",
