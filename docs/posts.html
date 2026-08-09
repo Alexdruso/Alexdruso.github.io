@@ -299,6 +299,53 @@ layout: default
       ctx.beginPath(); ctx.moveTo(50, 24); ctx.lineTo(w - 60, 24); ctx.lineTo(w - 68, 18); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(50, h - 24); ctx.lineTo(w - 60, h - 24); ctx.lineTo(w - 68, h - 18); ctx.stroke();
     },
+    /* A message-passing neighbourhood: one centre node pulling from its
+       neighbours, with the rest of the graph drawn quietly behind it. */
+    'graph-neural': function (ctx, w, h, t) {
+      var cx = w / 2, cy = h / 2, R = Math.min(w, h) * 0.34;
+      var inner = [], outer = [], i, a;
+      for (i = 0; i < 5; i++) {
+        a = -Math.PI / 2 + i / 5 * Math.PI * 2;
+        inner.push([cx + Math.cos(a) * R * 1.35, cy + Math.sin(a) * R]);
+      }
+      for (i = 0; i < 5; i++) {
+        a = -Math.PI / 2 + (i + 0.5) / 5 * Math.PI * 2;
+        outer.push([cx + Math.cos(a) * R * 2.35, cy + Math.sin(a) * R * 1.75]);
+      }
+      ctx.strokeStyle = t.grid; ctx.lineWidth = 1.5;
+      for (i = 0; i < 5; i++) {
+        var o = outer[i], n1 = inner[i], n2 = inner[(i + 1) % 5];
+        ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(n1[0], n1[1]); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(o[0], o[1]); ctx.lineTo(n2[0], n2[1]); ctx.stroke();
+      }
+      ctx.strokeStyle = t.accent; ctx.lineWidth = 2.5;
+      for (i = 0; i < 5; i++) {
+        ctx.beginPath(); ctx.moveTo(inner[i][0], inner[i][1]); ctx.lineTo(cx, cy); ctx.stroke();
+      }
+      ctx.fillStyle = t.accent;
+      for (i = 0; i < 5; i++) {
+        // arrowhead pointing inward: the message arriving at the centre
+        var dx = cx - inner[i][0], dy = cy - inner[i][1];
+        var len = Math.sqrt(dx * dx + dy * dy) || 1;
+        dx /= len; dy /= len;
+        var ex = cx - dx * 20, ey = cy - dy * 20;
+        ctx.beginPath();
+        ctx.moveTo(ex, ey);
+        ctx.lineTo(ex - dx * 9 - dy * 5, ey - dy * 9 + dx * 5);
+        ctx.lineTo(ex - dx * 9 + dy * 5, ey - dy * 9 - dx * 5);
+        ctx.fill();
+      }
+      for (i = 0; i < 5; i++) {
+        ctx.fillStyle = t.soft; ctx.strokeStyle = t.muted; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(outer[i][0], outer[i][1], 6, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      for (i = 0; i < 5; i++) {
+        ctx.fillStyle = t.soft; ctx.strokeStyle = t.accent; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(inner[i][0], inner[i][1], 9, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      }
+      ctx.fillStyle = t.strong; ctx.strokeStyle = t.accent; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx, cy, 13, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    },
     'representations': function (ctx, w, h, t) {
       ctx.strokeStyle = t.muted; ctx.lineWidth = 2;
       plot(ctx, w, h, function (u) { return 0.5 + 0.32 * Math.sin(u * Math.PI * 3); }, 0, 1, 30);

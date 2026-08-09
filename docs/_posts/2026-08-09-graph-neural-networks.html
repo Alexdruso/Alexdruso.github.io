@@ -1,0 +1,1785 @@
+---
+layout: post
+title: "Graph Neural Networks: Learning by Passing Messages Along Edges"
+date: 2026-08-09
+categories: [Deep Learning, Graph Neural Networks, Interactive]
+excerpt: "A graph neural network updates every node from its own features and an order-invariant aggregate of its neighbours' — the only form a layer can take when node indices carry no meaning. That single constraint produces message passing, message passing produces the GCN layer, the choice of aggregator sets a hard ceiling on which neighbourhoods a layer can tell apart, and repeated averaging drives every representation toward the same degree-dominated fixed point."
+---
+
+{% include study-note-styles.html %}
+
+<div class="study-note">
+
+<style>
+/* Note-specific LAYOUT only — every colour comes from the --sn-* tokens. */
+.gnn-panel { border: 1px solid var(--sn-border); border-radius: var(--sn-radius);
+  background: var(--sn-panel-inset); padding: 0.85rem 0.95rem; margin: 0.9rem 0; }
+.gnn-row { display: flex; flex-wrap: wrap; gap: 1.1rem; align-items: flex-start; }
+.gnn-row > * { min-width: 0; }
+.gnn-col { flex: 1 1 260px; min-width: 0; }
+.gnn-ctl { display: flex; flex-direction: column; gap: 0.28rem; min-width: 0; }
+.gnn-ctl > span:first-child { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--sn-muted); }
+.gnn-controls { display: flex; flex-wrap: wrap; gap: 0.9rem 1.1rem; align-items: center; margin: 0.2rem 0 0.7rem; }
+.gnn-seg { display: inline-flex; border: 1px solid var(--sn-border); border-radius: var(--sn-radius-sm);
+  overflow: hidden; background: var(--sn-panel); }
+.gnn-seg button { border: 0; background: transparent; color: var(--sn-muted); cursor: pointer;
+  padding: 0.32rem 0.62rem; font: 600 0.82rem/1 inherit;
+  transition: background 0.18s var(--sn-ease), color 0.18s var(--sn-ease); }
+.gnn-seg button + button { border-left: 1px solid var(--sn-border); }
+.gnn-seg button.on { background: var(--sn-accent); color: var(--sn-on-accent); }
+.gnn-seg button:hover:not(.on) { background: var(--sn-accent-soft); color: var(--sn-text); }
+.gnn-check { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.85rem; cursor: pointer; }
+.gnn-stats { display: flex; flex-wrap: wrap; gap: 1.2rem; }
+.gnn-stat { display: flex; flex-direction: column; line-height: 1.15; }
+.gnn-stat b { font: 1.05rem var(--sn-mono); font-variant-numeric: tabular-nums; color: var(--sn-accent); }
+.gnn-stat span { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sn-muted); }
+.gnn-out { font: 0.92rem var(--sn-mono); font-variant-numeric: tabular-nums;
+  color: var(--sn-accent); font-weight: 600; }
+.gnn-legend { font-size: 0.76rem; color: var(--sn-muted); margin-top: 0.4rem; }
+.gnn-legend i { font-style: normal; color: var(--sn-text); }
+.gnn-swatch { display: inline-block; width: 0.68rem; height: 0.68rem; border-radius: 3px;
+  vertical-align: -1px; margin-right: 0.2rem; }
+.gnn-multiset { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.35rem 0; min-height: 1.9rem; }
+.gnn-chip { border-radius: 999px; padding: 0.18rem 0.6rem; font: 600 0.78rem var(--sn-mono);
+  background: var(--sn-accent-soft); color: var(--sn-accent); }
+.gnn-chip.b { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.gnn-counter { display: inline-flex; align-items: center; gap: 0.35rem; margin-right: 0.7rem; font-size: 0.82rem; }
+.gnn-counter button { width: 1.5rem; height: 1.5rem; border-radius: 5px; cursor: pointer;
+  border: 1px solid var(--sn-border); background: var(--sn-panel); color: var(--sn-muted);
+  font: 600 0.9rem/1 inherit; padding: 0;
+  transition: background 0.15s var(--sn-ease), color 0.15s var(--sn-ease); }
+.gnn-counter button:hover { background: var(--sn-accent-soft); color: var(--sn-accent); }
+.gnn-counter b { font: 0.85rem var(--sn-mono); font-variant-numeric: tabular-nums;
+  color: var(--sn-text); min-width: 1ch; text-align: center; }
+.gnn-vecs { display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; font: 0.85rem var(--sn-mono);
+  font-variant-numeric: tabular-nums; color: var(--sn-text); margin: 0.4rem 0; }
+.gnn-tbl { width: 100%; border-collapse: collapse; font-size: 0.86rem; margin: 0.6rem 0; }
+.gnn-tbl th, .gnn-tbl td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--sn-border);
+  vertical-align: top; }
+.gnn-tbl th { font-size: 0.72rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--sn-muted); }
+.gnn-tblwrap { overflow-x: auto; }
+.gnn-diag { display: block; max-width: 100%; height: auto; margin: 0.6rem auto 0.2rem; }
+.gnn-diag .wire { stroke: var(--sn-grid); stroke-width: 2; fill: none; }
+.gnn-diag .dot { fill: var(--sn-accent-soft); stroke: var(--sn-accent); stroke-width: 1.6; }
+.gnn-diag .lbl { fill: var(--sn-text); font-size: 11.5px; }
+.gnn-diag .sub { fill: var(--sn-muted); font-size: 10px; }
+.gnn-take li { margin-bottom: 0.55rem; }
+@media (max-width: 620px) { .gnn-stats { gap: 0.9rem; } }
+</style>
+
+<p>
+  <strong>A graph neural network is a stack of layers, each of which rewrites every node's
+  representation from that node's current features and an order-invariant summary of its
+  neighbours' features.</strong> Graph data arrives as a set of nodes, a set of edges, and a
+  feature vector per node — with no canonical ordering of the nodes. That missing ordering is
+  the whole design problem: the question this note answers is what a layer is allowed to look
+  like when the index a node happens to carry means nothing, and what that restriction costs
+  in the end.
+</p>
+
+<div class="se-note">
+  <strong>One-sentence summary.</strong> Permutation equivariance forces every layer into the
+  shape "update each node from itself plus an aggregate over its neighbours", the GCN layer is
+  the cheapest useful instance of that shape, and the two things that decide whether it works
+  are which aggregator collects the messages and how many times the messages are passed.
+</div>
+
+<p>
+  The running example is a small citation graph: nodes are papers, edges are citations, and
+  each paper belongs to one of two research communities. Everything below — the relabelling
+  demo, the message-passing walkthrough, the normalisation heatmap, the over-smoothing slider,
+  and the trained classifier — reads from that graph.
+</p>
+
+<!-- ============================================================ -->
+<!-- 1. PERMUTATION EQUIVARIANCE                                   -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🕸️ The data has no rows</h3>
+  <p style="margin-top:0">
+    A graph is a pair <em>G</em> = (<em>V</em>, <em>E</em>). Attach a feature vector to each
+    node and stack them into a matrix X &isin; &#8477;<sup>N&times;d</sup>, and record the edges
+    in an adjacency matrix A &isin; &#123;0,1&#125;<sup>N&times;N</sup> with A<sub>uv</sub> = 1
+    when <em>u</em> and <em>v</em> are joined. Both matrices need node indices to exist — and
+    those indices were invented by whoever serialised the graph. Renumbering the papers is not a
+    different dataset.
+  </p>
+  <p>
+    Write the renumbering as a permutation matrix P. Applying it moves the rows of X and both
+    the rows and columns of A. A layer <em>f</em> is <strong>permutation equivariant</strong>
+    when relabelling the input relabels the output the same way and changes nothing else:
+  </p>
+
+  <div class="se-equation">
+    <span class="big">f(PX, PAP<sup>&#8868;</sup>) = P&thinsp;f(X, A)</span>
+  </div>
+
+  <p>
+    This is a constraint on the function, not a property to be learned. A multilayer perceptron
+    applied to the flattened adjacency matrix does not satisfy it: its weights are indexed by
+    position, so moving an edge from cell (2,7) to cell (5,3) sends the input somewhere else in
+    the weight space entirely. Every architecture in this note is built to satisfy it by
+    construction — which is why each one turns out to be some form of "collect from the
+    neighbours, then update".
+  </p>
+
+  <div class="gnn-panel">
+    <div class="gnn-controls">
+      <button class="se-btn" id="gnn-shuffle">🔀 Shuffle node IDs</button>
+      <button class="se-reset" id="gnn-unshuffle">Restore original IDs</button>
+    </div>
+    <div class="gnn-row">
+      <div class="gnn-col" style="flex:1.35 1 320px">
+        <div class="graph-wrap"><svg id="gnn-perm-graph" viewBox="0 0 520 300" width="100%" role="img"
+          aria-label="Citation graph with relabellable node IDs"></svg></div>
+        <div class="gnn-legend">
+          The number inside each node is its <i>ID</i>; the number beside it is that node's
+          layer output. Shuffling moves the IDs, not the papers.
+        </div>
+      </div>
+      <div class="gnn-col" style="flex:1 1 240px">
+        <div class="graph-wrap"><svg id="gnn-perm-adj" viewBox="0 0 262 262" width="100%" role="img"
+          aria-label="Adjacency matrix heatmap, reordered by node ID"></svg></div>
+        <div class="gnn-legend">Adjacency A, rows and columns ordered by ID.</div>
+      </div>
+    </div>
+    <div class="gnn-stats" style="margin-top:0.7rem">
+      <div class="gnn-stat"><b id="gnn-perm-node">c</b><span>output at the marked paper</span></div>
+      <div class="gnn-stat"><b id="gnn-perm-gnn">0.000</b><span>equivariant layer</span></div>
+      <div class="gnn-stat"><b id="gnn-perm-mlp">0.000</b><span>MLP on vec(A)</span></div>
+      <div class="gnn-stat"><b><span class="se-tag" id="gnn-perm-tag">unchanged</span></b><span>vs. original IDs</span></div>
+    </div>
+  </div>
+
+  <p>
+    The marked paper keeps its output through every relabelling: the equivariant layer reads
+    only the neighbourhood, and the neighbourhood is a property of the graph. The dense readout
+    over vec(A) — a fixed set of weights, one per matrix cell — moves every time, because it was
+    never reading the graph in the first place.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 2. MESSAGE PASSING                                            -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>📨 One layer is one round of messages</h3>
+  <p style="margin-top:0">
+    Equivariance leaves one natural template, formalised by Gilmer et al. as the message passing
+    neural network. Each node sends a message to each neighbour, every node aggregates the
+    messages it received with a function that ignores their order, and the aggregate is combined
+    with the node's own state:
+  </p>
+
+  <div class="se-equation">
+    <span class="big">h<sub>v</sub><sup>(k)</sup> = UPDATE&#8202;(&#8202;h<sub>v</sub><sup>(k&minus;1)</sup>,
+    AGGREGATE&#8202;(&#8202;&#123;&#123; h<sub>u</sub><sup>(k&minus;1)</sup> : u &isin; N(v) &#125;&#125;&#8202;)&#8202;)</span>
+  </div>
+
+  <p>
+    The doubled braces are deliberate: the thing being aggregated is a <em>multiset</em>. Two
+    neighbours carrying identical features are two separate elements, and any aggregator that
+    forgets this forgets something real about the graph — §4 is about exactly that. AGGREGATE
+    must be order-invariant, because the neighbours arrive in whatever order the edge list
+    happened to store them; UPDATE is applied to every node with the same parameters, which is
+    what makes the whole layer equivariant rather than merely invariant.
+  </p>
+
+  <p>
+    One layer moves information one hop. After <em>k</em> layers a node's representation is a
+    function of everything within <em>k</em> hops of it — its <strong>receptive field</strong> —
+    and of nothing outside it. Depth in a GNN buys reach, in exactly the way depth in a CNN buys
+    a larger patch.
+  </p>
+
+  <div class="gnn-panel">
+    <div class="gnn-controls">
+      <button class="se-btn" id="gnn-mp-step">▶ Step</button>
+      <button class="se-reset" id="gnn-mp-reset">Reset</button>
+      <div class="gnn-stats" style="margin-left:auto">
+        <div class="gnn-stat"><b id="gnn-mp-k">0</b><span>layers applied</span></div>
+        <div class="gnn-stat"><b id="gnn-mp-rf">1</b><span>nodes in receptive field</span></div>
+      </div>
+    </div>
+    <div class="graph-wrap"><svg id="gnn-mp-graph" viewBox="0 0 520 300" width="100%" role="img"
+      aria-label="Message passing on the citation graph"></svg></div>
+    <div class="gnn-legend">
+      Click any paper to select it, then press Step. Each step averages every node with its
+      neighbours; the ring marks the selected node's <i>k</i>-hop shell and the highlighted edges
+      are the ones carrying messages into it on this round.
+    </div>
+  </div>
+
+  <p>
+    The scalars shown are the simplest possible instance — AGGREGATE is a mean and UPDATE is the
+    identity, so each round replaces every value with the average over its closed neighbourhood.
+    Watch two things: how fast the selected node's shell swallows the graph, and how fast the
+    numbers stop differing from each other. Both are consequences of the same operator, and §5
+    is about the second one.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 3. THE GCN LAYER                                              -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🧮 The GCN layer</h3>
+  <p style="margin-top:0">
+    Kipf &amp; Welling's graph convolutional network picks the cheapest members of that template:
+    the message is the neighbour's feature vector scaled by a fixed coefficient, AGGREGATE is a
+    sum, and UPDATE is a shared linear map followed by a pointwise nonlinearity. The whole layer
+    is one sparse matrix product.
+  </p>
+
+  <div class="se-equation">
+    <span class="big">H<sup>(l+1)</sup> = &sigma;&#8202;(&#8202;D&#771;<sup>&minus;1/2</sup>&#8202;
+    &Atilde;&#8202;D&#771;<sup>&minus;1/2</sup>&#8202;H<sup>(l)</sup>&#8202;W<sup>(l)</sup>&#8202;)</span>
+    <div style="font-size:0.86rem;color:var(--sn-muted);margin-top:0.55rem">
+      with &Atilde; = A + I<sub>N</sub> &nbsp;and&nbsp;
+      D&#771;<sub>ii</sub> = &sum;<sub>j</sub> &Atilde;<sub>ij</sub>
+    </div>
+  </div>
+
+  <p>
+    Two design choices are hiding in there, and both matter more than the matrix notation
+    suggests.
+  </p>
+
+  <p>
+    <strong>Self-loops.</strong> Plain A excludes <em>v</em> from its own neighbourhood, so a
+    layer would throw away the node's current features and keep only the neighbours' — after two
+    such layers a node's own input has been laundered through its neighbours twice. Adding the
+    identity, &Atilde; = A + I, puts the node back in its own sum. This is the analogue of
+    GraphSAGE keeping <em>h</em><sub>v</sub> in a concatenation, done with a cheaper mechanism.
+  </p>
+
+  <p>
+    <strong>Symmetric normalisation.</strong> Aggregating with raw &Atilde; makes a node's
+    output scale with its degree, so hubs shout and leaves whisper, and stacking such layers
+    lets activations grow without bound. Dividing by the degree of the <em>receiving</em> node
+    alone gives the row-normalised operator D&#771;<sup>&minus;1</sup>&Atilde;, an honest mean.
+    Kipf &amp; Welling's renormalisation splits the division between both endpoints instead,
+    which keeps the operator symmetric and its eigenvalues inside [&minus;1, 1]:
+  </p>
+
+  <div class="se-equation">
+    <span class="big">h<sub>v</sub> = &sigma;&#8202;&#8202;(&#8202;W &sum;<sub>u &isin; N(v) &cup; &#123;v&#125;</sub>
+    h<sub>u</sub> &#8725; &radic;(&#8202;d&#771;<sub>u</sub>&#8202;d&#771;<sub>v</sub>&#8202;)&#8202;)</span>
+  </div>
+
+  <p>
+    Read per-node, a message from <em>u</em> to <em>v</em> is discounted by both endpoints'
+    degrees. A message from a hub counts for less, because the hub is telling everyone the same
+    thing; a message into a hub counts for less too, because the hub is already hearing from
+    everyone.
+  </p>
+
+  <div class="gnn-panel">
+    <div class="gnn-controls">
+      <label class="gnn-ctl"><span>Normalisation</span>
+        <span class="gnn-seg" id="gnn-norm-seg">
+          <button data-v="none" class="on">none &nbsp;&Atilde;</button>
+          <button data-v="row">row &nbsp;D&#771;<sup>&minus;1</sup>&Atilde;</button>
+          <button data-v="sym">symmetric</button>
+        </span>
+      </label>
+      <div class="gnn-stats" style="margin-left:auto">
+        <div class="gnn-stat"><b id="gnn-norm-hub">0.00</b><span>self-coefficient, hub (ID 4)</span></div>
+        <div class="gnn-stat"><b id="gnn-norm-leaf">0.00</b><span>self-coefficient, leaf (ID 8)</span></div>
+        <div class="gnn-stat"><b id="gnn-norm-max">0.00</b><span>largest row sum</span></div>
+      </div>
+    </div>
+    <div class="gnn-row">
+      <div class="gnn-col" style="flex:1 1 240px">
+        <div class="graph-wrap"><svg id="gnn-norm-adj" viewBox="0 0 262 262" width="100%" role="img"
+          aria-label="Coefficient matrix heatmap under the selected normalisation"></svg></div>
+      </div>
+      <div class="gnn-col" style="flex:1.1 1 260px">
+        <div class="graph-wrap"><svg id="gnn-norm-bars" viewBox="0 0 300 262" width="100%" role="img"
+          aria-label="Row sums of the coefficient matrix per node"></svg></div>
+        <div class="gnn-legend">Row sums — how much total weight each node aggregates.</div>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Node 4 is the hub, joined to six others. Under <span class="se-tag">none</span> its row sums
+    to 7 while node 8's sums to 3, so a single layer already amplifies the hub by more than a
+    factor of two. <span class="se-tag">row</span> flattens every row sum to exactly 1.
+    <span class="se-tag">symmetric</span> does not — hub rows stay slightly below 1 and leaf rows
+    slightly above — which is the price of keeping the operator symmetric, and cheap next to
+    what symmetry buys: Â is then a real symmetric matrix with a clean spectrum, so stacking
+    layers is a well-behaved filtering operation rather than a source of blow-up.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 4. AGGREGATORS AND EXPRESSIVE POWER                           -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🧺 The aggregator decides what the layer can tell apart</h3>
+  <p style="margin-top:0">
+    A neighbourhood is a multiset, so AGGREGATE is a function on multisets, and whatever it
+    cannot distinguish the layer cannot distinguish either — no amount of training fixes a
+    collision that happens before the weights are reached. Xu et al. rank the three standard
+    choices by exactly this criterion.
+  </p>
+
+  <ul>
+    <li><strong>Mean</strong> keeps proportions and drops counts: &#123;&#123;a, a, a&#125;&#125;
+      and &#123;&#123;a&#125;&#125; are the same input.</li>
+    <li><strong>Max</strong> keeps only the set of distinct elements, dropping both counts and
+      multiplicities: &#123;&#123;a, b&#125;&#125; and &#123;&#123;a, a, b, b, b&#125;&#125; are
+      the same input.</li>
+    <li><strong>Sum</strong> keeps the full multiset. Over a countable feature space there is a
+      mapping under which summation is injective on bounded multisets, so a sum followed by a
+      sufficiently expressive MLP can represent any multiset function — that is the graph
+      isomorphism network, GIN:</li>
+  </ul>
+
+  <div class="se-equation">
+    <span class="big">h<sub>v</sub><sup>(k)</sup> = MLP<sup>(k)</sup>&#8202;(&#8202;(1 +
+    &epsilon;<sup>(k)</sup>)&#8202;&middot;&#8202;h<sub>v</sub><sup>(k&minus;1)</sup> +
+    &sum;<sub>u &isin; N(v)</sub> h<sub>u</sub><sup>(k&minus;1)</sup>&#8202;)</span>
+  </div>
+
+  <div class="gnn-panel">
+    <div class="gnn-controls">
+      <label class="gnn-ctl"><span>Aggregator</span>
+        <span class="gnn-seg" id="gnn-agg-seg">
+          <button data-v="sum">sum</button>
+          <button data-v="mean" class="on">mean</button>
+          <button data-v="max">max</button>
+        </span>
+      </label>
+      <label class="gnn-ctl"><span>Preset</span>
+        <span class="gnn-seg" id="gnn-agg-preset">
+          <button data-v="counts" class="on">counts</button>
+          <button data-v="mult">multiplicity</button>
+          <button data-v="prop">proportions</button>
+        </span>
+      </label>
+    </div>
+    <div class="gnn-row">
+      <div class="gnn-col">
+        <div style="font-size:0.78rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--sn-muted)">
+          Neighbourhood 1</div>
+        <div class="gnn-multiset" id="gnn-ms0"></div>
+        <div>
+          <span class="gnn-counter"><button data-set="0" data-f="0" data-d="-1">&minus;</button>
+            <b id="gnn-c00">3</b><button data-set="0" data-f="0" data-d="1">+</button>
+            <span style="color:var(--sn-muted)">&times; a</span></span>
+          <span class="gnn-counter"><button data-set="0" data-f="1" data-d="-1">&minus;</button>
+            <b id="gnn-c01">0</b><button data-set="0" data-f="1" data-d="1">+</button>
+            <span style="color:var(--sn-muted)">&times; b</span></span>
+        </div>
+        <div class="gnn-vecs" id="gnn-agg0"></div>
+      </div>
+      <div class="gnn-col">
+        <div style="font-size:0.78rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--sn-muted)">
+          Neighbourhood 2</div>
+        <div class="gnn-multiset" id="gnn-ms1"></div>
+        <div>
+          <span class="gnn-counter"><button data-set="1" data-f="0" data-d="-1">&minus;</button>
+            <b id="gnn-c10">1</b><button data-set="1" data-f="0" data-d="1">+</button>
+            <span style="color:var(--sn-muted)">&times; a</span></span>
+          <span class="gnn-counter"><button data-set="1" data-f="1" data-d="-1">&minus;</button>
+            <b id="gnn-c11">0</b><button data-set="1" data-f="1" data-d="1">+</button>
+            <span style="color:var(--sn-muted)">&times; b</span></span>
+        </div>
+        <div class="gnn-vecs" id="gnn-agg1"></div>
+      </div>
+    </div>
+    <div style="margin-top:0.6rem">
+      <span class="se-tag" id="gnn-agg-tag">distinguishable ✓</span>
+      <span class="gnn-legend" style="display:inline;margin-left:0.5rem" id="gnn-agg-why"></span>
+    </div>
+    <div class="gnn-legend" style="margin-top:0.45rem">
+      Features are one-hot: <span class="gnn-chip">a</span> = [1, 0],
+      <span class="gnn-chip b">b</span> = [0, 1]. The three presets are the three ways a
+      neighbourhood pair can collide.
+    </div>
+  </div>
+
+  <p>
+    The ranking is <strong>sum &gt; mean &gt; max</strong> in discriminative power, and it is
+    strict: every pair that mean separates, sum separates too, and there are pairs — the
+    <span class="se-tag">counts</span> preset — that only sum separates. This does not make mean
+    a mistake. On a citation graph where degree is noise rather than signal, mean's invariance to
+    neighbourhood size is a useful prior, and it is what the GCN layer's normalisation
+    approximates. The ranking says what is <em>possible</em>, not what generalises.
+  </p>
+
+  <p>
+    Sum is also where the ceiling sits. Any message passing GNN of this shape is at most as
+    powerful as the <strong>1-dimensional Weisfeiler–Leman test</strong>, the classical
+    colour-refinement heuristic for graph isomorphism — proved independently by Xu et al. and by
+    Morris et al. Colour refinement does exactly what message passing does: hash each node's
+    colour together with the multiset of its neighbours' colours, repeat. Two graphs that 1-WL
+    cannot separate produce identical node representations under <em>every</em> such GNN, at any
+    width and any depth.
+  </p>
+
+  <svg class="gnn-diag" viewBox="0 0 480 158" width="480" role="img"
+    aria-label="Two disjoint triangles beside a six-cycle: graphs 1-WL cannot distinguish">
+    <g class="wire">
+      <path d="M40 118 L92 118 L66 68 Z"/>
+      <path d="M138 118 L190 118 L164 68 Z"/>
+    </g>
+    <g class="dot">
+      <circle cx="40" cy="118" r="9"/><circle cx="92" cy="118" r="9"/><circle cx="66" cy="68" r="9"/>
+      <circle cx="138" cy="118" r="9"/><circle cx="190" cy="118" r="9"/><circle cx="164" cy="68" r="9"/>
+    </g>
+    <text class="lbl" x="115" y="146" text-anchor="middle">two triangles</text>
+    <text class="sub" x="115" y="38" text-anchor="middle">6 nodes, 6 edges, every node of degree 2</text>
+    <g class="wire">
+      <path d="M340 128 L390 100 L390 48 L340 20 L290 48 L290 100 Z"/>
+    </g>
+    <g class="dot">
+      <circle cx="340" cy="128" r="9"/><circle cx="390" cy="100" r="9"/><circle cx="390" cy="48" r="9"/>
+      <circle cx="340" cy="20" r="9"/><circle cx="290" cy="48" r="9"/><circle cx="290" cy="100" r="9"/>
+    </g>
+    <text class="lbl" x="340" y="152" text-anchor="middle">one hexagon</text>
+  </svg>
+
+  <div class="se-example">
+    <strong>The blind spot, concretely.</strong> Both graphs above are 2-regular with unlabelled
+    nodes, so every node starts with the same colour and every neighbourhood multiset is
+    &#123;&#123;c, c&#125;&#125; forever. Colour refinement never splits them, and neither does
+    any sum-aggregating GNN, however deep — yet one graph is connected and the other is not.
+    Distinguishing them needs something outside the message passing template: higher-order
+    tensors, random or positional node identifiers, or explicit substructure counts.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 5. OVER-SMOOTHING                                             -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🌫️ Over-smoothing: why deep is not better here</h3>
+  <p style="margin-top:0">
+    Depth extends the receptive field, so a deeper GCN should see more. It does not work out that
+    way. Li, Han &amp; Wu identified the reason: the propagation step
+    Â&#8202;H is a form of <em>Laplacian smoothing</em>, and smoothing is a contraction on
+    everything except one direction. Iterating it drives the representations of a connected
+    component together — Oono &amp; Suzuki later showed the collapse is exponential in depth.
+  </p>
+
+  <p>
+    The surviving direction is easy to name. Â&#8202;D&#771;<sup>1/2</sup>&#8202;1 =
+    D&#771;<sup>&minus;1/2</sup>&Atilde;&#8202;1 = D&#771;<sup>1/2</sup>&#8202;1, so
+    D&#771;<sup>1/2</sup>&#8202;1 is an eigenvector with eigenvalue exactly 1 while every other
+    mode has modulus below 1 and decays. The fixed point is therefore
+    h<sub>v</sub> &#8594; &radic;d&#771;<sub>v</sub> &middot; c for one shared vector c: after
+    enough layers a node's representation encodes its degree and nothing else.
+  </p>
+
+  <div class="gnn-panel">
+    <div class="gnn-controls">
+      <label class="gnn-ctl" style="flex:1 1 220px">
+        <span>Propagation steps: <span class="gnn-out" id="gnn-os-kout">2</span></span>
+        <input type="range" id="gnn-os-k" min="0" max="40" step="1" value="2" style="width:100%">
+      </label>
+      <div class="gnn-stats" style="margin-left:auto">
+        <div class="gnn-stat"><b id="gnn-os-d">0.00</b><span>mean pairwise distance</span></div>
+      </div>
+    </div>
+    <div class="gnn-row">
+      <div class="gnn-col" style="flex:1.3 1 300px">
+        <div class="graph-wrap"><svg id="gnn-os-graph" viewBox="0 0 520 300" width="100%" role="img"
+          aria-label="Fifty-node graph coloured by a projection of each node's representation"></svg></div>
+      </div>
+      <div class="gnn-col" style="flex:1 1 240px">
+        <div class="graph-wrap"><svg id="gnn-os-chart" viewBox="0 0 320 300" width="100%" role="img"
+          aria-label="Mean pairwise distance between node representations against depth"></svg></div>
+      </div>
+    </div>
+    <div class="gnn-legend">
+      Colour is each node's representation projected onto the direction that separates the two
+      communities, on a scale pinned to the spread at <i>k</i> = 2. Distance is measured between
+      direction-normalised representations, so it is unaffected by the overall shrinkage.
+    </div>
+  </div>
+
+  <p>
+    At <em>k</em> = 0 the colours are noise: the raw features barely encode the community. Two or
+    three steps resolve them into two blocks, which is the entire benefit — averaging over a
+    neighbourhood cancels independent noise and leaves the shared community offset intact. Past
+    that, the same averaging eats the signal it just recovered. The mean pairwise distance falls
+    geometrically, from 1.40 at <em>k</em> = 0 to 0.80 at <em>k</em> = 10, 0.37 at
+    <em>k</em> = 20 and 0.13 at <em>k</em> = 40, and the two blocks fade into one colour on the
+    way. The rate is set by the second-largest eigenvalue of Â — the exponential decay Oono &amp;
+    Suzuki describe — so a graph with well-separated communities buys a few extra layers of grace
+    and nothing more. There is a useful depth and it is small; on standard citation benchmarks it
+    is 2, which is why the reference GCN has two layers and not ten.
+  </p>
+
+  <div class="se-example">
+    <strong>The pair off to the side.</strong> This particular sample has a two-node component
+    detached from the rest, and it keeps its own colour at every depth. Smoothing converges
+    <em>per connected component</em> — the eigenvalue-1 eigenspace has one dimension for each
+    component, not one in total — so nodes with no path between them never merge no matter how
+    deep the stack goes. The collapse is a statement about what a component's nodes look like
+    relative to each other, not about the graph as a whole.
+  </div>
+
+  <div class="se-note">
+    <strong>The standard mitigations.</strong> Residual and dense skip connections keep a path
+    back to the unsmoothed features; jumping knowledge concatenates or max-pools across layers so
+    each node picks its own effective depth; PairNorm and its relatives explicitly hold the total
+    pairwise distance constant; DropEdge resamples the edge set each epoch, which slows the
+    contraction. All of them attack the same contraction, none of them removes it.
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- 6. TRAINING                                                   -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🎓 Training a GCN</h3>
+  <p style="margin-top:0">
+    The setting below is the one Kipf &amp; Welling used: <strong>transductive semi-supervised
+    node classification</strong>. One fixed graph, features for every node, labels for a handful,
+    and a model that sees the whole graph at training time and is scored on the unlabelled
+    nodes. The reference architecture is two layers, softmax on the output, and a cross-entropy
+    loss summed over labelled nodes only:
+  </p>
+
+  <div class="se-equation">
+    <span class="big">Z = softmax&#8202;(&#8202;Â&#8202;ReLU(Â&#8202;X&#8202;W<sup>(0)</sup>)&#8202;W<sup>(1)</sup>&#8202;)</span>
+    <div style="font-size:0.86rem;color:var(--sn-muted);margin-top:0.55rem">
+      &#8466; = &minus;&sum;<sub>l &isin; 𝒴<sub>L</sub></sub> &sum;<sub>f</sub>
+      Y<sub>lf</sub> ln Z<sub>lf</sub>
+    </div>
+  </div>
+
+  <p>
+    The graph is a 50-node stochastic block model with two planted communities, drawn from a
+    fixed seed. Each node carries an 8-dimensional feature vector: a small community-dependent
+    offset buried in unit Gaussian noise. Deliberately weak — a classifier that sees only the
+    features has a low ceiling, so anything above it comes from the edges. The model is a few
+    hundred parameters, trained full-batch with Adam and L2 weight decay, on hand-written
+    gradients.
+  </p>
+
+  <div class="gnn-panel">
+    <div class="gnn-controls">
+      <button class="se-btn" id="gnn-run">⏸ Pause</button>
+      <button class="se-btn sec" id="gnn-step50">+50 steps</button>
+      <button class="se-reset" id="gnn-reset">Reset weights</button>
+      <label class="gnn-check"><input type="checkbox" id="gnn-usegraph" checked> use the graph (Â vs I)</label>
+    </div>
+    <div class="gnn-controls">
+      <label class="gnn-ctl" style="flex:1 1 180px">
+        <span>Learning rate: <span class="gnn-out" id="gnn-lr-out">0.0200</span></span>
+        <input type="range" id="gnn-lr" min="-3" max="-0.7" step="0.05" value="-1.7" style="width:100%">
+      </label>
+      <label class="gnn-ctl" style="flex:1 1 180px">
+        <span>Labels per class: <span class="gnn-out" id="gnn-lab-out">4</span></span>
+        <input type="range" id="gnn-lab" min="1" max="12" step="1" value="4" style="width:100%">
+      </label>
+      <label class="gnn-ctl"><span>Layers</span>
+        <span class="gnn-seg" id="gnn-layers-seg">
+          <button data-v="1">1</button>
+          <button data-v="2" class="on">2</button>
+          <button data-v="3">3</button>
+        </span>
+      </label>
+    </div>
+    <div class="gnn-stats" style="margin-bottom:0.7rem">
+      <div class="gnn-stat"><b id="gnn-t-step">0</b><span>step</span></div>
+      <div class="gnn-stat"><b id="gnn-t-loss">0.000</b><span>training loss</span></div>
+      <div class="gnn-stat"><b id="gnn-t-acc">0.00</b><span>held-out accuracy</span></div>
+      <div class="gnn-stat"><b id="gnn-t-best-g">–</b><span>best with Â</span></div>
+      <div class="gnn-stat"><b id="gnn-t-best-p">–</b><span>best with I</span></div>
+    </div>
+    <div class="gnn-row">
+      <div class="gnn-col" style="flex:1.25 1 300px">
+        <div class="graph-wrap"><svg id="gnn-t-graph" viewBox="0 0 520 320" width="100%" role="img"
+          aria-label="The graph coloured by predicted class, with labelled nodes ringed and errors marked"></svg></div>
+        <div class="gnn-legend">
+          <span class="gnn-swatch" style="background:var(--sn-accent)"></span>predicted community A ·
+          <span class="gnn-swatch" style="background:var(--sn-warn)"></span>predicted community B ·
+          ringed = labelled · ✕ = misclassified
+        </div>
+      </div>
+      <div class="gnn-col" style="flex:1 1 250px">
+        <div class="graph-wrap"><svg id="gnn-t-chart" viewBox="0 0 320 320" width="100%" role="img"
+          aria-label="Training loss and held-out accuracy against step"></svg></div>
+        <div class="gnn-legend">
+          <span class="gnn-swatch" style="background:var(--sn-accent)"></span>training loss ·
+          <span class="gnn-swatch" style="background:var(--sn-good)"></span>held-out accuracy
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p>
+    Untick <strong>use the graph</strong> and Â is replaced by the identity. Every other part of
+    the model is untouched — same weights, same optimiser, same labels — so what remains is a
+    plain MLP on the raw features, and its held-out accuracy plateaus far below. The two
+    <em>best</em> readouts keep the high-water mark for each setting side by side; the gap
+    between them is the graph's contribution, and it is the reason to use one of these models at
+    all. With four labels per class the run above settles around 0.90 held-out accuracy with Â
+    and around 0.60 with I — eight labelled papers, and the edges supply the rest.
+  </p>
+
+  <p>
+    Two other controls are worth moving. Dropping <strong>labels per class</strong> to 1 leaves
+    two labelled nodes in the entire graph, and accuracy barely moves — around 0.94, higher than
+    the four-label run rather than lower. The propagation matrix is doing the work, spreading two
+    labels across fifty nodes, and the features-only model at the same setting stays near 0.63.
+    On <strong>layers</strong>, 1 is clearly too few — the single propagation gets to roughly 0.79
+    where two layers reach 0.90 — while 3 costs more per step and buys nothing, landing on the
+    same accuracy as 2 at most label budgets and below it at the smallest. On a graph whose
+    communities are two hops wide, that is where the useful depth ends.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<!-- 7. THE FAMILY                                                 -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🧭 Where this generalises</h3>
+  <p style="margin-top:0">
+    Every architecture below is the same UPDATE/AGGREGATE template with a different answer to one
+    question: where does the coefficient on a neighbour's message come from?
+  </p>
+
+  <div class="gnn-tblwrap">
+  <table class="gnn-tbl">
+    <tr><th>Model</th><th>Coefficient on the message from <em>u</em> to <em>v</em></th><th>What it buys</th></tr>
+    <tr>
+      <td><strong>GCN</strong></td>
+      <td>Fixed, structural: 1 &#8725; &radic;(d&#771;<sub>u</sub> d&#771;<sub>v</sub>).</td>
+      <td>One sparse matrix product per layer; nothing to learn in the aggregation. The default
+        baseline.</td>
+    </tr>
+    <tr>
+      <td><strong>GraphSAGE</strong></td>
+      <td>Aggregate over a fixed-size uniform <em>sample</em> of N(v), then concatenate
+        h<sub>v</sub> before the weight matrix.</td>
+      <td>Bounded per-node cost regardless of degree, so it minibatches and runs inductively on
+        nodes never seen in training.</td>
+    </tr>
+    <tr>
+      <td><strong>GAT</strong></td>
+      <td>Learned: &alpha;<sub>vu</sub> = softmax over N(v) of
+        LeakyReLU(a<sup>&#8868;</sup>[Wh<sub>v</sub> &#8214; Wh<sub>u</sub>]).</td>
+      <td>The graph chooses which neighbours matter instead of the degrees choosing. This is
+        <a href="{{ site.baseurl }}/self-attention/">self-attention</a> with the softmax
+        restricted to N(v) rather than run over every position.</td>
+    </tr>
+    <tr>
+      <td><strong>GIN</strong></td>
+      <td>Uniform 1, self weighted by (1 + &epsilon;), the sum fed to an MLP.</td>
+      <td>Injective on neighbourhood multisets, hence as discriminative as 1-WL — the maximum for
+        this template.</td>
+    </tr>
+  </table>
+  </div>
+
+  <p>
+    Seen this way, attention is not a separate idea bolted onto graphs. A transformer is a GNN
+    run on a complete graph with learned edge weights and positional information supplied
+    separately; a GAT is that same computation with the complete graph replaced by a sparse one.
+    The restriction is the point: the edges are a prior, and on a citation graph it is a good one.
+  </p>
+
+  <p>
+    The layer stack is only half of a model. The other half is the readout, which depends on what
+    the prediction is about:
+  </p>
+
+  <ul>
+    <li><strong>Node level</strong> — classify or regress h<sub>v</sub><sup>(K)</sup> directly.
+      Node classification, as in §6; also fraud detection and role labelling.</li>
+    <li><strong>Edge level</strong> — score a pair, typically from
+      h<sub>u</sub><sup>(K)</sup> and h<sub>v</sub><sup>(K)</sup> via a dot product or a small
+      MLP. Link prediction and recommendation.</li>
+    <li><strong>Graph level</strong> — pool all node states into one vector with a
+      permutation-<em>invariant</em> readout, R(&#123;h<sub>v</sub><sup>(K)</sup>&#125;), then
+      predict from that. Molecular property prediction, the task MPNNs were written for. The
+      readout faces the same multiset question as AGGREGATE, with the same answer: sum preserves
+      the most, and hierarchical pooling is used when the graphs are large.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<!-- 8. TAKEAWAYS                                                  -->
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>🎯 Consequences worth remembering</h3>
+  <ul class="gnn-take">
+    <li><strong>Permutation equivariance is the axiom, message passing is the consequence.</strong>
+      Once a layer may not depend on node indices, it has to read each node's neighbourhood
+      through an order-invariant aggregate. Every model here is a choice of aggregate.</li>
+    <li><strong>Self-loops and normalisation are not cosmetic.</strong> Without &Atilde; = A + I a
+      node discards its own features; without degree normalisation hubs dominate and activations
+      grow with depth.</li>
+    <li><strong>The aggregator sets a ceiling before training starts.</strong> Mean forgets
+      counts, max forgets multiplicities, sum with an MLP forgets nothing — and no message
+      passing GNN of this shape beats the 1-WL test, whatever its width or depth.</li>
+    <li><strong>Depth in a GNN is not depth in a CNN.</strong> Propagation is smoothing, and
+      iterated smoothing converges to a degree-dominated fixed point. Two or three layers is
+      usually the right number; going deeper requires skips, jumping knowledge, or explicit
+      distance-preserving normalisation.</li>
+    <li><strong>The graph is what pays.</strong> With features weak enough to be interesting, the
+      gap between Â and I in §6 is the entire argument for the architecture — and it shows up
+      most clearly when the labels are scarce.</li>
+    <li><strong>Attention is a special case, not an alternative.</strong> Replace the fixed
+      degree-based coefficients with learned ones and a GCN becomes a GAT; replace the sparse
+      graph with a complete one and it becomes a transformer layer.</li>
+  </ul>
+</div>
+
+<div class="se-note">
+  <strong>Sources.</strong> Kipf &amp; Welling, <em>Semi-Supervised Classification with Graph
+  Convolutional Networks</em> (ICLR 2017); Gilmer et al., <em>Neural Message Passing for Quantum
+  Chemistry</em> (ICML 2017); Xu et al., <em>How Powerful are Graph Neural Networks?</em> (ICLR
+  2019) and Morris et al., <em>Weisfeiler and Leman Go Neural</em> (AAAI 2019); Li, Han &amp; Wu,
+  <em>Deeper Insights into Graph Convolutional Networks</em> (AAAI 2018) and Oono &amp; Suzuki,
+  <em>Graph Neural Networks Exponentially Lose Expressive Power for Node Classification</em>
+  (ICLR 2020); Hamilton, Ying &amp; Leskovec, <em>Inductive Representation Learning on Large
+  Graphs</em> (NeurIPS 2017); Veličković et al., <em>Graph Attention Networks</em> (ICLR 2018).
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ================================================================
+     Shared: token reading + theme-aware redraw
+     ================================================================ */
+  var SN = document.querySelector(".study-note");
+  function readCols() {
+    var cs = getComputedStyle(SN);
+    function c(n) { return cs.getPropertyValue(n).trim(); }
+    return {
+      accent: c("--sn-accent"), accentStrong: c("--sn-accent-strong"),
+      accentSoft: c("--sn-accent-soft"), accentLine: c("--sn-accent-line"),
+      onAccent: c("--sn-on-accent"), good: c("--sn-good"), warn: c("--sn-warn"),
+      bad: c("--sn-bad"), muted: c("--sn-muted"), text: c("--sn-text"),
+      grid: c("--sn-grid"), border: c("--sn-border"), panel: c("--sn-panel"),
+      inset: c("--sn-panel-inset")
+    };
+  }
+  var COL = readCols();
+  var redraw = [];
+  new MutationObserver(function () {
+    COL = readCols();
+    for (var i = 0; i < redraw.length; i++) redraw[i]();
+  }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  /* colour blending between tokens (never literal hex ramps) */
+  var RGB = {};
+  function toRgb(col) {
+    if (RGB[col]) return RGB[col];
+    var out = [128, 128, 128], m;
+    if (col.charAt(0) === "#") {
+      var h = col.slice(1);
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      out = [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+    } else if ((m = col.match(/rgba?\(([^)]+)\)/))) {
+      var p = m[1].split(",");
+      out = [parseFloat(p[0]), parseFloat(p[1]), parseFloat(p[2])];
+    }
+    RGB[col] = out;
+    return out;
+  }
+  function mix(a, b, t) {
+    var A = toRgb(a), B = toRgb(b);
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    return "rgb(" + Math.round(A[0] + (B[0] - A[0]) * t) + "," +
+                    Math.round(A[1] + (B[1] - A[1]) * t) + "," +
+                    Math.round(A[2] + (B[2] - A[2]) * t) + ")";
+  }
+
+  /* deterministic PRNG — every random quantity in this note is seeded */
+  function makeRng(seed) {
+    var s = seed >>> 0;
+    return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  function makeGauss(rng) {
+    var spare = null;
+    return function () {
+      if (spare !== null) { var r = spare; spare = null; return r; }
+      var u, v, q;
+      do { u = rng() * 2 - 1; v = rng() * 2 - 1; q = u * u + v * v; } while (q >= 1 || q === 0);
+      var f = Math.sqrt(-2 * Math.log(q) / q);
+      spare = v * f;
+      return u * f;
+    };
+  }
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s); }
+  function seg(id, onPick) {
+    var host = $(id);
+    host.addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("button") : null;
+      if (!b || !host.contains(b)) return;
+      var kids = host.querySelectorAll("button");
+      for (var i = 0; i < kids.length; i++) kids[i].classList.toggle("on", kids[i] === b);
+      onPick(b.getAttribute("data-v"));
+    });
+  }
+
+  /* ================================================================
+     The running citation graph (10 papers, two communities)
+     ================================================================ */
+  var POS = [[90, 78], [172, 126], [96, 186], [186, 50], [250, 178],
+             [330, 224], [404, 244], [360, 116], [468, 172], [444, 74]];
+  var EDGES = [[0, 1], [0, 2], [0, 4], [1, 2], [1, 3], [1, 4], [2, 4], [3, 4],
+               [4, 5], [4, 7], [5, 6], [5, 7], [6, 7], [6, 8], [7, 9], [8, 9]];
+  var N10 = 10;
+  var ADJ = [];
+  (function () {
+    var i, j;
+    for (i = 0; i < N10; i++) { ADJ.push([]); for (j = 0; j < N10; j++) ADJ[i].push(0); }
+    for (i = 0; i < EDGES.length; i++) {
+      ADJ[EDGES[i][0]][EDGES[i][1]] = 1;
+      ADJ[EDGES[i][1]][EDGES[i][0]] = 1;
+    }
+  })();
+  var NBR = [];
+  (function () {
+    for (var i = 0; i < N10; i++) {
+      var l = [];
+      for (var j = 0; j < N10; j++) if (ADJ[i][j]) l.push(j);
+      NBR.push(l);
+    }
+  })();
+  var DEG = NBR.map(function (l) { return l.length; });
+  var DEGT = DEG.map(function (d) { return d + 1; });          /* d̃ = d + 1 */
+  var X10 = [0.90, 0.20, 0.70, 0.10, 0.50, 0.30, 0.80, 0.40, 0.60, 0.15];
+
+  function nodeCircle(cx, cy, r, fill, stroke, sw) {
+    return '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="' + fill +
+      '" stroke="' + stroke + '" stroke-width="' + sw + '"/>';
+  }
+
+  /* ================================================================
+     Demo 1 — relabelling: equivariance vs. a dense readout on vec(A)
+     ================================================================ */
+  (function () {
+    var gsvg = $("gnn-perm-graph"), asvg = $("gnn-perm-adj");
+    var idOf = [];                       /* idOf[node] = displayed ID */
+    var nodeAt = [];                     /* nodeAt[id]  = node index  */
+    function identity() {
+      idOf = []; nodeAt = [];
+      for (var i = 0; i < N10; i++) { idOf.push(i); nodeAt.push(i); }
+    }
+    identity();
+    var MARKED = 4;                      /* the paper whose output we track */
+
+    /* an equivariant layer: symmetric-normalised aggregate of the scalar feature */
+    var Y = [];
+    (function () {
+      for (var v = 0; v < N10; v++) {
+        var s = X10[v] / DEGT[v];
+        for (var t = 0; t < NBR[v].length; t++) {
+          var u = NBR[v][t];
+          s += X10[u] / Math.sqrt(DEGT[u] * DEGT[v]);
+        }
+        Y.push(s);
+      }
+    })();
+
+    /* a dense readout over vec(A): fixed weights, one per matrix cell */
+    var Wvec = [];
+    (function () {
+      var g = makeGauss(makeRng(20260809));
+      for (var i = 0; i < N10 * N10; i++) Wvec.push(g());
+    })();
+    function mlpOnVecA() {
+      var s = 0;
+      for (var p = 0; p < N10; p++) {
+        for (var q = 0; q < N10; q++) s += Wvec[p * N10 + q] * ADJ[nodeAt[p]][nodeAt[q]];
+      }
+      return s;
+    }
+    var baseMlp = mlpOnVecA();
+
+    var shuffleRng = makeRng(7);
+    function shuffle() {
+      var perm = [];
+      for (var i = 0; i < N10; i++) perm.push(i);
+      for (var k = N10 - 1; k > 0; k--) {
+        var j = Math.floor(shuffleRng() * (k + 1));
+        var t = perm[k]; perm[k] = perm[j]; perm[j] = t;
+      }
+      nodeAt = perm;
+      idOf = [];
+      for (var p = 0; p < N10; p++) idOf[perm[p]] = p;
+      draw();
+    }
+
+    function drawGraph() {
+      var s = "", i;
+      for (i = 0; i < EDGES.length; i++) {
+        var a = POS[EDGES[i][0]], b = POS[EDGES[i][1]];
+        s += '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] +
+          '" stroke="' + COL.grid + '" stroke-width="2"/>';
+      }
+      for (i = 0; i < N10; i++) {
+        var p = POS[i], marked = i === MARKED;
+        s += nodeCircle(p[0], p[1], marked ? 17 : 14,
+          marked ? COL.accent : COL.accentSoft, marked ? COL.accentStrong : COL.accentLine,
+          marked ? 2.4 : 1.6);
+        s += '<text x="' + p[0] + '" y="' + (p[1] + 4.5) + '" text-anchor="middle" font-size="12.5" ' +
+          'font-weight="700" fill="' + (marked ? COL.onAccent : COL.accent) + '">' + idOf[i] + '</text>';
+        s += '<text x="' + (p[0] + (marked ? 22 : 19)) + '" y="' + (p[1] - 14) + '" font-size="10.5" ' +
+          'fill="' + COL.muted + '" font-family="monospace">' + Y[i].toFixed(2) + '</text>';
+      }
+      s += '<text x="10" y="292" font-size="11" fill="' + COL.muted + '">the marked paper is the hub, ' +
+        'whatever it is called</text>';
+      gsvg.innerHTML = s;
+    }
+
+    function drawAdj() {
+      var cell = 23, ox = 26, oy = 26, s = "", p, q;
+      for (p = 0; p < N10; p++) {
+        s += '<text x="' + (ox + p * cell + cell / 2) + '" y="' + (oy - 8) +
+          '" text-anchor="middle" font-size="9.5" fill="' + COL.muted + '">' + p + '</text>';
+        s += '<text x="' + (ox - 7) + '" y="' + (oy + p * cell + cell / 2 + 3.5) +
+          '" text-anchor="end" font-size="9.5" fill="' + COL.muted + '">' + p + '</text>';
+      }
+      for (p = 0; p < N10; p++) {
+        for (q = 0; q < N10; q++) {
+          var on = ADJ[nodeAt[p]][nodeAt[q]];
+          s += '<rect x="' + (ox + q * cell) + '" y="' + (oy + p * cell) + '" width="' + (cell - 1.5) +
+            '" height="' + (cell - 1.5) + '" rx="2" fill="' + (on ? COL.accent : COL.inset) +
+            '" stroke="' + COL.border + '" stroke-width="0.6"/>';
+        }
+      }
+      asvg.innerHTML = s;
+    }
+
+    function draw() {
+      drawGraph();
+      drawAdj();
+      $("gnn-perm-node").textContent = "#" + idOf[MARKED];
+      $("gnn-perm-gnn").textContent = Y[MARKED].toFixed(3);
+      var m = mlpOnVecA();
+      $("gnn-perm-mlp").textContent = m.toFixed(3);
+      var same = Math.abs(m - baseMlp) < 1e-9;
+      var tag = $("gnn-perm-tag");
+      tag.className = "se-tag " + (same ? "good" : "hot");
+      tag.textContent = same ? "both unchanged ✓" : "MLP output moved ✗";
+    }
+
+    $("gnn-shuffle").addEventListener("click", shuffle);
+    $("gnn-unshuffle").addEventListener("click", function () { identity(); draw(); });
+    redraw.push(draw);
+    draw();
+  })();
+
+  /* ================================================================
+     Demo 2 — stepping through message passing
+     ================================================================ */
+  (function () {
+    var svg = $("gnn-mp-graph");
+    var sel = 0, k = 0, h = X10.slice(), flashing = [];
+    var dist = [];
+    function bfs(src) {
+      var d = [], i;
+      for (i = 0; i < N10; i++) d.push(Infinity);
+      d[src] = 0;
+      var q = [src];
+      while (q.length) {
+        var v = q.shift();
+        for (i = 0; i < NBR[v].length; i++) {
+          var u = NBR[v][i];
+          if (d[u] === Infinity) { d[u] = d[v] + 1; q.push(u); }
+        }
+      }
+      return d;
+    }
+    dist = bfs(sel);
+
+    function stats() {
+      var n = 0;
+      for (var i = 0; i < N10; i++) if (dist[i] <= k) n++;
+      $("gnn-mp-k").textContent = k;
+      $("gnn-mp-rf").textContent = n;
+    }
+
+    function draw() {
+      var s = "", i;
+      for (i = 0; i < EDGES.length; i++) {
+        var e = EDGES[i], a = POS[e[0]], b = POS[e[1]];
+        var hot = flashing.indexOf(i) !== -1;
+        s += '<line x1="' + a[0] + '" y1="' + a[1] + '" x2="' + b[0] + '" y2="' + b[1] +
+          '" stroke="' + (hot ? COL.accentStrong : COL.grid) + '" stroke-width="' + (hot ? 3.6 : 2) + '"/>';
+      }
+      for (i = 0; i < N10; i++) {
+        var p = POS[i], d = dist[i], inRf = d <= k, shell = d === k && k > 0;
+        if (i === sel) {
+          s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="21" fill="none" stroke="' +
+            COL.accentStrong + '" stroke-width="2"/>';
+        } else if (shell) {
+          s += '<circle cx="' + p[0] + '" cy="' + p[1] + '" r="20" fill="none" stroke="' +
+            COL.accentLine + '" stroke-width="2" stroke-dasharray="3 3"/>';
+        }
+        /* the tint is capped well short of the full accent so the value stays legible */
+        var fill = inRf ? mix(COL.inset, COL.accent, 0.12 + 0.34 * (1 - Math.min(d, 4) / 4)) : COL.inset;
+        s += '<circle class="gnn-hit" data-i="' + i + '" cx="' + p[0] + '" cy="' + p[1] +
+          '" r="15" fill="' + fill + '" stroke="' + (inRf ? COL.accent : COL.border) +
+          '" stroke-width="1.7" style="cursor:pointer"/>';
+        s += '<text x="' + p[0] + '" y="' + (p[1] + 4) + '" text-anchor="middle" font-size="10.5" ' +
+          'font-family="monospace" font-weight="600" pointer-events="none" fill="' +
+          (inRf ? COL.text : COL.muted) + '">' + h[i].toFixed(2) + '</text>';
+      }
+      s += '<text x="10" y="292" font-size="11" fill="' + COL.muted + '">selected: node ' + sel +
+        ' &#183; ring = ' + (k > 0 ? k + '-hop shell' : 'no messages yet') + '</text>';
+      svg.innerHTML = s;
+      stats();
+    }
+
+    var flashTimer = null;
+    function step() {
+      var next = [], i, v;
+      for (v = 0; v < N10; v++) {
+        var s = h[v];
+        for (i = 0; i < NBR[v].length; i++) s += h[NBR[v][i]];
+        next.push(s / DEGT[v]);
+      }
+      h = next;
+      k += 1;
+      /* edges carrying messages into the newly-reached shell */
+      flashing = [];
+      for (i = 0; i < EDGES.length; i++) {
+        var a = EDGES[i][0], b = EDGES[i][1];
+        if (Math.min(dist[a], dist[b]) === k - 1 && Math.max(dist[a], dist[b]) <= k) flashing.push(i);
+      }
+      draw();
+      if (flashTimer) clearTimeout(flashTimer);
+      flashTimer = setTimeout(function () { flashing = []; draw(); }, 700);
+    }
+
+    svg.addEventListener("click", function (e) {
+      var t = e.target;
+      if (!t || !t.getAttribute) return;
+      var i = t.getAttribute("data-i");
+      if (i === null) return;
+      sel = +i;
+      dist = bfs(sel);
+      draw();
+    });
+    $("gnn-mp-step").addEventListener("click", step);
+    $("gnn-mp-reset").addEventListener("click", function () {
+      h = X10.slice(); k = 0; flashing = [];
+      if (flashTimer) clearTimeout(flashTimer);
+      draw();
+    });
+    redraw.push(draw);
+    draw();
+  })();
+
+  /* ================================================================
+     Demo 3 — what normalisation does to the coefficient matrix
+     ================================================================ */
+  (function () {
+    var asvg = $("gnn-norm-adj"), bsvg = $("gnn-norm-bars");
+    var mode = "none";
+    function coeffs() {
+      var M = [], p, q;
+      for (p = 0; p < N10; p++) {
+        M.push([]);
+        for (q = 0; q < N10; q++) {
+          var at = (p === q ? 1 : 0) + ADJ[p][q];
+          var val = at;
+          if (at) {
+            if (mode === "row") val = at / DEGT[p];
+            else if (mode === "sym") val = at / Math.sqrt(DEGT[p] * DEGT[q]);
+          }
+          M[p].push(val);
+        }
+      }
+      return M;
+    }
+    function draw() {
+      var M = coeffs(), cell = 23, ox = 26, oy = 26, s = "", p, q, mx = 0;
+      for (p = 0; p < N10; p++) for (q = 0; q < N10; q++) if (M[p][q] > mx) mx = M[p][q];
+      for (p = 0; p < N10; p++) {
+        s += '<text x="' + (ox + p * cell + cell / 2) + '" y="' + (oy - 8) +
+          '" text-anchor="middle" font-size="9.5" fill="' + COL.muted + '">' + p + '</text>';
+        s += '<text x="' + (ox - 7) + '" y="' + (oy + p * cell + cell / 2 + 3.5) +
+          '" text-anchor="end" font-size="9.5" fill="' + COL.muted + '">' + p + '</text>';
+      }
+      for (p = 0; p < N10; p++) {
+        for (q = 0; q < N10; q++) {
+          var v = M[p][q];
+          var fill = v > 0 ? mix(COL.inset, COL.accent, 0.12 + 0.88 * (v / mx)) : COL.inset;
+          s += '<rect x="' + (ox + q * cell) + '" y="' + (oy + p * cell) + '" width="' + (cell - 1.5) +
+            '" height="' + (cell - 1.5) + '" rx="2" fill="' + fill + '" stroke="' + COL.border +
+            '" stroke-width="0.6"/>';
+        }
+      }
+      asvg.innerHTML = s;
+
+      /* row sums */
+      var sums = [], mxs = 0;
+      for (p = 0; p < N10; p++) {
+        var t = 0;
+        for (q = 0; q < N10; q++) t += M[p][q];
+        sums.push(t);
+        if (t > mxs) mxs = t;
+      }
+      var bw = 236, bx = 44, by = 24, bh = (262 - 44) / N10;
+      var b = "";
+      for (p = 0; p < N10; p++) {
+        var y = by + p * bh;
+        b += '<text x="' + (bx - 8) + '" y="' + (y + bh / 2 + 3) + '" text-anchor="end" font-size="10" fill="' +
+          COL.muted + '">' + p + '</text>';
+        b += '<rect x="' + bx + '" y="' + (y + 2) + '" width="' + (bw * sums[p] / mxs) + '" height="' +
+          (bh - 6) + '" rx="2.5" fill="' + (p === 4 ? COL.accentStrong : COL.accent) + '" opacity="0.85"/>';
+        b += '<text x="' + (bx + bw * sums[p] / mxs + 5) + '" y="' + (y + bh / 2 + 3.5) + '" font-size="9.5" ' +
+          'font-family="monospace" fill="' + COL.muted + '">' + sums[p].toFixed(2) + '</text>';
+      }
+      b += '<text x="' + bx + '" y="14" font-size="10.5" fill="' + COL.muted + '">row sum &#8721;' +
+        '<tspan font-size="8">q</tspan> Â<tspan font-size="8">pq</tspan></text>';
+      bsvg.innerHTML = b;
+
+      $("gnn-norm-hub").textContent = M[4][4].toFixed(3);
+      $("gnn-norm-leaf").textContent = M[8][8].toFixed(3);
+      $("gnn-norm-max").textContent = mxs.toFixed(2);
+    }
+    seg("gnn-norm-seg", function (v) { mode = v; draw(); });
+    redraw.push(draw);
+    draw();
+  })();
+
+  /* ================================================================
+     Demo 4 — sum / mean / max on multisets
+     ================================================================ */
+  (function () {
+    var counts = [[3, 0], [1, 0]];
+    var agg = "mean";
+    var PRESETS = {
+      counts: [[3, 0], [1, 0]],
+      mult: [[1, 1], [2, 1]],
+      prop: [[1, 1], [2, 2]]
+    };
+    function aggregate(c) {
+      var na = c[0], nb = c[1], n = na + nb;
+      if (n === 0) return [0, 0];
+      if (agg === "sum") return [na, nb];
+      if (agg === "mean") return [na / n, nb / n];
+      return [na > 0 ? 1 : 0, nb > 0 ? 1 : 0];
+    }
+    function chips(c) {
+      var s = "", i;
+      for (i = 0; i < c[0]; i++) s += '<span class="gnn-chip">a</span>';
+      for (i = 0; i < c[1]; i++) s += '<span class="gnn-chip b">b</span>';
+      if (c[0] + c[1] === 0) s += '<span class="gnn-chip" style="opacity:0.5">&#8709;</span>';
+      return s;
+    }
+    var WHY = {
+      sum: "sum keeps every element, so two neighbourhoods collide only when they are equal.",
+      mean: "mean divides by the count, so it sees proportions and not sizes.",
+      max: "max keeps only which features are present, so counts and multiplicities are gone."
+    };
+    function draw() {
+      var i;
+      for (i = 0; i < 2; i++) {
+        $("gnn-ms" + i).innerHTML = chips(counts[i]);
+        $("gnn-c" + i + "0").textContent = counts[i][0];
+        $("gnn-c" + i + "1").textContent = counts[i][1];
+        var a = aggregate(counts[i]);
+        $("gnn-agg" + i).innerHTML = "<span>" + agg + " = [ " + a[0].toFixed(2) + ", " +
+          a[1].toFixed(2) + " ]</span>";
+      }
+      var a0 = aggregate(counts[0]), a1 = aggregate(counts[1]);
+      var equalIn = counts[0][0] === counts[1][0] && counts[0][1] === counts[1][1];
+      var same = Math.abs(a0[0] - a1[0]) < 1e-9 && Math.abs(a0[1] - a1[1]) < 1e-9;
+      var tag = $("gnn-agg-tag");
+      if (equalIn) {
+        tag.className = "se-tag";
+        tag.textContent = "identical neighbourhoods";
+        $("gnn-agg-why").textContent = "the two multisets are equal, so every aggregator agrees.";
+      } else {
+        tag.className = "se-tag " + (same ? "hot" : "good");
+        tag.textContent = same ? "collapsed ✗" : "distinguishable ✓";
+        $("gnn-agg-why").textContent = WHY[agg];
+      }
+    }
+    seg("gnn-agg-seg", function (v) { agg = v; draw(); });
+    seg("gnn-agg-preset", function (v) {
+      counts = [PRESETS[v][0].slice(), PRESETS[v][1].slice()];
+      draw();
+    });
+    var host = $("gnn-agg-seg").closest(".gnn-panel");
+    host.addEventListener("click", function (e) {
+      var b = e.target.closest ? e.target.closest("button[data-set]") : null;
+      if (!b) return;
+      var si = +b.getAttribute("data-set"), fi = +b.getAttribute("data-f"), d = +b.getAttribute("data-d");
+      var next = counts[si][fi] + d;
+      if (next < 0 || next > 6) return;
+      counts[si][fi] = next;
+      draw();
+    });
+    draw();
+  })();
+
+  /* ================================================================
+     The 50-node stochastic block model shared by §5 and §6
+     ================================================================ */
+  var G = (function () {
+    var N = 50, C = 2, d = 8, rng = makeRng(20260809), gauss = makeGauss(rng);
+    var label = [], i, j;
+    for (i = 0; i < N; i++) label.push(i < N / 2 ? 0 : 1);
+    var pIn = 0.16, pOut = 0.018;
+    var adj = [], edges = [];
+    for (i = 0; i < N; i++) { adj.push([]); for (j = 0; j < N; j++) adj[i].push(0); }
+    for (i = 0; i < N; i++) {
+      for (j = i + 1; j < N; j++) {
+        var p = label[i] === label[j] ? pIn : pOut;
+        if (rng() < p) { adj[i][j] = 1; adj[j][i] = 1; edges.push([i, j]); }
+      }
+    }
+    /* guarantee no isolated node: attach each orphan to a same-community node */
+    for (i = 0; i < N; i++) {
+      var deg = 0;
+      for (j = 0; j < N; j++) deg += adj[i][j];
+      if (deg === 0) {
+        var t;
+        do { t = Math.floor(rng() * N); } while (t === i || label[t] !== label[i]);
+        adj[i][t] = 1; adj[t][i] = 1; edges.push([i, t]);
+      }
+    }
+    var degt = [];
+    for (i = 0; i < N; i++) {
+      var s = 1;
+      for (j = 0; j < N; j++) s += adj[i][j];
+      degt.push(s);
+    }
+    /* Â = D̃^(-1/2) (A + I) D̃^(-1/2), dense (N is 50) */
+    var Ah = new Float64Array(N * N);
+    for (i = 0; i < N; i++) {
+      for (j = 0; j < N; j++) {
+        var a = (i === j ? 1 : 0) + adj[i][j];
+        if (a) Ah[i * N + j] = a / Math.sqrt(degt[i] * degt[j]);
+      }
+    }
+    /* features: a weak community offset buried in unit Gaussian noise */
+    var dir = [], nrm = 0;
+    for (i = 0; i < d; i++) { dir.push(gauss()); nrm += dir[i] * dir[i]; }
+    nrm = Math.sqrt(nrm);
+    for (i = 0; i < d; i++) dir[i] /= nrm;
+    var SIG = 0.62;
+    var X = new Float64Array(N * d);
+    for (i = 0; i < N; i++) {
+      var sgn = label[i] === 0 ? 1 : -1;
+      for (j = 0; j < d; j++) X[i * d + j] = sgn * SIG * dir[j] + gauss();
+    }
+    /* deterministic force-directed layout */
+    var px = [], py = [];
+    for (i = 0; i < N; i++) {
+      var ang = rng() * Math.PI * 2, r = 60 + rng() * 90;
+      px.push(Math.cos(ang) * r + (label[i] === 0 ? -70 : 70));
+      py.push(Math.sin(ang) * r);
+    }
+    for (var it = 0; it < 320; it++) {
+      var fx = new Float64Array(N), fy = new Float64Array(N);
+      for (i = 0; i < N; i++) {
+        for (j = i + 1; j < N; j++) {
+          var dx = px[i] - px[j], dy = py[i] - py[j];
+          var r2 = dx * dx + dy * dy + 0.01, rr = Math.sqrt(r2);
+          var f = 1600 / r2;
+          fx[i] += dx / rr * f; fy[i] += dy / rr * f;
+          fx[j] -= dx / rr * f; fy[j] -= dy / rr * f;
+        }
+      }
+      for (var e = 0; e < edges.length; e++) {
+        var u = edges[e][0], w = edges[e][1];
+        var ex = px[w] - px[u], ey = py[w] - py[u];
+        var el = Math.sqrt(ex * ex + ey * ey) + 0.01;
+        var s2 = 0.012 * (el - 44);
+        fx[u] += ex * s2; fy[u] += ey * s2;
+        fx[w] -= ex * s2; fy[w] -= ey * s2;
+      }
+      for (i = 0; i < N; i++) {
+        px[i] += Math.max(-6, Math.min(6, fx[i])) * 0.55 - px[i] * 0.0012;
+        py[i] += Math.max(-6, Math.min(6, fy[i])) * 0.55 - py[i] * 0.0012;
+      }
+    }
+    return { N: N, C: C, d: d, label: label, adj: adj, edges: edges, degt: degt,
+             Ah: Ah, X: X, dir: dir, px: px, py: py };
+  })();
+
+  /* map the layout into an SVG viewBox */
+  function fitLayout(w, h, pad) {
+    var i, x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    for (i = 0; i < G.N; i++) {
+      if (G.px[i] < x0) x0 = G.px[i];
+      if (G.px[i] > x1) x1 = G.px[i];
+      if (G.py[i] < y0) y0 = G.py[i];
+      if (G.py[i] > y1) y1 = G.py[i];
+    }
+    var sx = (w - 2 * pad) / (x1 - x0 || 1), sy = (h - 2 * pad) / (y1 - y0 || 1);
+    var s = Math.min(sx, sy);
+    var ox = pad + ((w - 2 * pad) - (x1 - x0) * s) / 2;
+    var oy = pad + ((h - 2 * pad) - (y1 - y0) * s) / 2;
+    var X = [], Y = [];
+    for (i = 0; i < G.N; i++) { X.push(ox + (G.px[i] - x0) * s); Y.push(oy + (G.py[i] - y0) * s); }
+    return { x: X, y: Y };
+  }
+
+  /* ================================================================
+     Demo 5 — over-smoothing
+     ================================================================ */
+  (function () {
+    var gsvg = $("gnn-os-graph"), csvg = $("gnn-os-chart");
+    var KMAX = 40, N = G.N, d = G.d;
+    var lay = fitLayout(520, 300, 22);
+
+    /* H_k = Â^k X, projections onto the community direction, and the mean
+       pairwise distance between direction-normalised rows */
+    var proj = [], dists = [], sd0 = 1;
+    (function () {
+      var H = new Float64Array(G.X), tmp = new Float64Array(N * d), i, j, t, k;
+      for (k = 0; k <= KMAX; k++) {
+        var p = [];
+        for (i = 0; i < N; i++) {
+          var s = 0;
+          for (j = 0; j < d; j++) s += H[i * d + j] * G.dir[j];
+          p.push(s);
+        }
+        proj.push(p);
+        /* mean pairwise distance of L2-normalised rows */
+        var U = [];
+        for (i = 0; i < N; i++) {
+          var n2 = 0;
+          for (j = 0; j < d; j++) n2 += H[i * d + j] * H[i * d + j];
+          n2 = Math.sqrt(n2) || 1;
+          var row = [];
+          for (j = 0; j < d; j++) row.push(H[i * d + j] / n2);
+          U.push(row);
+        }
+        var acc = 0, cnt = 0;
+        for (i = 0; i < N; i++) {
+          for (t = i + 1; t < N; t++) {
+            var q = 0;
+            for (j = 0; j < d; j++) { var dd = U[i][j] - U[t][j]; q += dd * dd; }
+            acc += Math.sqrt(q); cnt++;
+          }
+        }
+        dists.push(acc / cnt);
+        if (k === KMAX) break;
+        tmp.fill(0);
+        for (i = 0; i < N; i++) {
+          for (t = 0; t < N; t++) {
+            var a = G.Ah[i * N + t];
+            if (a === 0) continue;
+            for (j = 0; j < d; j++) tmp[i * d + j] += a * H[t * d + j];
+          }
+        }
+        H.set(tmp);
+      }
+      /* Colour scale is pinned to the spread at k = 2 — the depth the note argues
+         is the useful one — so k = 0 reads as noise, k = 2 as two communities, and
+         the collapse at large k as a single flat colour. Normalising by the k = 0
+         spread instead would hide the collapse, because most of that spread is the
+         feature noise that propagation is supposed to remove. */
+      var ref = proj[2], m = 0, v = 0, i2;
+      for (i2 = 0; i2 < N; i2++) m += ref[i2];
+      m /= N;
+      for (i2 = 0; i2 < N; i2++) v += (ref[i2] - m) * (ref[i2] - m);
+      sd0 = Math.sqrt(v / N) || 1;
+    })();
+
+    var k = 2;
+    function drawGraph() {
+      var s = "", i, m = 0;
+      for (i = 0; i < N; i++) m += proj[k][i];
+      m /= N;
+      for (i = 0; i < G.edges.length; i++) {
+        var u = G.edges[i][0], w = G.edges[i][1];
+        s += '<line x1="' + lay.x[u].toFixed(1) + '" y1="' + lay.y[u].toFixed(1) + '" x2="' +
+          lay.x[w].toFixed(1) + '" y2="' + lay.y[w].toFixed(1) + '" stroke="' + COL.grid +
+          '" stroke-width="1.1"/>';
+      }
+      for (i = 0; i < N; i++) {
+        var z = (proj[k][i] - m) / sd0;
+        var t = (z + 1.5) / 3;
+        s += '<circle cx="' + lay.x[i].toFixed(1) + '" cy="' + lay.y[i].toFixed(1) + '" r="6.4" fill="' +
+          mix(COL.warn, COL.accent, t) + '" stroke="' + COL.border + '" stroke-width="0.8"/>';
+      }
+      gsvg.innerHTML = s;
+    }
+    function drawChart() {
+      var W = 320, H = 300, L = 44, R = 14, T = 22, B = 34;
+      var mx = 0, i;
+      for (i = 0; i <= KMAX; i++) if (dists[i] > mx) mx = dists[i];
+      mx = mx * 1.12 || 1;
+      function PX(kk) { return L + kk / KMAX * (W - L - R); }
+      function PY(v) { return H - B - v / mx * (H - T - B); }
+      var s = "";
+      for (i = 0; i <= 4; i++) {
+        var yv = mx * i / 4, y = PY(yv);
+        s += '<line x1="' + L + '" y1="' + y.toFixed(1) + '" x2="' + (W - R) + '" y2="' + y.toFixed(1) +
+          '" stroke="' + COL.grid + '" stroke-width="1"/>';
+        s += '<text x="' + (L - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="9.5" fill="' +
+          COL.muted + '">' + yv.toFixed(2) + '</text>';
+      }
+      var pts = "";
+      for (i = 0; i <= KMAX; i++) pts += PX(i).toFixed(1) + "," + PY(dists[i]).toFixed(1) + " ";
+      s += '<polyline points="' + pts + '" fill="none" stroke="' + COL.accent + '" stroke-width="2.4"/>';
+      s += '<line x1="' + PX(k).toFixed(1) + '" y1="' + T + '" x2="' + PX(k).toFixed(1) + '" y2="' + (H - B) +
+        '" stroke="' + COL.accentLine + '" stroke-width="1.5" stroke-dasharray="4 4"/>';
+      s += '<circle cx="' + PX(k).toFixed(1) + '" cy="' + PY(dists[k]).toFixed(1) + '" r="5" fill="' +
+        COL.accentStrong + '"/>';
+      for (i = 0; i <= KMAX; i += 10) {
+        s += '<text x="' + PX(i).toFixed(1) + '" y="' + (H - B + 15) + '" text-anchor="middle" font-size="9.5" fill="' +
+          COL.muted + '">' + i + '</text>';
+      }
+      s += '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" fill="' +
+        COL.muted + '">propagation steps k</text>';
+      s += '<text x="' + L + '" y="14" font-size="10.5" fill="' + COL.muted +
+        '">mean pairwise distance</text>';
+      csvg.innerHTML = s;
+    }
+    function draw() { drawGraph(); drawChart(); }
+    $("gnn-os-k").addEventListener("input", function () {
+      k = +this.value;
+      $("gnn-os-kout").textContent = k;
+      $("gnn-os-d").textContent = dists[k].toFixed(3);
+      draw();
+    });
+    $("gnn-os-d").textContent = dists[k].toFixed(3);
+    redraw.push(draw);
+    draw();
+  })();
+
+  /* ================================================================
+     Demo 6 — training a GCN on the block model
+     ================================================================ */
+  (function () {
+    var gsvg = $("gnn-t-graph"), csvg = $("gnn-t-chart");
+    var N = G.N, d = G.d, C = G.C, HID = 16;
+    var lay = fitLayout(520, 300, 24);
+
+    var UI = { lr: 0.02, labels: 4, layers: 2, useGraph: true };
+    var WD = 1e-2;                 /* L2 weight decay, as in the reference setup */
+    var running = true, visible = false;
+    var model = null, step = 0, hist = [], best = { g: null, p: null };
+    var trainMask = [], lastLoss = 0, lastAcc = 0, lastPred = null;
+
+    function buildMask() {
+      trainMask = [];
+      var i, seen = [0, 0];
+      for (i = 0; i < N; i++) trainMask.push(false);
+      for (i = 0; i < N; i++) {
+        var c = G.label[i];
+        if (seen[c] < UI.labels) { trainMask[i] = true; seen[c]++; }
+      }
+    }
+
+    function dims() {
+      if (UI.layers === 1) return [d, C];
+      if (UI.layers === 2) return [d, HID, C];
+      return [d, HID, HID, C];
+    }
+
+    function build() {
+      var dm = dims(), rng = makeRng(913 + UI.layers * 17);
+      var Ws = [], l, i;
+      for (l = 0; l < dm.length - 1; l++) {
+        var fi = dm[l], fo = dm[l + 1], lim = Math.sqrt(6 / (fi + fo));
+        var W = { p: new Float64Array(fi * fo), g: new Float64Array(fi * fo),
+                  m: new Float64Array(fi * fo), v: new Float64Array(fi * fo), fi: fi, fo: fo };
+        for (i = 0; i < fi * fo; i++) W.p[i] = (rng() * 2 - 1) * lim;
+        Ws.push(W);
+      }
+      model = { W: Ws, t: 0, dm: dm };
+      step = 0; hist = []; best = { g: null, p: null };
+      buildMask();
+      evaluate();
+      drawAll();
+    }
+
+    /* dense helpers ------------------------------------------------- */
+    function propagate(A, n, k, out) {          /* out = P · A, P = Â or I */
+      if (!UI.useGraph) { out.set(A); return; }
+      out.fill(0);
+      for (var i = 0; i < n; i++) {
+        for (var t = 0; t < n; t++) {
+          var a = G.Ah[i * n + t];
+          if (a === 0) continue;
+          for (var j = 0; j < k; j++) out[i * k + j] += a * A[t * k + j];
+        }
+      }
+    }
+    function matmul(A, B, n, k, m, out) {       /* [n,k] · [k,m] */
+      out.fill(0);
+      for (var i = 0; i < n; i++) {
+        for (var t = 0; t < k; t++) {
+          var a = A[i * k + t];
+          if (a === 0) continue;
+          var bo = t * m, ao = i * m;
+          for (var j = 0; j < m; j++) out[ao + j] += a * B[bo + j];
+        }
+      }
+    }
+    function matmulTA(A, B, n, k, m, out) {     /* [n,k]^T · [n,m] -> [k,m] */
+      out.fill(0);
+      for (var i = 0; i < n; i++) {
+        for (var t = 0; t < k; t++) {
+          var a = A[i * k + t];
+          if (a === 0) continue;
+          var bo = i * m, ao = t * m;
+          for (var j = 0; j < m; j++) out[ao + j] += a * B[bo + j];
+        }
+      }
+    }
+    function matmulTB(A, B, n, m, k, out) {     /* [n,m] · [k,m]^T -> [n,k] */
+      out.fill(0);
+      for (var i = 0; i < n; i++) {
+        for (var j = 0; j < k; j++) {
+          var s = 0, ao = i * m, bo = j * m;
+          for (var t = 0; t < m; t++) s += A[ao + t] * B[bo + t];
+          out[i * k + j] = s;
+        }
+      }
+    }
+
+    /* forward: A_0 = X; S_l = P·A_l; Z_l = S_l W_l; A_{l+1} = ReLU(Z_l) */
+    function forward() {
+      var dm = model.dm, L = model.W.length, A = [G.X], S = [], Z = [], l;
+      for (l = 0; l < L; l++) {
+        var s = new Float64Array(N * dm[l]);
+        propagate(A[l], N, dm[l], s);
+        S.push(s);
+        var z = new Float64Array(N * dm[l + 1]);
+        matmul(s, model.W[l].p, N, dm[l], dm[l + 1], z);
+        Z.push(z);
+        if (l < L - 1) {
+          var a = new Float64Array(N * dm[l + 1]);
+          for (var i = 0; i < a.length; i++) a[i] = z[i] > 0 ? z[i] : 0;
+          A.push(a);
+        }
+      }
+      return { A: A, S: S, Z: Z, logits: Z[L - 1] };
+    }
+
+    function softmaxRows(logits) {
+      var P = new Float64Array(N * C), i, c;
+      for (i = 0; i < N; i++) {
+        var o = i * C, mx = -Infinity;
+        for (c = 0; c < C; c++) if (logits[o + c] > mx) mx = logits[o + c];
+        var s = 0;
+        for (c = 0; c < C; c++) { P[o + c] = Math.exp(logits[o + c] - mx); s += P[o + c]; }
+        for (c = 0; c < C; c++) P[o + c] /= s;
+      }
+      return P;
+    }
+
+    function evaluate() {
+      var f = forward(), P = softmaxRows(f.logits), i, c;
+      var loss = 0, ntr = 0, ok = 0, tot = 0, pred = [];
+      for (i = 0; i < N; i++) {
+        var o = i * C, bestc = 0, mx = -Infinity;
+        for (c = 0; c < C; c++) if (P[o + c] > mx) { mx = P[o + c]; bestc = c; }
+        pred.push(bestc);
+        if (trainMask[i]) { loss += -Math.log(Math.max(P[o + G.label[i]], 1e-12)); ntr++; }
+        else { tot++; if (bestc === G.label[i]) ok++; }
+      }
+      lastLoss = ntr ? loss / ntr : 0;
+      lastAcc = tot ? ok / tot : 0;
+      lastPred = pred;
+      var key = UI.useGraph ? "g" : "p";
+      if (best[key] === null || lastAcc > best[key]) best[key] = lastAcc;
+      return { loss: lastLoss, acc: lastAcc };
+    }
+
+    function trainStep() {
+      var dm = model.dm, L = model.W.length, f = forward(), P = softmaxRows(f.logits);
+      var ntr = 0, i, c;
+      for (i = 0; i < N; i++) if (trainMask[i]) ntr++;
+      var dZ = new Float64Array(N * C);
+      for (i = 0; i < N; i++) {
+        if (!trainMask[i]) continue;
+        var o = i * C;
+        for (c = 0; c < C; c++) dZ[o + c] = (P[o + c] - (c === G.label[i] ? 1 : 0)) / ntr;
+      }
+      var l;
+      for (l = L - 1; l >= 0; l--) {
+        var fi = dm[l], fo = dm[l + 1], W = model.W[l];
+        matmulTA(f.S[l], dZ, N, fi, fo, W.g);
+        if (l > 0) {
+          var dS = new Float64Array(N * fi);
+          matmulTB(dZ, W.p, N, fo, fi, dS);
+          var dA = new Float64Array(N * fi);
+          propagate(dS, N, fi, dA);            /* Â is symmetric, so P^T = P */
+          var prev = new Float64Array(N * fi);
+          for (i = 0; i < prev.length; i++) prev[i] = f.Z[l - 1][i] > 0 ? dA[i] : 0;
+          dZ = prev;
+        }
+      }
+      /* Adam */
+      model.t++;
+      var b1 = 0.9, b2 = 0.999, eps = 1e-8;
+      var c1 = 1 - Math.pow(b1, model.t), c2 = 1 - Math.pow(b2, model.t);
+      for (l = 0; l < L; l++) {
+        var Wl = model.W[l];
+        for (i = 0; i < Wl.p.length; i++) {
+          var g = Wl.g[i] + WD * Wl.p[i];
+          Wl.m[i] = b1 * Wl.m[i] + (1 - b1) * g;
+          Wl.v[i] = b2 * Wl.v[i] + (1 - b2) * g * g;
+          Wl.p[i] -= UI.lr * (Wl.m[i] / c1) / (Math.sqrt(Wl.v[i] / c2) + eps);
+        }
+      }
+      step++;
+    }
+
+    /* views --------------------------------------------------------- */
+    function drawGraph() {
+      var s = "", i;
+      for (i = 0; i < G.edges.length; i++) {
+        var u = G.edges[i][0], w = G.edges[i][1];
+        s += '<line x1="' + lay.x[u].toFixed(1) + '" y1="' + lay.y[u].toFixed(1) + '" x2="' +
+          lay.x[w].toFixed(1) + '" y2="' + lay.y[w].toFixed(1) + '" stroke="' + COL.grid +
+          '" stroke-width="1.1"/>';
+      }
+      for (i = 0; i < N; i++) {
+        var pc = lastPred ? lastPred[i] : 0;
+        var fill = pc === 0 ? COL.accent : COL.warn;
+        var wrong = lastPred && lastPred[i] !== G.label[i];
+        var r = trainMask[i] ? 7.4 : 6.2;
+        if (trainMask[i]) {
+          s += '<circle cx="' + lay.x[i].toFixed(1) + '" cy="' + lay.y[i].toFixed(1) +
+            '" r="11" fill="none" stroke="' + COL.text + '" stroke-width="1.8"/>';
+        }
+        s += '<circle cx="' + lay.x[i].toFixed(1) + '" cy="' + lay.y[i].toFixed(1) + '" r="' + r +
+          '" fill="' + fill + '" stroke="' + COL.border + '" stroke-width="0.8"/>';
+        if (wrong) {
+          var x = lay.x[i], y = lay.y[i], q = 4.2;
+          s += '<path d="M' + (x - q) + ' ' + (y - q) + ' L' + (x + q) + ' ' + (y + q) +
+            ' M' + (x + q) + ' ' + (y - q) + ' L' + (x - q) + ' ' + (y + q) + '" stroke="' + COL.bad +
+            '" stroke-width="2.2" stroke-linecap="round"/>';
+        }
+      }
+      s += '<text x="10" y="314" font-size="11" fill="' + COL.muted + '">' + N + ' papers &#183; ' +
+        G.edges.length + ' citations &#183; propagation: ' + (UI.useGraph ? "Â" : "I") + '</text>';
+      gsvg.innerHTML = s;
+    }
+
+    function drawChart() {
+      var W = 320, H = 320, L = 42, R = 34, T = 24, B = 34, s = "", i;
+      var maxStep = hist.length ? hist[hist.length - 1].step : 1;
+      if (maxStep < 1) maxStep = 1;
+      var maxLoss = 0.1;
+      for (i = 0; i < hist.length; i++) if (hist[i].loss > maxLoss) maxLoss = hist[i].loss;
+      function PX(st) { return L + st / maxStep * (W - L - R); }
+      function PL(v) { return H - B - v / maxLoss * (H - T - B); }
+      function PA(v) { return H - B - v * (H - T - B); }
+      for (i = 0; i <= 4; i++) {
+        var y = T + i / 4 * (H - T - B);
+        s += '<line x1="' + L + '" y1="' + y.toFixed(1) + '" x2="' + (W - R) + '" y2="' + y.toFixed(1) +
+          '" stroke="' + COL.grid + '" stroke-width="1"/>';
+        s += '<text x="' + (L - 6) + '" y="' + (y + 3.5).toFixed(1) + '" text-anchor="end" font-size="9" fill="' +
+          COL.muted + '">' + (maxLoss * (1 - i / 4)).toFixed(2) + '</text>';
+        s += '<text x="' + (W - R + 6) + '" y="' + (y + 3.5).toFixed(1) + '" font-size="9" fill="' +
+          COL.muted + '">' + (1 - i / 4).toFixed(2) + '</text>';
+      }
+      if (hist.length > 1) {
+        var pl = "", pa = "";
+        for (i = 0; i < hist.length; i++) {
+          pl += PX(hist[i].step).toFixed(1) + "," + PL(hist[i].loss).toFixed(1) + " ";
+          pa += PX(hist[i].step).toFixed(1) + "," + PA(hist[i].acc).toFixed(1) + " ";
+        }
+        s += '<polyline points="' + pa + '" fill="none" stroke="' + COL.good + '" stroke-width="2.2"/>';
+        s += '<polyline points="' + pl + '" fill="none" stroke="' + COL.accent + '" stroke-width="2.2"/>';
+      }
+      s += '<text x="' + L + '" y="14" font-size="10" fill="' + COL.muted + '">loss</text>';
+      s += '<text x="' + (W - R) + '" y="14" text-anchor="end" font-size="10" fill="' + COL.muted +
+        '">accuracy</text>';
+      s += '<text x="' + ((L + W - R) / 2) + '" y="' + (H - 6) + '" text-anchor="middle" font-size="10" fill="' +
+        COL.muted + '">step ' + maxStep + '</text>';
+      csvg.innerHTML = s;
+    }
+
+    function refreshStats() {
+      $("gnn-t-step").textContent = step;
+      $("gnn-t-loss").textContent = lastLoss.toFixed(3);
+      $("gnn-t-acc").textContent = lastAcc.toFixed(2);
+      $("gnn-t-best-g").textContent = best.g === null ? "–" : best.g.toFixed(2);
+      $("gnn-t-best-p").textContent = best.p === null ? "–" : best.p.toFixed(2);
+    }
+    function drawAll() { drawGraph(); drawChart(); refreshStats(); }
+
+    function record() {
+      hist.push({ step: step, loss: lastLoss, acc: lastAcc });
+      if (hist.length > 320) {
+        hist = hist.filter(function (_, i) { return i % 2 === 0; });
+      }
+    }
+
+    function frame() {
+      if (!running) return;
+      if (!visible) { requestAnimationFrame(frame); return; }
+      var t0 = performance.now(), n = 0;
+      while (n < 3 && performance.now() - t0 < 10) { trainStep(); n++; }
+      evaluate();
+      record();
+      drawAll();
+      requestAnimationFrame(frame);
+    }
+    function setRunning(v) {
+      running = v;
+      $("gnn-run").textContent = v ? "⏸ Pause" : "▶ Run";
+      if (v) requestAnimationFrame(frame);
+    }
+
+    /* wiring -------------------------------------------------------- */
+    $("gnn-run").addEventListener("click", function () { setRunning(!running); });
+    $("gnn-step50").addEventListener("click", function () {
+      for (var i = 0; i < 50; i++) trainStep();
+      evaluate(); record(); drawAll();
+    });
+    $("gnn-reset").addEventListener("click", function () { build(); });
+    $("gnn-usegraph").addEventListener("change", function () {
+      UI.useGraph = this.checked;
+      evaluate(); drawAll();
+    });
+    $("gnn-lr").addEventListener("input", function () {
+      UI.lr = Math.pow(10, +this.value);
+      $("gnn-lr-out").textContent = UI.lr.toFixed(4);
+    });
+    $("gnn-lab").addEventListener("input", function () {
+      UI.labels = +this.value;
+      $("gnn-lab-out").textContent = UI.labels;
+      buildMask(); evaluate(); drawAll();
+    });
+    seg("gnn-layers-seg", function (v) { UI.layers = +v; build(); });
+
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (es) { visible = es[0].isIntersecting; },
+        { rootMargin: "200px" }).observe(gsvg);
+    } else {
+      visible = true;
+    }
+
+    redraw.push(drawAll);
+    build();
+    setRunning(true);
+
+    /* a small hook so the demo can be driven headlessly when verifying */
+    window.__gnnTrain = {
+      run: function (steps) {
+        for (var i = 0; i < steps; i++) trainStep();
+        evaluate(); record(); drawAll();
+        return { step: step, loss: lastLoss, acc: lastAcc, bestG: best.g, bestP: best.p };
+      },
+      setGraph: function (v) { UI.useGraph = v; $("gnn-usegraph").checked = v; evaluate(); drawAll(); },
+      setWd: function (v) { WD = v; },
+      reset: build,
+      state: function () { return { step: step, loss: lastLoss, acc: lastAcc, bestG: best.g, bestP: best.p }; }
+    };
+  })();
+})();
+</script>
+
+</div>
