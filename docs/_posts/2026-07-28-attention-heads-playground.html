@@ -102,7 +102,7 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
 <!-- 1. THE MODEL                                                  -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🔬 The model on the table</h3>
+  <h3>The model on the table</h3>
   <p style="margin-top:0">
     The transformer below is a real decoder-only model — token and positional embeddings, a
     stack of pre-LayerNorm blocks each holding multi-head causal self-attention and a GELU
@@ -173,7 +173,7 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
 <!-- 2. THE PLAYGROUND                                             -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎮 The playground</h3>
+  <h3>The playground</h3>
   <p style="margin-top:0">
     Pick a task, pick a shape, and press run. Each square below is one head's attention
     matrix on a single held-out example: row <em>i</em> is the distribution the query at
@@ -223,8 +223,8 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
   </div>
 
   <div class="ah-transport">
-    <button class="se-btn" id="ah-run">▶ Run</button>
-    <button class="se-btn sec" id="ah-step">⏭ 50 steps</button>
+    <button class="se-btn" id="ah-run">▶︎ Run</button>
+    <button class="se-btn sec" id="ah-step">+50 steps</button>
     <button class="se-reset" id="ah-reset">↻ Reset weights</button>
     <div class="ah-stats">
       <div class="ah-stat"><b id="ah-s-step">0</b><span>step</span></div>
@@ -242,7 +242,7 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
   <div class="ah-panel" style="margin-top:0.9rem">
     <div class="ah-row" style="align-items:center;gap:0.7rem">
       <strong style="font-size:0.85rem">Held-out example</strong>
-      <button class="se-btn sec" id="ah-newex" style="padding:0.25rem 0.6rem;font-size:0.78rem">⟳ New example</button>
+      <button class="se-btn sec" id="ah-newex" style="padding:0.25rem 0.6rem;font-size:0.78rem">New example</button>
       <span class="ah-legend" style="margin:0">Click a token to change it and watch the heads react.</span>
     </div>
     <div class="ah-seq" id="ah-seq"></div>
@@ -255,7 +255,7 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
 <!-- 3. READING A HEAD                                             -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🗺️ Reading a head</h3>
+  <h3>Reading a head</h3>
   <p style="margin-top:0">
     A head's label is not a judgement call: each canonical pattern is a specific set of cells
     in the attention matrix, and the score is simply how much probability mass lands there,
@@ -291,7 +291,7 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
 <!-- 4. DEPTH                                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🔁 Why induction needs two layers</h3>
+  <h3>Why induction needs two layers</h3>
   <p style="margin-top:0">
     The induction task is a sequence of distinct tokens followed by the same tokens again in a
     rotated order, so every token in the second half has exactly one earlier copy, and the
@@ -370,7 +370,7 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
 <!-- 5. POSITION AS A REMOVABLE INPUT                              -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📍 Position is an input you can remove</h3>
+  <h3>Position is an input you can remove</h3>
   <p style="margin-top:0">
     Self-attention is permutation-equivariant: a softmax over dot products has no notion of
     order, and position enters only because it is added to the embeddings. Turning
@@ -414,7 +414,7 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
 <!-- 6. CLOSING                                                    -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎯 Consequences worth remembering</h3>
+  <h3>Consequences worth remembering</h3>
   <ul>
     <li><strong>Heads are fitted, not specified.</strong> The same architecture grows a mirror
       head on reverse, a uniform counting head on majority, and a prev-token/induction pair on
@@ -1090,7 +1090,7 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
   }
   function setRunning(v) {
     running = v;
-    $("ah-run").textContent = v ? "⏸ Pause" : "▶ Run";
+    $("ah-run").textContent = v ? "❚❚ Pause" : "▶︎ Run";
     if (v) requestAnimationFrame(frame);
   }
 

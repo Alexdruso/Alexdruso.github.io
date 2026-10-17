@@ -66,7 +66,7 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
 <!-- 1. FLIP IT AND WATCH THE EVIDENCE                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🪙 Flip it and watch the evidence build</h3>
+  <h3>Flip it and watch the evidence build</h3>
   <p style="margin-top:0">
     Set the coin's <em>true</em> bias with the slider (the universe knows it; you don't), then start
     flipping. The chart tracks the <strong>running fraction of heads</strong>, p&#770;, after every
@@ -119,7 +119,7 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
 <!-- 2. THE NULL HYPOTHESIS AND THE p-VALUE                       -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>⚖️ The skeptic's question: the null hypothesis &amp; the p-value</h3>
+  <h3>The skeptic's question: the null hypothesis &amp; the p-value</h3>
   <p style="margin-top:0">
     To <em>prove</em> rigging we start by assuming the opposite — that's how statistics stays honest.
     The <strong>null hypothesis</strong> is "the coin is fair," H<sub>0</sub>: p = 0.5. Under H<sub>0</sub>
@@ -186,7 +186,7 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
 <!-- 3. TWO WAYS TO BE WRONG: ALPHA AND POWER                     -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎯 Two ways to be wrong: false alarms (&alpha;) and missed detections (power)</h3>
+  <h3>Two ways to be wrong: false alarms (&alpha;) and missed detections (power)</h3>
   <p style="margin-top:0">
     A test can fail in two directions. A <strong>false alarm</strong> (Type I error) is calling a fair
     coin rigged — its rate is the threshold <strong>&alpha;</strong> we picked above (e.g. 0.05). A
@@ -248,7 +248,7 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
 <!-- 4. THE PURE-MATH ANSWER: THE SAMPLE-SIZE FORMULA            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧮 The pure-math answer: a formula for n</h3>
+  <h3>The pure-math answer: a formula for n</h3>
   <p style="margin-top:0">
     Now we just turn the picture into algebra. We want the critical line to sit far enough from the fair
     center to keep false alarms at &alpha;, <em>and</em> far enough below the true bias to catch it with
@@ -307,7 +307,7 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
 <!-- 5. SIMULATION MEETS MATH                                     -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🔬 Simulation meets math: does the formula actually hold?</h3>
+  <h3>Simulation meets math: does the formula actually hold?</h3>
   <p style="margin-top:0">
     A formula is only as good as its predictions. So let's <strong>brute-force it</strong>. Pick a true
     bias, a number of flips, and &alpha;. We run a thousand independent experiments — each one flips the
@@ -334,7 +334,7 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
         <span class="pv" id="ct5-av">0.050</span>
       </div>
       <div class="ct-controls" style="justify-content:center;margin-top:0.8rem">
-        <button class="se-btn" id="ct5-run">▶ Run 1000 experiments</button>
+        <button class="se-btn" id="ct5-run">▶︎ Run 1000 experiments</button>
         <button class="se-reset" id="ct5-reset">↺ Reset</button>
       </div>
     </div>
@@ -373,7 +373,7 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
 <!-- WRAP UP                                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎁 The whole story in one breath</h3>
+  <h3>The whole story in one breath</h3>
   <ul style="line-height:1.7">
     <li><strong>Assume innocence.</strong> Start from H<sub>0</sub>: "the coin is fair," and ask how
       surprising your data would be if that were true — that's the <strong>p-value</strong>.</li>
@@ -764,10 +764,10 @@ excerpt: "How many flips does it take to confidently tell a rigged coin from a f
     }
     function start() {
       if (done >= TOTAL) reset();
-      running = true; runBtn.textContent = "⏳ Running…"; runBtn.disabled = true;
+      running = true; runBtn.textContent = "Running…"; runBtn.disabled = true;
       showTheory(); raf = requestAnimationFrame(loop);
     }
-    function stop() { running = false; runBtn.textContent = "▶ Run 1000 experiments"; runBtn.disabled = false; if (raf) cancelAnimationFrame(raf); }
+    function stop() { running = false; runBtn.textContent = "▶︎ Run 1000 experiments"; runBtn.disabled = false; if (raf) cancelAnimationFrame(raf); }
 
     [pS, nS, aS].forEach(s => s.addEventListener("input", () => { reset(); }));
     runBtn.addEventListener("click", start);

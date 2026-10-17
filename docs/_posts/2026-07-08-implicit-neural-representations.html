@@ -102,7 +102,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 <!-- 1. THE IMAGE AS A FUNCTION                                    -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🗺️ An image is a dataset of coordinate–colour pairs</h3>
+  <h3>An image is a dataset of coordinate–colour pairs</h3>
   <p style="margin-top:0">
     A stored image defines colour only at integer pixel locations. The implicit view instead
     treats the picture as an unknown continuous function and fits a network to it. The training
@@ -149,7 +149,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 <!-- 2. SPECTRAL BIAS IN 1-D                                       -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🌊 Spectral bias: gradient descent learns low frequencies first</h3>
+  <h3>Spectral bias: gradient descent learns low frequencies first</h3>
   <p style="margin-top:0">
     Neural networks trained by gradient descent fit the low-frequency content of a target first,
     and for low-dimensional inputs like a coordinate the high frequencies arrive so slowly that
@@ -161,7 +161,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
   </p>
 
   <div class="inr-controls" style="justify-content:center">
-    <button class="se-btn" id="inr-1d-play">▶ train</button>
+    <button class="se-btn" id="inr-1d-play">▶︎ train</button>
     <button class="se-reset" id="inr-1d-reset">reset</button>
     <span style="font-size:0.82rem; color:var(--sn-muted)">step <span class="inr-readout" id="inr-1d-step">0</span></span>
   </div>
@@ -192,7 +192,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 <!-- 3. THE RACE ON THE LIGHTHOUSE                                 -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🏁 Three networks, one lighthouse</h3>
+  <h3>Three networks, one lighthouse</h3>
   <p style="margin-top:0">
     The same failure and the same two classic fixes, now on the actual image. All three models
     are MLPs of identical size (3 hidden layers, width 36) trained with Adam on minibatches of
@@ -234,7 +234,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
   </p>
 
   <div class="inr-controls" style="justify-content:center">
-    <button class="se-btn" id="inr-race-play">▶ train</button>
+    <button class="se-btn" id="inr-race-play">▶︎ train</button>
     <button class="se-reset" id="inr-race-reset">reset</button>
     <span style="font-size:0.82rem; color:var(--sn-muted)">step <span class="inr-readout" id="inr-race-step">0</span> / 1800</span>
     <label style="font-size:0.82rem">Fourier σ
@@ -289,7 +289,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 <!-- 4. ARBITRARY-SCALE UPSCALING                                  -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🔍 The payoff: one network, sampled at any resolution</h3>
+  <h3>The payoff: one network, sampled at any resolution</h3>
   <p style="margin-top:0">
     Nothing about a trained f<sub>θ</sub> knows or cares about the grid it was trained on — it
     is a continuous function, and a pixel grid is just one way to sample it. So: train a SIREN
@@ -300,7 +300,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
   </p>
 
   <div class="inr-controls" style="justify-content:center">
-    <button class="se-btn" id="inr-sr-play">▶ fit the low-res image</button>
+    <button class="se-btn" id="inr-sr-play">▶︎ fit the low-res image</button>
     <button class="se-reset" id="inr-sr-reset">reset</button>
     <span style="font-size:0.82rem; color:var(--sn-muted)" id="inr-sr-prog">untrained</span>
   </div>
@@ -355,7 +355,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 <!-- 5. THE RACE ON A USER-SUPPLIED IMAGE                          -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🖼️ The same race, on any image</h3>
+  <h3>The same race, on any image</h3>
   <p style="margin-top:0">
     Nothing above is specific to the lighthouse: any picture is just another dataset of
     (coordinate, colour) pairs, and the three parametrizations can be compared on it directly.
@@ -428,7 +428,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 <!-- 6. WHERE THIS GOES                                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧭 Where this goes</h3>
+  <h3>Where this goes</h3>
   <p style="margin-top:0">
     Everything above generalizes far beyond one photo of a lighthouse. The recipe — coordinates
     in, signal out, a spectral-bias fix in between — is the backbone of:
@@ -847,17 +847,17 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
         step++;
       }
       draw();
-      if (step >= MAX) { running = false; playBtn.textContent = "▶ train"; return; }
+      if (step >= MAX) { running = false; playBtn.textContent = "▶︎ train"; return; }
       requestAnimationFrame(frame);
     }
     playBtn.addEventListener("click", function () {
-      if (running) { running = false; playBtn.textContent = "▶ train"; return; }
+      if (running) { running = false; playBtn.textContent = "▶︎ train"; return; }
       if (step >= MAX) { init(); }
       running = true; playBtn.textContent = "❚❚ pause";
       requestAnimationFrame(frame);
     });
     document.getElementById("inr-1d-reset").addEventListener("click", function () {
-      running = false; playBtn.textContent = "▶ train"; init(); draw();
+      running = false; playBtn.textContent = "▶︎ train"; init(); draw();
     });
     redrawFns.push(draw);
     init(); draw();
@@ -973,19 +973,19 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
       if (step >= MAX) {
         KINDS.forEach(function (kk) { if (lastEval[kk] < MAX) evalModel(kk); });
         drawChart();
-        running = false; playBtn.textContent = "▶ train";
+        running = false; playBtn.textContent = "▶︎ train";
         return;
       }
       requestAnimationFrame(frame);
     }
     playBtn.addEventListener("click", function () {
-      if (running) { running = false; playBtn.textContent = "▶ train"; return; }
+      if (running) { running = false; playBtn.textContent = "▶︎ train"; return; }
       if (step >= MAX) init();
       running = true; playBtn.textContent = "❚❚ pause";
       requestAnimationFrame(frame);
     });
     document.getElementById("inr-race-reset").addEventListener("click", function () {
-      running = false; playBtn.textContent = "▶ train"; init(); drawChart();
+      running = false; playBtn.textContent = "▶︎ train"; init(); drawChart();
     });
     var sigSlider = document.getElementById("inr-race-sigma");
     var sigOut = document.getElementById("inr-race-sigma-out");
@@ -1121,17 +1121,17 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
       prog.innerHTML = "step <span class='inr-readout'>" + step + "</span> / " + MAX +
                        " · train fit " + imagePsnr(pred, low, P * 3).toFixed(1) + " dB";
       if (step % 250 === 0 || step >= MAX) renderAll();
-      if (step >= MAX) { running = false; playBtn.textContent = "▶ fit the low-res image"; renderAll(); return; }
+      if (step >= MAX) { running = false; playBtn.textContent = "▶︎ fit the low-res image"; renderAll(); return; }
       requestAnimationFrame(frame);
     }
     playBtn.addEventListener("click", function () {
-      if (running) { running = false; playBtn.textContent = "▶ fit the low-res image"; return; }
+      if (running) { running = false; playBtn.textContent = "▶︎ fit the low-res image"; return; }
       if (step >= MAX) init();
       running = true; playBtn.textContent = "❚❚ pause";
       requestAnimationFrame(frame);
     });
     document.getElementById("inr-sr-reset").addEventListener("click", function () {
-      running = false; playBtn.textContent = "▶ fit the low-res image"; init(); renderAll();
+      running = false; playBtn.textContent = "▶︎ fit the low-res image"; init(); renderAll();
     });
     scaleSl.addEventListener("input", renderAll);
     init(); renderAll();
@@ -1243,7 +1243,7 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
 
     function setRunning(on) {
       running = on;
-      playBtn.textContent = on ? "❚❚ pause" : "▶ train";
+      playBtn.textContent = on ? "❚❚ pause" : "▶︎ train";
       if (on) requestAnimationFrame(frame);
     }
     function frame() {

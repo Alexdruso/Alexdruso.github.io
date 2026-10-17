@@ -1,9 +1,10 @@
 # Study Notes — authoring guide
 
 Interactive study notes live here as standalone HTML posts (`layout: post`) with an
-inline `<style>` block and embedded vanilla JS. They share one **sleek / futuristic**
-design system so they look cohesive and never drift back toward the old "gamey,
-blue-and-violet" look. Follow these rules when creating or editing a note.
+inline `<style>` block and embedded vanilla JS. They share one **editorial** design
+system (a single reading column, serif prose, numbered sections, one cyan-teal accent)
+so they look cohesive and professional, and never drift back toward the old "gamey,
+blue-and-violet" or emoji-decorated look. Follow these rules when creating or editing a note.
 
 ## Writing voice
 
@@ -21,10 +22,14 @@ pitch it to an audience. Write to be informative first.
   narrator. State the idea directly.
 - **"you" is for demo instructions only** — imperative how-to like "drag the slider" or "start
   flipping". Don't use it for audience promises ("you'll see…", "you already know…").
-- **Keep what already teaches well.** The one-sentence summary box, emoji section headers,
-  equations, and the interactive demos all stay. A running worked example (e.g. Luca for MDPs,
-  the coin for hypothesis testing) is welcome **when it genuinely carries the math** — introduce
-  it right after the concept, not as a story that opens the note.
+- **Keep what already teaches well.** The one-sentence summary box, equations, and the
+  interactive demos all stay. A running worked example (e.g. Luca for MDPs, the coin for
+  hypothesis testing) is welcome **when it genuinely carries the math** — introduce it right
+  after the concept, not as a story that opens the note.
+- **No emoji anywhere** — not in headings, buttons, labels, demo data or status strings.
+  Section headings are plain text (the shared CSS numbers them 01, 02, …). Typographic
+  symbols that carry meaning are fine: arrows (→ ↑ ↺), ✓ / ✗, ❚❚ for pause, and ▶︎ for
+  play (write it as `▶︎`, i.e. followed by U+FE0E, so iOS doesn't render it as an emoji).
 - **Excerpts** (front-matter) follow the same voice: a crisp concept summary, not a hook.
 
 ## Required scaffold
@@ -82,6 +87,16 @@ Defined in `_includes/study-note-styles.html` on `.study-note`, with
 **Never** use purple (`#8e44ad`), the old blue (`#2980b9`/`#4a90e2`), or rainbow
 gradients. Accent reference: `#0891b2` (light) / `#22d3ee` (dark) / `#06b6d4` (mid).
 
+## Layout & typography (handled by `study-note-styles.html`)
+
+- The note, its title and its date sit in one ~760px reading column.
+- Prose (`p`/`ul`/`ol` directly under `.study-note` or a section) is set in the serif
+  (`--sn-serif`, Source Serif 4); headings, demos, controls and captions stay sans.
+- Sections (`se-section`/`bm-section`/`mdp-section`) are **not boxes**: a hairline rule
+  above, a mono accent number, then a plain `h3`. Don't add backgrounds/borders back.
+- `se-note` is a quiet italic pull-quote; `se-equation` is unboxed, centered serif;
+  `se-example` and chart wraps are flat `--sn-panel-inset` fills with no border.
+
 ## Component rules
 
 - **Sliders** are flat and single-accent (neutral track + accent thumb with a soft
@@ -133,4 +148,4 @@ cd docs && bundle exec jekyll serve --livereload   # http://localhost:4000/
 ```
 
 Check each demo in **both** light and dark (toggle bottom-right). Sliders, buttons,
-tags, charts, and the theme toggle should all stay cyan/sleek with no purple.
+tags, charts, and the theme toggle should all stay cyan, with no purple and no emoji.

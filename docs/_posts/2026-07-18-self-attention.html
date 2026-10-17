@@ -81,7 +81,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 1. QUERIES, KEYS, VALUES                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧲 Queries, keys, values: a differentiable lookup</h3>
+  <h3>Queries, keys, values: a differentiable lookup</h3>
   <p style="margin-top:0">
     A dictionary lookup retrieves the single value whose key exactly matches the query.
     Self-attention softens both halves of that sentence: every key matches <em>a little</em>, and
@@ -140,7 +140,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 2. READING AN ATTENTION PATTERN (DEMO 1)                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🗺️ Reading an attention pattern</h3>
+  <h3>Reading an attention pattern</h3>
   <p style="margin-top:0">
     One row of the attention matrix — one token's outgoing weights — is a probability
     distribution over the sequence. Below, the arcs and bars show that row for the selected token,
@@ -164,7 +164,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
   </p>
 
   <div class="sa-controls">
-    <button class="se-btn sec" id="sa-hm-mask" aria-pressed="false">🔓 causal mask: off</button>
+    <button class="se-btn sec" id="sa-hm-mask" aria-pressed="false">causal mask: off</button>
     <span class="se-tag" id="sa-hm-tag"></span>
   </div>
   <div class="se-chartwrap">
@@ -181,7 +181,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 3. WHY DIVIDE BY SQRT(D)                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🌡️ Why divide by &radic;d: the scaling is a temperature</h3>
+  <h3>Why divide by &radic;d: the scaling is a temperature</h3>
   <p style="margin-top:0">
     The one non-obvious constant in the formula is the &radic;d<sub>k</sub> divisor. The problem
     it solves is statistical: a dot product is a sum of d<sub>k</sub> terms, and sums grow with
@@ -222,7 +222,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 4. Q·K GEOMETRY (DEMO 2)                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧭 Attention weight is vector alignment</h3>
+  <h3>Attention weight is vector alignment</h3>
   <p style="margin-top:0">
     Everything upstream of the softmax is a dot product, and a dot product is geometry:
   </p>
@@ -266,7 +266,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 5. MULTI-HEAD (DEMO 3)                                        -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎭 Many heads, many relations</h3>
+  <h3>Many heads, many relations</h3>
   <p style="margin-top:0">
     One softmax produces one distribution — one pattern of relevance. But a token often needs
     several relations at once: "it" wants its referent (a coreference pattern), its local context
@@ -315,7 +315,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 6. ORIGINS                                                    -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🕰️ Where attention came from, and why recurrence was dropped</h3>
+  <h3>Where attention came from, and why recurrence was dropped</h3>
   <p style="margin-top:0">
     Attention predates the transformer by three years, and it was invented to fix a bottleneck.
     The RNN encoder–decoders of 2014 translated by reading the whole source sentence into
@@ -376,7 +376,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 7. POSITIONAL ENCODING                                        -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📍 Attention is order-blind: positional encoding</h3>
+  <h3>Attention is order-blind: positional encoding</h3>
   <p style="margin-top:0">
     The formula in §1 never mentions position: shuffle the input tokens and the (unmasked)
     outputs shuffle identically — self-attention is <em>permutation-equivariant</em>, a set
@@ -417,7 +417,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 8. THE FULL TRANSFORMER BLOCK                                 -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧱 The full transformer block</h3>
+  <h3>The full transformer block</h3>
   <p style="margin-top:0">
     Attention only ever <em>mixes</em> information across tokens — a weighted average cannot
     compute a new feature of a single token. The transformer block pairs it with a position-wise
@@ -478,7 +478,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 9. INFERENCE                                                  -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>⚡ Attention at inference: cache, share, tile</h3>
+  <h3>Attention at inference: cache, share, tile</h3>
   <p style="margin-top:0">
     Generation exposes the O(n&sup2;) honestly: producing token t naively re-runs attention over
     the whole prefix, every step. Three fixes, in escalating order, are why chat-scale inference
@@ -521,7 +521,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 <!-- 10. LITERATURE + CONSEQUENCES                                 -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📚 Where this lives in the literature</h3>
+  <h3>Where this lives in the literature</h3>
   <ul style="margin-top:0">
     <li><strong>Bahdanau, Cho &amp; Bengio (2015)</strong>, <em>Neural Machine Translation by Jointly Learning to Align and Translate</em> — additive attention over RNN encoder states; the fixed-vector bottleneck argument.</li>
     <li><strong>Luong, Pham &amp; Manning (2015)</strong>, <em>Effective Approaches to Attention-based NMT</em> — dot-product (multiplicative) attention.</li>
@@ -532,7 +532,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
     <li><strong>Ainslie et al. (2023)</strong>, <em>GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints</em>.</li>
   </ul>
 
-  <h3>🎯 Consequences worth remembering</h3>
+  <h3>Consequences worth remembering</h3>
   <ul style="margin-bottom:0">
     <li>Self-attention is a <strong>differentiable soft lookup</strong>: softmax(q&middot;k) weights over value vectors, with Q, K, V all projections of the same sequence.</li>
     <li>The <strong>&radic;d divisor is a softmax temperature</strong> chosen to keep score variance at 1 — not a heuristic, a variance calculation.</li>
@@ -677,7 +677,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 
     maskBtn.addEventListener("click", () => {
       st.causal = !st.causal;
-      maskBtn.textContent = st.causal ? "🔒 causal mask: on" : "🔓 causal mask: off";
+      maskBtn.textContent = st.causal ? "causal mask: on" : "causal mask: off";
       maskBtn.setAttribute("aria-pressed", String(st.causal));
       maskBtn.classList.toggle("sec", !st.causal);
       draw();

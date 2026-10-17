@@ -134,7 +134,7 @@ points, summarized (read the file for the full rules):
   `<div class="study-note"> … </div>`. The wrapper is required for theming and
   CSS scoping to work.
 - Use the **`--sn-*` design tokens** defined in
-  `docs/_includes/study-note-styles.html` (cyan-teal "sleek/futuristic" system
+  `docs/_includes/study-note-styles.html` (editorial system: serif prose in one reading column, numbered sections, no emoji, one cyan-teal accent
   with light + dark variants). **Never** hardcode brand colors, and never use
   the old purple/blue palette.
 - JS-drawn SVG/canvas must read tokens at runtime and redraw on theme toggle

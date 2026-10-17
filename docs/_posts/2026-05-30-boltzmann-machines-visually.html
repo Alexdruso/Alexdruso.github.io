@@ -75,7 +75,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 <!-- 1. RECAP: HOPFIELD / ENERGY                                  -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>⛰️ The starting point: energy</h3>
+  <h3>The starting point: energy</h3>
   <p style="margin-top:0">
     Take <em>N</em> units, each either <strong>on (+1)</strong> or <strong>off (−1)</strong>. Connect them symmetrically with weights <em>w<sub>ij</sub></em> (and give each a bias <em>b<sub>i</sub></em>). The whole configuration <strong>s</strong> has a single scalar <strong>energy</strong>:
   </p>
@@ -94,7 +94,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 <!-- 2. CENTERPIECE: STOCHASTIC NEURONS + TEMPERATURE             -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🌡️ The one new ingredient: temperature</h3>
+  <h3>The one new ingredient: temperature</h3>
   <p style="margin-top:0">
     Below is a tiny network of <strong>9 units</strong> drawn as a 3×3 grid, with two patterns stored by the Hebbian rule: a <strong>T</strong> and an <strong>L</strong>. Instead of flipping units deterministically, each update is a coin flip biased by the energy:
   </p>
@@ -126,15 +126,15 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 
     <div class="bm-panel">
       <div class="bm-controls" style="margin-top:0">
-        <span style="font-size:0.85rem">🌡️ Temperature</span>
+        <span style="font-size:0.85rem">Temperature</span>
         <input type="range" id="bmA-temp" class="bm-slider" min="2" max="400" value="20" style="flex:1;min-width:120px">
         <span class="bm-temp-readout" id="bmA-tval">0.20</span>
       </div>
       <div class="bm-controls">
-        <button class="bm-btn" id="bmA-run">▶ Run</button>
+        <button class="bm-btn" id="bmA-run">▶︎ Run</button>
         <button class="bm-btn sec" id="bmA-step">Step (1 sweep)</button>
-        <button class="bm-reset" id="bmA-corrupt">✦ Corrupt a memory</button>
-        <button class="bm-reset" id="bmA-rand">🎲 Randomize</button>
+        <button class="bm-reset" id="bmA-corrupt">Corrupt a memory</button>
+        <button class="bm-reset" id="bmA-rand">Randomize</button>
       </div>
       <div class="bm-statrow">
         <div class="bm-stat"><div class="lab">Energy</div><div class="val" id="bmA-energy">0.0</div></div>
@@ -156,7 +156,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 <!-- 3. THE SIGMOID RULE                                          -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🎲 Why a sigmoid? Temperature interpolates between a thermostat and a coin</h3>
+  <h3>Why a sigmoid? Temperature interpolates between a thermostat and a coin</h3>
   <p style="margin-top:0">
     The update rule is the whole personality of the network, so it's worth staring at. The probability a unit turns on is a sigmoid of <em>(energy saved) / temperature</em>. The plot shows that curve; drag temperature to reshape it.
   </p>
@@ -169,7 +169,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
     </div>
     <div class="bm-panel">
       <div class="bm-controls" style="margin-top:0">
-        <span style="font-size:0.85rem">🌡️ T</span>
+        <span style="font-size:0.85rem">T</span>
         <input type="range" id="bmB-temp" class="bm-slider" min="3" max="600" value="100" style="flex:1">
         <span class="bm-temp-readout" id="bmB-tval">1.00</span>
       </div>
@@ -199,7 +199,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 <!-- 4. ENERGY -> PROBABILITY (Boltzmann distribution)            -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>📊 Energy becomes probability: the Boltzmann distribution</h3>
+  <h3>Energy becomes probability: the Boltzmann distribution</h3>
   <p style="margin-top:0">
     Here's the payoff that gives the machine its name. If you let those stochastic units run forever, the network doesn't converge to a single state — it visits every configuration <strong>s</strong> with a probability that depends only on its energy:
   </p>
@@ -212,7 +212,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
   </p>
 
   <div class="bm-controls">
-    <span style="font-size:0.85rem">🌡️ Temperature</span>
+    <span style="font-size:0.85rem">Temperature</span>
     <input type="range" id="bmC-temp" class="bm-slider" min="5" max="500" value="100" style="flex:1;max-width:340px">
     <span class="bm-temp-readout" id="bmC-tval">1.00</span>
   </div>
@@ -241,7 +241,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 <!-- 5. SIMULATED ANNEALING                                       -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>❄️ Simulated annealing: start hot, cool slowly, land deep</h3>
+  <h3>Simulated annealing: start hot, cool slowly, land deep</h3>
   <p style="margin-top:0">
     Now the practical magic. To find a <em>deep</em> valley (a real memory, not a spurious one), don't go straight to T≈0 — you'll freeze wherever you happen to be. Instead, start <strong>hot</strong> so the network roams freely over the whole landscape, then <strong>cool gradually</strong> so it settles into the deepest basin it found. This is <em>simulated annealing</em>, borrowed straight from metallurgy.
   </p>
@@ -251,10 +251,10 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
     <div class="bm-segbtns" id="bmD-mode">
       <button data-mode="greedy">Greedy (cold)</button>
       <button data-mode="hot">Always hot</button>
-      <button data-mode="anneal" class="active">Annealed ❄️</button>
+      <button data-mode="anneal" class="active">Annealed</button>
     </div>
-    <button class="bm-btn" id="bmD-run">▶ Run once</button>
-    <button class="bm-btn sec" id="bmD-race">🏁 Race 200 runs each</button>
+    <button class="bm-btn" id="bmD-run">▶︎ Run once</button>
+    <button class="bm-btn sec" id="bmD-race">Race 200 runs each</button>
   </div>
 
   <div class="bm-flexwrap">
@@ -274,7 +274,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
   </div>
 
   <div id="bmD-race-wrap" style="display:none;margin-top:1rem">
-    <h4>🏁 Out of 200 runs from random starts, how often did each reach a stored memory?</h4>
+    <h4>Out of 200 runs from random starts, how often did each reach a stored memory?</h4>
     <div id="bmD-race-bars"></div>
   </div>
 </div>
@@ -283,7 +283,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 <!-- 6. LEARNING                                                  -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🧠 Learning: two phases, one elegant rule</h3>
+  <h3>Learning: two phases, one elegant rule</h3>
   <p style="margin-top:0">
     So far we <em>hand-built</em> the valleys with the Hebbian rule. The real question is: can the network <strong>learn</strong> its own energy landscape so that its Boltzmann distribution matches a dataset? Yes — and the rule is beautifully symmetric. To make data likely, nudge the weights by the difference between two correlation measurements:
   </p>
@@ -307,7 +307,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 <!-- 7. RBM                                                       -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🔗 Restricted Boltzmann Machines: make the sampling cheap</h3>
+  <h3>Restricted Boltzmann Machines: make the sampling cheap</h3>
   <p style="margin-top:0">
     The trick is structural. Split the units into a <strong>visible</strong> layer (the data) and a <strong>hidden</strong> layer (learned features), and <em>forbid</em> connections within a layer. The graph becomes bipartite:
   </p>
@@ -323,7 +323,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
   </p>
 
   <div class="bm-controls">
-    <button class="bm-btn" id="bmE-train">🚀 Train (CD-1)</button>
+    <button class="bm-btn" id="bmE-train">Train (CD-1)</button>
     <button class="bm-reset" id="bmE-resetw">↺ Reset weights</button>
     <span id="bmE-epoch" style="font-size:0.85rem;opacity:0.75"></span>
   </div>
@@ -365,7 +365,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
   </div>
   <div class="bm-controls" style="justify-content:center">
     <button class="bm-btn" id="bmE-recon">↻ v → h → v′</button>
-    <button class="bm-reset" id="bmE-corrupt">✦ Load corrupted T</button>
+    <button class="bm-reset" id="bmE-corrupt">Load corrupted T</button>
     <button class="bm-reset" id="bmE-clear">Clear</button>
   </div>
 </div>
@@ -374,7 +374,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 <!-- WRAP UP                                                      -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🎯 The whole story in one breath</h3>
+  <h3>The whole story in one breath</h3>
   <ul style="line-height:1.7">
     <li><strong>Energy</strong> turns a network's weights into a landscape; stored patterns are valleys.</li>
     <li><strong>Temperature + a sigmoid</strong> turn deterministic descent (Hopfield) into stochastic sampling.</li>
@@ -494,7 +494,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
       const status = document.getElementById("bmA-status");
       if (samePattern(s, PAT_T)) { status.textContent = "locked: memory T ✓"; status.className = "bm-tag good"; }
       else if (samePattern(s, PAT_L)) { status.textContent = "locked: memory L ✓"; status.className = "bm-tag good"; }
-      else if (tempOf() > 1.5) { status.textContent = "boiling 🔥"; status.className = "bm-tag hot"; }
+      else if (tempOf() > 1.5) { status.textContent = "boiling"; status.className = "bm-tag hot"; }
       else { status.textContent = "exploring"; status.className = "bm-tag warn"; }
       drawChart();
     }
@@ -548,7 +548,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
     const runBtn = document.getElementById("bmA-run");
     runBtn.addEventListener("click", () => {
       running = !running;
-      runBtn.textContent = running ? "⏸ Pause" : "▶ Run";
+      runBtn.textContent = running ? "❚❚ Pause" : "▶︎ Run";
       if (running) { last = 0; acc = 0; raf = requestAnimationFrame(loop); }
       else if (raf) cancelAnimationFrame(raf);
     });
@@ -785,7 +785,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
 
     document.getElementById("bmD-race").addEventListener("click", () => {
       const modes = ["greedy", "hot", "anneal"];
-      const labels = { greedy: "Greedy (cold)", hot: "Always hot", anneal: "Annealed ❄️" };
+      const labels = { greedy: "Greedy (cold)", hot: "Always hot", anneal: "Annealed" };
       const colors = { greedy: COL.bad, hot: COL.warn, anneal: COL.good };
       const res = {};
       modes.forEach(m => {

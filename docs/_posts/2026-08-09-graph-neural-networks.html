@@ -96,7 +96,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 <!-- 1. PERMUTATION EQUIVARIANCE                                   -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🕸️ The data has no rows</h3>
+  <h3>The data has no rows</h3>
   <p style="margin-top:0">
     A graph is a pair <em>G</em> = (<em>V</em>, <em>E</em>). Attach a feature vector to each
     node and stack them into a matrix X &isin; &#8477;<sup>N&times;d</sup>, and record the edges
@@ -126,7 +126,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 
   <div class="gnn-panel">
     <div class="gnn-controls">
-      <button class="se-btn" id="gnn-shuffle">🔀 Shuffle node IDs</button>
+      <button class="se-btn" id="gnn-shuffle">Shuffle node IDs</button>
       <button class="se-reset" id="gnn-unshuffle">Restore original IDs</button>
     </div>
     <div class="gnn-row">
@@ -164,7 +164,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 <!-- 2. MESSAGE PASSING                                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📨 One layer is one round of messages</h3>
+  <h3>One layer is one round of messages</h3>
   <p style="margin-top:0">
     Equivariance leaves one natural template, formalised by Gilmer et al. as the message passing
     neural network. Each node sends a message to each neighbour, every node aggregates the
@@ -195,7 +195,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 
   <div class="gnn-panel">
     <div class="gnn-controls">
-      <button class="se-btn" id="gnn-mp-step">▶ Step</button>
+      <button class="se-btn" id="gnn-mp-step">▶︎ Step</button>
       <button class="se-reset" id="gnn-mp-reset">Reset</button>
       <div class="gnn-stats" style="margin-left:auto">
         <div class="gnn-stat"><b id="gnn-mp-k">0</b><span>layers applied</span></div>
@@ -224,7 +224,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 <!-- 3. THE GCN LAYER                                              -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧮 The GCN layer</h3>
+  <h3>The GCN layer</h3>
   <p style="margin-top:0">
     Kipf &amp; Welling's graph convolutional network picks the cheapest members of that template:
     the message is the neighbour's feature vector scaled by a fixed coefficient, AGGREGATE is a
@@ -318,7 +318,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 <!-- 4. AGGREGATORS AND EXPRESSIVE POWER                           -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧺 The aggregator decides what the layer can tell apart</h3>
+  <h3>The aggregator decides what the layer can tell apart</h3>
   <p style="margin-top:0">
     A neighbourhood is a multiset, so AGGREGATE is a function on multisets, and whatever it
     cannot distinguish the layer cannot distinguish either — no amount of training fixes a
@@ -457,7 +457,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 <!-- 5. OVER-SMOOTHING                                             -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🌫️ Over-smoothing: why deep is not better here</h3>
+  <h3>Over-smoothing: why deep is not better here</h3>
   <p style="margin-top:0">
     Depth extends the receptive field, so a deeper GCN should see more. It does not work out that
     way. Li, Han &amp; Wu identified the reason: the propagation step
@@ -537,7 +537,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 <!-- 6. TRAINING                                                   -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎓 Training a GCN</h3>
+  <h3>Training a GCN</h3>
   <p style="margin-top:0">
     The setting below is the one Kipf &amp; Welling used: <strong>transductive semi-supervised
     node classification</strong>. One fixed graph, features for every node, labels for a handful,
@@ -565,7 +565,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 
   <div class="gnn-panel">
     <div class="gnn-controls">
-      <button class="se-btn" id="gnn-run">⏸ Pause</button>
+      <button class="se-btn" id="gnn-run">❚❚ Pause</button>
       <button class="se-btn sec" id="gnn-step50">+50 steps</button>
       <button class="se-reset" id="gnn-reset">Reset weights</button>
       <label class="gnn-check"><input type="checkbox" id="gnn-usegraph" checked> use the graph (Â vs I)</label>
@@ -641,7 +641,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 <!-- 7. THE FAMILY                                                 -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧭 Where this generalises</h3>
+  <h3>Where this generalises</h3>
   <p style="margin-top:0">
     Every architecture below is the same UPDATE/AGGREGATE template with a different answer to one
     question: where does the coefficient on a neighbour's message come from?
@@ -710,7 +710,7 @@ excerpt: "A graph neural network updates every node from its own features and an
 <!-- 8. TAKEAWAYS                                                  -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎯 Consequences worth remembering</h3>
+  <h3>Consequences worth remembering</h3>
   <ul class="gnn-take">
     <li><strong>Permutation equivariance is the axiom, message passing is the consequence.</strong>
       Once a layer may not depend on node indices, it has to read each node's neighbourhood
@@ -1729,7 +1729,7 @@ excerpt: "A graph neural network updates every node from its own features and an
     }
     function setRunning(v) {
       running = v;
-      $("gnn-run").textContent = v ? "⏸ Pause" : "▶ Run";
+      $("gnn-run").textContent = v ? "❚❚ Pause" : "▶︎ Run";
       if (v) requestAnimationFrame(frame);
     }
 

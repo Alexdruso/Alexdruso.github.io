@@ -63,7 +63,7 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
 <!-- 1. SURPRISE / INFORMATION CONTENT                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>😲 The atom: surprise of a single outcome</h3>
+  <h3>The atom: surprise of a single outcome</h3>
   <p style="margin-top:0">
     Before averaging anything, look at one outcome. If an event has probability <em>p</em>, how
     <em>surprised</em> should you be when it happens? Shannon's answer — the only one satisfying a few
@@ -113,7 +113,7 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
 <!-- 2. BIASED COIN / BERNOULLI ENTROPY                           -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🪙 Average surprise: the biased coin</h3>
+  <h3>Average surprise: the biased coin</h3>
   <p style="margin-top:0">
     Now average. A coin lands heads with probability <em>p</em>, tails with <em>1 − p</em>. Sometimes
     you get the surprising outcome, sometimes the likely one. Weight each surprise by how often it
@@ -159,7 +159,7 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
 <!-- 3. DISTRIBUTION EXPLORER                                     -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎛️ More than two outcomes: shape a distribution</h3>
+  <h3>More than two outcomes: shape a distribution</h3>
   <p style="margin-top:0">
     Coins are just the two-outcome case. For any distribution over outcomes <em>x</em>, entropy is the
     same average-surprise idea, summed over everything that can happen:
@@ -178,8 +178,8 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
     <div class="se-panel" style="flex:0 0 300px">
       <div id="se3-sliders"></div>
       <div class="se-controls" style="justify-content:center;margin-top:0.8rem">
-        <button class="se-btn" id="se3-uniform">⚖️ Make uniform</button>
-        <button class="se-reset" id="se3-certain">🎯 Make certain</button>
+        <button class="se-btn" id="se3-uniform">Make uniform</button>
+        <button class="se-reset" id="se3-certain">Make certain</button>
       </div>
     </div>
     <div class="se-panel">
@@ -210,7 +210,7 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
 <!-- 4. SAMPLER / LAW OF LARGE NUMBERS                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎲 "Average surprise" is not a metaphor</h3>
+  <h3>"Average surprise" is not a metaphor</h3>
   <p style="margin-top:0">
     Entropy is an <em>expectation</em>, so let's actually take the average. Using the distribution you
     shaped above, we'll draw outcomes one at a time, score each draw by its surprise
@@ -219,7 +219,7 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
   </p>
 
   <div class="se-controls">
-    <button class="se-btn" id="se4-run">▶ Run sampler</button>
+    <button class="se-btn" id="se4-run">▶︎ Run sampler</button>
     <button class="se-btn sec" id="se4-step">Draw 25</button>
     <button class="se-reset" id="se4-reset">↺ Reset</button>
   </div>
@@ -248,7 +248,7 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
 <!-- WRAP UP                                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎯 The whole story in one breath</h3>
+  <h3>The whole story in one breath</h3>
   <ul style="line-height:1.7">
     <li><strong>Surprise</strong> of one outcome is −log<sub>2</sub>p: rare = many bits, certain = zero.</li>
     <li><strong>Entropy</strong> is the average surprise — the expected bits per draw, <em>H = −&Sigma; p log<sub>2</sub> p</em>.</li>
@@ -418,7 +418,7 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
   // SHARED distribution state for demos 3 & 4
   // ============================================================
   const dist = {
-    names: ["☀️ Sunny", "⛅ Cloudy", "🌧️ Rain", "⛈️ Storm", "❄️ Snow"],
+    names: ["Sunny", "Cloudy", "Rain", "Storm", "Snow"],
     colors: ["#0891b2", "#0ea5b8", "#22b8c9", "#67cdd9", "#a5e3ea"],
     raw: [5, 3, 2, 1, 0.6],   // unnormalised slider weights
     probs() { const s = this.raw.reduce((a, b) => a + b, 0); return this.raw.map(w => w / s); },
@@ -583,8 +583,8 @@ excerpt: "Entropy is usually introduced as a formula — −Σ p log p — with 
       draw();
       raf = requestAnimationFrame(loop);
     }
-    function start() { running = true; runBtn.textContent = "⏸ Pause"; last = 0; acc = 0; raf = requestAnimationFrame(loop); }
-    function stop() { running = false; runBtn.textContent = "▶ Run sampler"; if (raf) cancelAnimationFrame(raf); }
+    function start() { running = true; runBtn.textContent = "❚❚ Pause"; last = 0; acc = 0; raf = requestAnimationFrame(loop); }
+    function stop() { running = false; runBtn.textContent = "▶︎ Run sampler"; if (raf) cancelAnimationFrame(raf); }
 
     runBtn.addEventListener("click", () => { running ? stop() : start(); });
     document.getElementById("se4-step").addEventListener("click", () => { for (let i = 0; i < 25; i++) drawOne(); draw(); });
