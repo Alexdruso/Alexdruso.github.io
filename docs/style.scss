@@ -458,12 +458,12 @@ footer {
 .blog-header {
   text-align: center;
   margin-bottom: 3em;
-  padding: 2em 0;
+  padding: 0 0 2em;
   border-bottom: 1px solid $lightGray;
 
   h1 {
     font-size: 2.5em;
-    margin-bottom: 0.5em;
+    margin: 0 0 0.5em;
     color: $accentBlue;
   }
 
@@ -871,8 +871,13 @@ footer {
 
   max-width: 800px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 2rem 2rem;
   text-align: center;
+
+  h1 {
+    margin: 0 0 0.5em;
+    color: $accentBlue;
+  }
 }
 
 .game-description {
@@ -1637,8 +1642,27 @@ footer {
   padding: 1.1rem 1.3rem 1.2rem;
 
   .post-meta {
-    margin-bottom: 0.4em;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4em 0.8em;
+    margin-bottom: 0.6em;
     font-size: 0.8em;
+    color: $gray;
+  }
+
+  .post-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35em;
+  }
+
+  .post-category {
+    padding: 0.15em 0.55em;
+    background-color: $lightBlue;
+    color: $accentBlue;
+    border-radius: 3px;
+    font-size: 0.9em;
   }
 
   h2 {
@@ -1704,6 +1728,11 @@ footer {
 
   .note-card-excerpt {
     color: $dark-gray;
+  }
+
+  .note-card-body .post-category {
+    background-color: rgba($dark-accent, 0.1);
+    color: $dark-accent;
   }
 }
 
@@ -1955,5 +1984,68 @@ footer {
 
   .cmdk-foot {
     border-top-color: $dark-border;
+  }
+}
+
+// 404 page
+.not-found {
+  max-width: 560px;
+  margin: 2em auto 3em;
+  text-align: center;
+
+  .not-found-code {
+    margin: 0;
+    font-size: 5em;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: $accentBlue;
+  }
+
+  h1 {
+    margin: 0.3em 0 0.4em;
+    font-size: 1.8em;
+  }
+
+  p {
+    color: $gray;
+  }
+
+  .not-found-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6em;
+    margin: 1.5em 0;
+
+    a {
+      padding: 0.45em 1em;
+      border: 1px solid $lightGray;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+  }
+
+  kbd {
+    font-family: inherit;
+    font-size: 0.85em;
+    padding: 0.1em 0.4em;
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+  }
+}
+
+.dark-theme .not-found {
+  .not-found-code {
+    color: $dark-accent;
+  }
+
+  p {
+    color: $dark-gray;
+  }
+
+  .not-found-links a,
+  kbd {
+    border-color: $dark-border;
   }
 }
