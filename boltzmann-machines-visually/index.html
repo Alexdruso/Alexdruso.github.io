@@ -89,13 +89,16 @@
   <h1>Boltzmann Machines, Visually: From Hopfield Nets to Stochastic Neurons</h1>
 
   <div class="entry">
-    <style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
 /* ============================================================
    Study Notes — shared design system
-   Sleek/futuristic: cyan-teal accent, hairline borders, flat
-   single-accent controls, monospace numerals, glow in dark only.
+   Editorial: a single reading column, serif prose, sans headings
+   and demos, numbered sections divided by hairlines (no boxes),
+   one cyan-teal accent, monospace numerals, glow in dark only.
    Adaptive light + dark via tokens. Every selector is scoped
-   under .study-note so nothing leaks to the rest of the site.
+   under .study-note (plus the post title/date on note pages)
+   so nothing leaks to the rest of the site.
    ============================================================ */
 .study-note {
   --sn-accent: #0891b2;
@@ -117,8 +120,10 @@
   --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
   --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
 
-  --sn-radius: 12px;
-  --sn-radius-sm: 8px;
+  --sn-radius: 6px;
+  --sn-radius-sm: 4px;
+  --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --sn-glow: none;
@@ -148,6 +153,33 @@
   --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
 }
 
+/* ---- reading column: title, body and date share one measure ---- */
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.post > h1 {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 600;
+  font-size: 2.5em;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
+@media (max-width: 640px) { .post > h1 { font-size: 2em; } }
+
+/* ---- prose is serif; headings, demos and controls stay sans ---- */
+.study-note > p,
+.study-note > ul,
+.study-note > ol,
+.study-note > div > p,
+.study-note > div > ul,
+.study-note > div > ol {
+  font-family: var(--sn-serif);
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
 /* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
 .study-note sub,
 .study-note sup {
@@ -159,61 +191,75 @@
 .study-note sup { top: -0.5em; }
 .study-note sub { bottom: -0.22em; }
 
-/* ---- sections / cards ---- */
+/* ---- sections: numbered, divided by a hairline, no box ---- */
 .study-note .se-section,
 .study-note .bm-section,
 .study-note .mdp-section {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  border-radius: var(--sn-radius);
-  background: var(--sn-section);
-  border: 1px solid var(--sn-border);
-  box-shadow: var(--sn-shadow);
+  counter-increment: sn-sec;
+  margin: 3rem 0 0;
+  padding: 2.25rem 0 0;
+  border-top: 1px solid var(--sn-border);
 }
 .study-note .se-section h3,
 .study-note .bm-section h3,
 .study-note .mdp-section h3 {
-  margin-top: 0;
-  color: var(--sn-accent);
-  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+  color: var(--sn-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
 }
+.study-note .se-section h3::before,
+.study-note .bm-section h3::before,
+.study-note .mdp-section h3::before {
+  content: counter(sn-sec, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--sn-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--sn-accent);
+}
+.study-note h4 { color: var(--sn-text); }
 
 /* ---- equation boxes ---- */
 .study-note .se-equation,
 .study-note .bm-equation,
 .study-note .equation-box {
-  padding: 1rem 1.5rem;
-  margin: 1rem 0;
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
-  border-radius: var(--sn-radius-sm);
-  font-size: 1.1rem;
+  padding: 0.6rem 0;
+  margin: 1.5rem 0;
+  font-family: var(--sn-serif);
+  font-size: 1.25rem;
   text-align: center;
   overflow-x: auto;
 }
 .study-note .se-equation .big,
 .study-note .bm-equation .big { font-size: 1.25rem; }
 
-/* ---- callout / note ---- */
+/* ---- callout / note: a quiet pull-quote ---- */
 .study-note .se-note,
 .study-note .bm-note {
-  background: var(--sn-accent-soft);
-  border-radius: var(--sn-radius-sm);
-  border-left: 3px solid var(--sn-accent);
-  padding: 0.9rem 1.1rem;
-  font-size: 0.9rem;
-  margin: 1rem 0;
+  border-left: 2px solid var(--sn-accent);
+  padding: 0.2rem 0 0.2rem 1.3rem;
+  margin: 1.75rem 0;
+  font-family: var(--sn-serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  line-height: 1.65;
 }
+.study-note .se-note strong,
+.study-note .bm-note strong { font-style: normal; }
 
 /* ---- example box ---- */
 .study-note .se-example,
 .study-note .bm-example,
 .study-note .example-box {
   background: var(--sn-panel-inset);
-  border: 1px solid var(--sn-border);
-  border-left: 3px solid var(--sn-warn);
   border-radius: var(--sn-radius-sm);
-  padding: 1rem;
+  padding: 0.9rem 1rem;
+  line-height: 1.55;
   font-size: 0.9rem;
   margin: 1rem 0;
 }
@@ -222,8 +268,7 @@
 .study-note .se-chartwrap,
 .study-note .bm-chartwrap,
 .study-note .graph-wrap {
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
+  background: var(--sn-panel-inset);
   border-radius: var(--sn-radius-sm);
   padding: 0.5rem;
 }
@@ -436,7 +481,7 @@
 <!-- 1. RECAP: HOPFIELD / ENERGY                                  -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>⛰️ The starting point: energy</h3>
+  <h3>The starting point: energy</h3>
   <p style="margin-top:0">
     Take <em>N</em> units, each either <strong>on (+1)</strong> or <strong>off (−1)</strong>. Connect them symmetrically with weights <em>w<sub>ij</sub></em> (and give each a bias <em>b<sub>i</sub></em>). The whole configuration <strong>s</strong> has a single scalar <strong>energy</strong>:
   </p>
@@ -455,7 +500,7 @@
 <!-- 2. CENTERPIECE: STOCHASTIC NEURONS + TEMPERATURE             -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🌡️ The one new ingredient: temperature</h3>
+  <h3>The one new ingredient: temperature</h3>
   <p style="margin-top:0">
     Below is a tiny network of <strong>9 units</strong> drawn as a 3×3 grid, with two patterns stored by the Hebbian rule: a <strong>T</strong> and an <strong>L</strong>. Instead of flipping units deterministically, each update is a coin flip biased by the energy:
   </p>
@@ -487,15 +532,15 @@
 
     <div class="bm-panel">
       <div class="bm-controls" style="margin-top:0">
-        <span style="font-size:0.85rem">🌡️ Temperature</span>
+        <span style="font-size:0.85rem">Temperature</span>
         <input type="range" id="bmA-temp" class="bm-slider" min="2" max="400" value="20" style="flex:1;min-width:120px">
         <span class="bm-temp-readout" id="bmA-tval">0.20</span>
       </div>
       <div class="bm-controls">
-        <button class="bm-btn" id="bmA-run">▶ Run</button>
+        <button class="bm-btn" id="bmA-run">▶︎ Run</button>
         <button class="bm-btn sec" id="bmA-step">Step (1 sweep)</button>
-        <button class="bm-reset" id="bmA-corrupt">✦ Corrupt a memory</button>
-        <button class="bm-reset" id="bmA-rand">🎲 Randomize</button>
+        <button class="bm-reset" id="bmA-corrupt">Corrupt a memory</button>
+        <button class="bm-reset" id="bmA-rand">Randomize</button>
       </div>
       <div class="bm-statrow">
         <div class="bm-stat"><div class="lab">Energy</div><div class="val" id="bmA-energy">0.0</div></div>
@@ -517,7 +562,7 @@
 <!-- 3. THE SIGMOID RULE                                          -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🎲 Why a sigmoid? Temperature interpolates between a thermostat and a coin</h3>
+  <h3>Why a sigmoid? Temperature interpolates between a thermostat and a coin</h3>
   <p style="margin-top:0">
     The update rule is the whole personality of the network, so it's worth staring at. The probability a unit turns on is a sigmoid of <em>(energy saved) / temperature</em>. The plot shows that curve; drag temperature to reshape it.
   </p>
@@ -530,7 +575,7 @@
     </div>
     <div class="bm-panel">
       <div class="bm-controls" style="margin-top:0">
-        <span style="font-size:0.85rem">🌡️ T</span>
+        <span style="font-size:0.85rem">T</span>
         <input type="range" id="bmB-temp" class="bm-slider" min="3" max="600" value="100" style="flex:1">
         <span class="bm-temp-readout" id="bmB-tval">1.00</span>
       </div>
@@ -560,7 +605,7 @@
 <!-- 4. ENERGY -> PROBABILITY (Boltzmann distribution)            -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>📊 Energy becomes probability: the Boltzmann distribution</h3>
+  <h3>Energy becomes probability: the Boltzmann distribution</h3>
   <p style="margin-top:0">
     Here's the payoff that gives the machine its name. If you let those stochastic units run forever, the network doesn't converge to a single state — it visits every configuration <strong>s</strong> with a probability that depends only on its energy:
   </p>
@@ -573,7 +618,7 @@
   </p>
 
   <div class="bm-controls">
-    <span style="font-size:0.85rem">🌡️ Temperature</span>
+    <span style="font-size:0.85rem">Temperature</span>
     <input type="range" id="bmC-temp" class="bm-slider" min="5" max="500" value="100" style="flex:1;max-width:340px">
     <span class="bm-temp-readout" id="bmC-tval">1.00</span>
   </div>
@@ -602,7 +647,7 @@
 <!-- 5. SIMULATED ANNEALING                                       -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>❄️ Simulated annealing: start hot, cool slowly, land deep</h3>
+  <h3>Simulated annealing: start hot, cool slowly, land deep</h3>
   <p style="margin-top:0">
     Now the practical magic. To find a <em>deep</em> valley (a real memory, not a spurious one), don't go straight to T≈0 — you'll freeze wherever you happen to be. Instead, start <strong>hot</strong> so the network roams freely over the whole landscape, then <strong>cool gradually</strong> so it settles into the deepest basin it found. This is <em>simulated annealing</em>, borrowed straight from metallurgy.
   </p>
@@ -612,10 +657,10 @@
     <div class="bm-segbtns" id="bmD-mode">
       <button data-mode="greedy">Greedy (cold)</button>
       <button data-mode="hot">Always hot</button>
-      <button data-mode="anneal" class="active">Annealed ❄️</button>
+      <button data-mode="anneal" class="active">Annealed</button>
     </div>
-    <button class="bm-btn" id="bmD-run">▶ Run once</button>
-    <button class="bm-btn sec" id="bmD-race">🏁 Race 200 runs each</button>
+    <button class="bm-btn" id="bmD-run">▶︎ Run once</button>
+    <button class="bm-btn sec" id="bmD-race">Race 200 runs each</button>
   </div>
 
   <div class="bm-flexwrap">
@@ -635,7 +680,7 @@
   </div>
 
   <div id="bmD-race-wrap" style="display:none;margin-top:1rem">
-    <h4>🏁 Out of 200 runs from random starts, how often did each reach a stored memory?</h4>
+    <h4>Out of 200 runs from random starts, how often did each reach a stored memory?</h4>
     <div id="bmD-race-bars"></div>
   </div>
 </div>
@@ -644,7 +689,7 @@
 <!-- 6. LEARNING                                                  -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🧠 Learning: two phases, one elegant rule</h3>
+  <h3>Learning: two phases, one elegant rule</h3>
   <p style="margin-top:0">
     So far we <em>hand-built</em> the valleys with the Hebbian rule. The real question is: can the network <strong>learn</strong> its own energy landscape so that its Boltzmann distribution matches a dataset? Yes — and the rule is beautifully symmetric. To make data likely, nudge the weights by the difference between two correlation measurements:
   </p>
@@ -668,7 +713,7 @@
 <!-- 7. RBM                                                       -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🔗 Restricted Boltzmann Machines: make the sampling cheap</h3>
+  <h3>Restricted Boltzmann Machines: make the sampling cheap</h3>
   <p style="margin-top:0">
     The trick is structural. Split the units into a <strong>visible</strong> layer (the data) and a <strong>hidden</strong> layer (learned features), and <em>forbid</em> connections within a layer. The graph becomes bipartite:
   </p>
@@ -684,7 +729,7 @@
   </p>
 
   <div class="bm-controls">
-    <button class="bm-btn" id="bmE-train">🚀 Train (CD-1)</button>
+    <button class="bm-btn" id="bmE-train">Train (CD-1)</button>
     <button class="bm-reset" id="bmE-resetw">↺ Reset weights</button>
     <span id="bmE-epoch" style="font-size:0.85rem;opacity:0.75"></span>
   </div>
@@ -726,7 +771,7 @@
   </div>
   <div class="bm-controls" style="justify-content:center">
     <button class="bm-btn" id="bmE-recon">↻ v → h → v′</button>
-    <button class="bm-reset" id="bmE-corrupt">✦ Load corrupted T</button>
+    <button class="bm-reset" id="bmE-corrupt">Load corrupted T</button>
     <button class="bm-reset" id="bmE-clear">Clear</button>
   </div>
 </div>
@@ -735,7 +780,7 @@
 <!-- WRAP UP                                                      -->
 <!-- ============================================================ -->
 <div class="bm-section">
-  <h3>🎯 The whole story in one breath</h3>
+  <h3>The whole story in one breath</h3>
   <ul style="line-height:1.7">
     <li><strong>Energy</strong> turns a network's weights into a landscape; stored patterns are valleys.</li>
     <li><strong>Temperature + a sigmoid</strong> turn deterministic descent (Hopfield) into stochastic sampling.</li>
@@ -855,7 +900,7 @@
       const status = document.getElementById("bmA-status");
       if (samePattern(s, PAT_T)) { status.textContent = "locked: memory T ✓"; status.className = "bm-tag good"; }
       else if (samePattern(s, PAT_L)) { status.textContent = "locked: memory L ✓"; status.className = "bm-tag good"; }
-      else if (tempOf() > 1.5) { status.textContent = "boiling 🔥"; status.className = "bm-tag hot"; }
+      else if (tempOf() > 1.5) { status.textContent = "boiling"; status.className = "bm-tag hot"; }
       else { status.textContent = "exploring"; status.className = "bm-tag warn"; }
       drawChart();
     }
@@ -909,7 +954,7 @@
     const runBtn = document.getElementById("bmA-run");
     runBtn.addEventListener("click", () => {
       running = !running;
-      runBtn.textContent = running ? "⏸ Pause" : "▶ Run";
+      runBtn.textContent = running ? "❚❚ Pause" : "▶︎ Run";
       if (running) { last = 0; acc = 0; raf = requestAnimationFrame(loop); }
       else if (raf) cancelAnimationFrame(raf);
     });
@@ -1146,7 +1191,7 @@
 
     document.getElementById("bmD-race").addEventListener("click", () => {
       const modes = ["greedy", "hot", "anneal"];
-      const labels = { greedy: "Greedy (cold)", hot: "Always hot", anneal: "Annealed ❄️" };
+      const labels = { greedy: "Greedy (cold)", hot: "Always hot", anneal: "Annealed" };
       const colors = { greedy: COL.bad, hot: COL.warn, anneal: COL.good };
       const res = {};
       modes.forEach(m => {

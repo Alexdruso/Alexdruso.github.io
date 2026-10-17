@@ -89,13 +89,16 @@
   <h1>Self-Attention: The Content-Addressed Lookup at the Heart of Transformers</h1>
 
   <div class="entry">
-    <style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
 /* ============================================================
    Study Notes — shared design system
-   Sleek/futuristic: cyan-teal accent, hairline borders, flat
-   single-accent controls, monospace numerals, glow in dark only.
+   Editorial: a single reading column, serif prose, sans headings
+   and demos, numbered sections divided by hairlines (no boxes),
+   one cyan-teal accent, monospace numerals, glow in dark only.
    Adaptive light + dark via tokens. Every selector is scoped
-   under .study-note so nothing leaks to the rest of the site.
+   under .study-note (plus the post title/date on note pages)
+   so nothing leaks to the rest of the site.
    ============================================================ */
 .study-note {
   --sn-accent: #0891b2;
@@ -117,8 +120,10 @@
   --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
   --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
 
-  --sn-radius: 12px;
-  --sn-radius-sm: 8px;
+  --sn-radius: 6px;
+  --sn-radius-sm: 4px;
+  --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --sn-glow: none;
@@ -148,6 +153,33 @@
   --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
 }
 
+/* ---- reading column: title, body and date share one measure ---- */
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.post > h1 {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 600;
+  font-size: 2.5em;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
+@media (max-width: 640px) { .post > h1 { font-size: 2em; } }
+
+/* ---- prose is serif; headings, demos and controls stay sans ---- */
+.study-note > p,
+.study-note > ul,
+.study-note > ol,
+.study-note > div > p,
+.study-note > div > ul,
+.study-note > div > ol {
+  font-family: var(--sn-serif);
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
 /* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
 .study-note sub,
 .study-note sup {
@@ -159,61 +191,75 @@
 .study-note sup { top: -0.5em; }
 .study-note sub { bottom: -0.22em; }
 
-/* ---- sections / cards ---- */
+/* ---- sections: numbered, divided by a hairline, no box ---- */
 .study-note .se-section,
 .study-note .bm-section,
 .study-note .mdp-section {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  border-radius: var(--sn-radius);
-  background: var(--sn-section);
-  border: 1px solid var(--sn-border);
-  box-shadow: var(--sn-shadow);
+  counter-increment: sn-sec;
+  margin: 3rem 0 0;
+  padding: 2.25rem 0 0;
+  border-top: 1px solid var(--sn-border);
 }
 .study-note .se-section h3,
 .study-note .bm-section h3,
 .study-note .mdp-section h3 {
-  margin-top: 0;
-  color: var(--sn-accent);
-  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+  color: var(--sn-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
 }
+.study-note .se-section h3::before,
+.study-note .bm-section h3::before,
+.study-note .mdp-section h3::before {
+  content: counter(sn-sec, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--sn-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--sn-accent);
+}
+.study-note h4 { color: var(--sn-text); }
 
 /* ---- equation boxes ---- */
 .study-note .se-equation,
 .study-note .bm-equation,
 .study-note .equation-box {
-  padding: 1rem 1.5rem;
-  margin: 1rem 0;
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
-  border-radius: var(--sn-radius-sm);
-  font-size: 1.1rem;
+  padding: 0.6rem 0;
+  margin: 1.5rem 0;
+  font-family: var(--sn-serif);
+  font-size: 1.25rem;
   text-align: center;
   overflow-x: auto;
 }
 .study-note .se-equation .big,
 .study-note .bm-equation .big { font-size: 1.25rem; }
 
-/* ---- callout / note ---- */
+/* ---- callout / note: a quiet pull-quote ---- */
 .study-note .se-note,
 .study-note .bm-note {
-  background: var(--sn-accent-soft);
-  border-radius: var(--sn-radius-sm);
-  border-left: 3px solid var(--sn-accent);
-  padding: 0.9rem 1.1rem;
-  font-size: 0.9rem;
-  margin: 1rem 0;
+  border-left: 2px solid var(--sn-accent);
+  padding: 0.2rem 0 0.2rem 1.3rem;
+  margin: 1.75rem 0;
+  font-family: var(--sn-serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  line-height: 1.65;
 }
+.study-note .se-note strong,
+.study-note .bm-note strong { font-style: normal; }
 
 /* ---- example box ---- */
 .study-note .se-example,
 .study-note .bm-example,
 .study-note .example-box {
   background: var(--sn-panel-inset);
-  border: 1px solid var(--sn-border);
-  border-left: 3px solid var(--sn-warn);
   border-radius: var(--sn-radius-sm);
-  padding: 1rem;
+  padding: 0.9rem 1rem;
+  line-height: 1.55;
   font-size: 0.9rem;
   margin: 1rem 0;
 }
@@ -222,8 +268,7 @@
 .study-note .se-chartwrap,
 .study-note .bm-chartwrap,
 .study-note .graph-wrap {
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
+  background: var(--sn-panel-inset);
   border-radius: var(--sn-radius-sm);
   padding: 0.5rem;
 }
@@ -442,7 +487,7 @@
 <!-- 1. QUERIES, KEYS, VALUES                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧲 Queries, keys, values: a differentiable lookup</h3>
+  <h3>Queries, keys, values: a differentiable lookup</h3>
   <p style="margin-top:0">
     A dictionary lookup retrieves the single value whose key exactly matches the query.
     Self-attention softens both halves of that sentence: every key matches <em>a little</em>, and
@@ -501,7 +546,7 @@
 <!-- 2. READING AN ATTENTION PATTERN (DEMO 1)                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🗺️ Reading an attention pattern</h3>
+  <h3>Reading an attention pattern</h3>
   <p style="margin-top:0">
     One row of the attention matrix — one token's outgoing weights — is a probability
     distribution over the sequence. Below, the arcs and bars show that row for the selected token,
@@ -525,7 +570,7 @@
   </p>
 
   <div class="sa-controls">
-    <button class="se-btn sec" id="sa-hm-mask" aria-pressed="false">🔓 causal mask: off</button>
+    <button class="se-btn sec" id="sa-hm-mask" aria-pressed="false">causal mask: off</button>
     <span class="se-tag" id="sa-hm-tag"></span>
   </div>
   <div class="se-chartwrap">
@@ -542,7 +587,7 @@
 <!-- 3. WHY DIVIDE BY SQRT(D)                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🌡️ Why divide by &radic;d: the scaling is a temperature</h3>
+  <h3>Why divide by &radic;d: the scaling is a temperature</h3>
   <p style="margin-top:0">
     The one non-obvious constant in the formula is the &radic;d<sub>k</sub> divisor. The problem
     it solves is statistical: a dot product is a sum of d<sub>k</sub> terms, and sums grow with
@@ -583,7 +628,7 @@
 <!-- 4. Q·K GEOMETRY (DEMO 2)                                      -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧭 Attention weight is vector alignment</h3>
+  <h3>Attention weight is vector alignment</h3>
   <p style="margin-top:0">
     Everything upstream of the softmax is a dot product, and a dot product is geometry:
   </p>
@@ -627,7 +672,7 @@
 <!-- 5. MULTI-HEAD (DEMO 3)                                        -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎭 Many heads, many relations</h3>
+  <h3>Many heads, many relations</h3>
   <p style="margin-top:0">
     One softmax produces one distribution — one pattern of relevance. But a token often needs
     several relations at once: "it" wants its referent (a coreference pattern), its local context
@@ -676,7 +721,7 @@
 <!-- 6. ORIGINS                                                    -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🕰️ Where attention came from, and why recurrence was dropped</h3>
+  <h3>Where attention came from, and why recurrence was dropped</h3>
   <p style="margin-top:0">
     Attention predates the transformer by three years, and it was invented to fix a bottleneck.
     The RNN encoder–decoders of 2014 translated by reading the whole source sentence into
@@ -737,7 +782,7 @@
 <!-- 7. POSITIONAL ENCODING                                        -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📍 Attention is order-blind: positional encoding</h3>
+  <h3>Attention is order-blind: positional encoding</h3>
   <p style="margin-top:0">
     The formula in §1 never mentions position: shuffle the input tokens and the (unmasked)
     outputs shuffle identically — self-attention is <em>permutation-equivariant</em>, a set
@@ -778,7 +823,7 @@
 <!-- 8. THE FULL TRANSFORMER BLOCK                                 -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧱 The full transformer block</h3>
+  <h3>The full transformer block</h3>
   <p style="margin-top:0">
     Attention only ever <em>mixes</em> information across tokens — a weighted average cannot
     compute a new feature of a single token. The transformer block pairs it with a position-wise
@@ -839,7 +884,7 @@
 <!-- 9. INFERENCE                                                  -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>⚡ Attention at inference: cache, share, tile</h3>
+  <h3>Attention at inference: cache, share, tile</h3>
   <p style="margin-top:0">
     Generation exposes the O(n&sup2;) honestly: producing token t naively re-runs attention over
     the whole prefix, every step. Three fixes, in escalating order, are why chat-scale inference
@@ -882,7 +927,7 @@
 <!-- 10. LITERATURE + CONSEQUENCES                                 -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📚 Where this lives in the literature</h3>
+  <h3>Where this lives in the literature</h3>
   <ul style="margin-top:0">
     <li><strong>Bahdanau, Cho &amp; Bengio (2015)</strong>, <em>Neural Machine Translation by Jointly Learning to Align and Translate</em> — additive attention over RNN encoder states; the fixed-vector bottleneck argument.</li>
     <li><strong>Luong, Pham &amp; Manning (2015)</strong>, <em>Effective Approaches to Attention-based NMT</em> — dot-product (multiplicative) attention.</li>
@@ -893,7 +938,7 @@
     <li><strong>Ainslie et al. (2023)</strong>, <em>GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints</em>.</li>
   </ul>
 
-  <h3>🎯 Consequences worth remembering</h3>
+  <h3>Consequences worth remembering</h3>
   <ul style="margin-bottom:0">
     <li>Self-attention is a <strong>differentiable soft lookup</strong>: softmax(q&middot;k) weights over value vectors, with Q, K, V all projections of the same sequence.</li>
     <li>The <strong>&radic;d divisor is a softmax temperature</strong> chosen to keep score variance at 1 — not a heuristic, a variance calculation.</li>
@@ -1038,7 +1083,7 @@
 
     maskBtn.addEventListener("click", () => {
       st.causal = !st.causal;
-      maskBtn.textContent = st.causal ? "🔒 causal mask: on" : "🔓 causal mask: off";
+      maskBtn.textContent = st.causal ? "causal mask: on" : "causal mask: off";
       maskBtn.setAttribute("aria-pressed", String(st.causal));
       maskBtn.classList.toggle("sec", !st.causal);
       draw();

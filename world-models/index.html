@@ -89,13 +89,16 @@
   <h1>World Models: Learning to Dream, Then Act</h1>
 
   <div class="entry">
-    <style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
 /* ============================================================
    Study Notes — shared design system
-   Sleek/futuristic: cyan-teal accent, hairline borders, flat
-   single-accent controls, monospace numerals, glow in dark only.
+   Editorial: a single reading column, serif prose, sans headings
+   and demos, numbered sections divided by hairlines (no boxes),
+   one cyan-teal accent, monospace numerals, glow in dark only.
    Adaptive light + dark via tokens. Every selector is scoped
-   under .study-note so nothing leaks to the rest of the site.
+   under .study-note (plus the post title/date on note pages)
+   so nothing leaks to the rest of the site.
    ============================================================ */
 .study-note {
   --sn-accent: #0891b2;
@@ -117,8 +120,10 @@
   --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
   --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
 
-  --sn-radius: 12px;
-  --sn-radius-sm: 8px;
+  --sn-radius: 6px;
+  --sn-radius-sm: 4px;
+  --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --sn-glow: none;
@@ -148,6 +153,33 @@
   --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
 }
 
+/* ---- reading column: title, body and date share one measure ---- */
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.post > h1 {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 600;
+  font-size: 2.5em;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
+@media (max-width: 640px) { .post > h1 { font-size: 2em; } }
+
+/* ---- prose is serif; headings, demos and controls stay sans ---- */
+.study-note > p,
+.study-note > ul,
+.study-note > ol,
+.study-note > div > p,
+.study-note > div > ul,
+.study-note > div > ol {
+  font-family: var(--sn-serif);
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
 /* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
 .study-note sub,
 .study-note sup {
@@ -159,61 +191,75 @@
 .study-note sup { top: -0.5em; }
 .study-note sub { bottom: -0.22em; }
 
-/* ---- sections / cards ---- */
+/* ---- sections: numbered, divided by a hairline, no box ---- */
 .study-note .se-section,
 .study-note .bm-section,
 .study-note .mdp-section {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  border-radius: var(--sn-radius);
-  background: var(--sn-section);
-  border: 1px solid var(--sn-border);
-  box-shadow: var(--sn-shadow);
+  counter-increment: sn-sec;
+  margin: 3rem 0 0;
+  padding: 2.25rem 0 0;
+  border-top: 1px solid var(--sn-border);
 }
 .study-note .se-section h3,
 .study-note .bm-section h3,
 .study-note .mdp-section h3 {
-  margin-top: 0;
-  color: var(--sn-accent);
-  letter-spacing: -0.01em;
+  margin: 0 0 1rem;
+  color: var(--sn-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
 }
+.study-note .se-section h3::before,
+.study-note .bm-section h3::before,
+.study-note .mdp-section h3::before {
+  content: counter(sn-sec, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--sn-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--sn-accent);
+}
+.study-note h4 { color: var(--sn-text); }
 
 /* ---- equation boxes ---- */
 .study-note .se-equation,
 .study-note .bm-equation,
 .study-note .equation-box {
-  padding: 1rem 1.5rem;
-  margin: 1rem 0;
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
-  border-radius: var(--sn-radius-sm);
-  font-size: 1.1rem;
+  padding: 0.6rem 0;
+  margin: 1.5rem 0;
+  font-family: var(--sn-serif);
+  font-size: 1.25rem;
   text-align: center;
   overflow-x: auto;
 }
 .study-note .se-equation .big,
 .study-note .bm-equation .big { font-size: 1.25rem; }
 
-/* ---- callout / note ---- */
+/* ---- callout / note: a quiet pull-quote ---- */
 .study-note .se-note,
 .study-note .bm-note {
-  background: var(--sn-accent-soft);
-  border-radius: var(--sn-radius-sm);
-  border-left: 3px solid var(--sn-accent);
-  padding: 0.9rem 1.1rem;
-  font-size: 0.9rem;
-  margin: 1rem 0;
+  border-left: 2px solid var(--sn-accent);
+  padding: 0.2rem 0 0.2rem 1.3rem;
+  margin: 1.75rem 0;
+  font-family: var(--sn-serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  line-height: 1.65;
 }
+.study-note .se-note strong,
+.study-note .bm-note strong { font-style: normal; }
 
 /* ---- example box ---- */
 .study-note .se-example,
 .study-note .bm-example,
 .study-note .example-box {
   background: var(--sn-panel-inset);
-  border: 1px solid var(--sn-border);
-  border-left: 3px solid var(--sn-warn);
   border-radius: var(--sn-radius-sm);
-  padding: 1rem;
+  padding: 0.9rem 1rem;
+  line-height: 1.55;
   font-size: 0.9rem;
   margin: 1rem 0;
 }
@@ -222,8 +268,7 @@
 .study-note .se-chartwrap,
 .study-note .bm-chartwrap,
 .study-note .graph-wrap {
-  background: var(--sn-panel);
-  border: 1px solid var(--sn-border);
+  background: var(--sn-panel-inset);
   border-radius: var(--sn-radius-sm);
   padding: 0.5rem;
 }
@@ -424,7 +469,7 @@
 <!-- 1. THE SPLIT                                                  -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧩 A big world model and a tiny controller</h3>
+  <h3>A big world model and a tiny controller</h3>
   <p style="margin-top:0">
     The architecture has three parts, and almost all of the weights live in the first two. <strong>V</strong>
     (Vision) is a <strong>variational autoencoder</strong>: it squeezes each raw <em>64&times;64&times;3</em>
@@ -488,7 +533,7 @@
 <!-- 2. M IS GENERATIVE                                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>💭 M is generative: rolling it forward is dreaming</h3>
+  <h3>M is generative: rolling it forward is dreaming</h3>
   <p style="margin-top:0">
     M does not predict a single next latent — the future is uncertain, so it predicts a whole
     <em>distribution</em> over the next latent. It is a <strong>Mixture Density Network</strong> on top of
@@ -519,7 +564,7 @@
   </p>
 
   <div class="wm-controls">
-    <span style="font-size:0.85rem">🌡️ &tau;</span>
+    <span style="font-size:0.85rem">&tau;</span>
     <input type="range" id="wm-b-tau" min="0" max="1000" value="680" style="flex:1">
     <span class="wm-readout" id="wm-b-tauval">1.00</span>
     <span id="wm-b-tag" class="se-tag">—</span>
@@ -528,7 +573,7 @@
     <svg id="wm-b-svg" width="100%" height="280" viewBox="0 0 720 280"></svg>
   </div>
   <div class="wm-btns" style="justify-content:center">
-    <button class="se-btn" id="wm-b-run">▶ Dream</button>
+    <button class="se-btn" id="wm-b-run">▶︎ Dream</button>
     <button class="se-btn sec" id="wm-b-step">Step</button>
     <button class="se-reset" id="wm-b-reset">↺ Resample</button>
   </div>
@@ -538,7 +583,7 @@
 <!-- 3. TRAINING IN THE DREAM + THE CHEATING PROBLEM              -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎯 Training inside the dream — and the cheating problem</h3>
+  <h3>Training inside the dream — and the cheating problem</h3>
   <p style="margin-top:0">
     Here is the move that gives the paper its name. Since M is a self-contained simulator, you can train
     the controller <strong>entirely inside the dream</strong>: never touch the real environment, just let
@@ -566,7 +611,7 @@
   </p>
 
   <div class="wm-controls">
-    <span style="font-size:0.85rem">🌡️ dream &tau;</span>
+    <span style="font-size:0.85rem">dream &tau;</span>
     <input type="range" id="wm-c-tau" min="0" max="1000" value="640" style="flex:1">
     <span class="wm-readout" id="wm-c-tauval">1.00</span>
     <span id="wm-c-tag" class="se-tag">—</span>
@@ -594,7 +639,7 @@
 <!-- 4. WHERE THIS SITS                                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📚 Where this sits</h3>
+  <h3>Where this sits</h3>
   <ul style="margin:0.3rem 0 0 0;padding-left:1.2rem;line-height:1.7">
     <li><strong>Unsupervised first, reward last.</strong> V and M learn from raw experience with no reward
       signal; only the 867-parameter C ever sees the score. Most of the agent's competence is built before
@@ -833,8 +878,8 @@
       draw();
       raf = requestAnimationFrame(loop);
     }
-    function start() { running = true; runBtn.textContent = "⏸ Pause"; last = 0; acc = 0; if (reveal >= STEPS) reveal = 0; raf = requestAnimationFrame(loop); }
-    function stop() { running = false; runBtn.textContent = "▶ Dream"; if (raf) cancelAnimationFrame(raf); }
+    function start() { running = true; runBtn.textContent = "❚❚ Pause"; last = 0; acc = 0; if (reveal >= STEPS) reveal = 0; raf = requestAnimationFrame(loop); }
+    function stop() { running = false; runBtn.textContent = "▶︎ Dream"; if (raf) cancelAnimationFrame(raf); }
 
     runBtn.addEventListener("click", () => running ? stop() : start());
     stepBtn.addEventListener("click", () => { if (running) stop(); reveal = reveal >= STEPS ? STEPS : Math.min(STEPS, reveal + 4); draw(); });
