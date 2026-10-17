@@ -102,7 +102,7 @@ excerpt: "Q-learning estimates the value of every action in every state directly
 
 <!-- ==================== STATE ==================== -->
 <div class="se-section">
-  <h3>🧭 What the snake actually sees</h3>
+  <h3>What the snake actually sees</h3>
   <p style="margin-top:0">
     A tabular method must visit each state many times to learn its values, so the state space has to be tiny. The full board is out: even a modest 20×20 grid has on the order of 10<sup>100</sup> snake configurations. The fix is to describe the situation <em>relative to the snake's head</em>, keeping only what matters for the immediate decision:
   </p>
@@ -138,7 +138,7 @@ excerpt: "Q-learning estimates the value of every action in every state directly
 
 <!-- ==================== REWARDS ==================== -->
 <div class="se-section">
-  <h3>🍎 Rewards, and why shaping is asymmetric</h3>
+  <h3>Rewards, and why shaping is asymmetric</h3>
   <p style="margin-top:0">
     The reward function defines the task. Eating and dying are the obvious signals, but on their own they are too sparse: a random snake takes hundreds of steps to stumble into its first food, and until then every action looks equally worthless. A small <em>shaping</em> reward based on Manhattan distance to the food gives the agent a gradient to follow from step one.
   </p>
@@ -162,7 +162,7 @@ excerpt: "Q-learning estimates the value of every action in every state directly
 
 <!-- ==================== UPDATE RULE ==================== -->
 <div class="se-section">
-  <h3>📐 The temporal-difference update</h3>
+  <h3>The temporal-difference update</h3>
   <p style="margin-top:0">
     Q(s,&nbsp;a) estimates the total discounted reward from taking action <em>a</em> in state <em>s</em> and acting optimally afterwards. After each transition (s, a, r, s′) the table is nudged toward a better estimate of itself:
   </p>
@@ -198,7 +198,7 @@ excerpt: "Q-learning estimates the value of every action in every state directly
 
 <!-- ==================== EPSILON ==================== -->
 <div class="se-section">
-  <h3>🎲 ε-greedy exploration, on a schedule</h3>
+  <h3>ε-greedy exploration, on a schedule</h3>
   <p style="margin-top:0">
     A greedy agent exploits whatever the half-learned table currently says and can lock into bad habits before ever trying the better move. The standard fix is <strong>ε-greedy</strong>: with probability ε act uniformly at random, otherwise take the argmax action. Crucially, ε is <em>scheduled</em>: it starts at 1.0 (pure random exploration, since the initial table knows nothing worth exploiting) and decays multiplicatively after every episode — ε &larr; max(ε<sub>min</sub>, ε &middot; d) — down to a floor of 0.01 that keeps a sliver of lifelong exploration.
   </p>
@@ -222,13 +222,13 @@ excerpt: "Q-learning estimates the value of every action in every state directly
 
 <!-- ==================== LIVE TRAINER ==================== -->
 <div class="se-section">
-  <h3>🐍 The full loop, from scratch</h3>
+  <h3>The full loop, from scratch</h3>
   <p style="margin-top:0">
     All four pieces — relative state, shaped rewards, TD updates, decaying ε — assembled into the complete algorithm, running here on a 12×12 board with a fresh, empty table. Press <strong>Start</strong> and switch to fast mode: the early episodes are near-random flailing, then the shaping gradient kicks in, then food-seeking becomes reliable and the rolling average climbs. The curve is the whole story of the algorithm compressed into one line.
   </p>
 
   <div class="ql-controls" style="justify-content:center">
-    <button class="se-btn" id="tr-start">▶ Start training</button>
+    <button class="se-btn" id="tr-start">▶︎ Start training</button>
     <button class="se-btn sec" id="tr-speed1">1×</button>
     <button class="se-btn sec" id="tr-speed200">200×</button>
     <button class="reset-link" id="tr-reset">↺ Reset table</button>
@@ -442,10 +442,10 @@ excerpt: "Q-learning estimates the value of every action in every state directly
      ============================================================ */
   (function calculator() {
     const SCN = [
-      { id: "eat", label: "🍎 Ate the food", r: 10, done: false },
+      { id: "eat", label: "Ate the food", r: 10, done: false },
       { id: "closer", label: "↗ Moved closer", r: 0.3, done: false },
       { id: "farther", label: "↘ Moved away", r: -0.45, done: false },
-      { id: "die", label: "💥 Crashed", r: -10, done: true }
+      { id: "die", label: "Crashed", r: -10, done: true }
     ];
     const Q_SA = 2.4, MAX_NEXT = 4.6;
     let scn = SCN[0];
@@ -699,7 +699,7 @@ excerpt: "Q-learning estimates the value of every action in every state directly
 
     function setRunning(on) {
       running = on;
-      startBtn.textContent = on ? "⏸ Pause" : "▶ Start training";
+      startBtn.textContent = on ? "❚❚ Pause" : "▶︎ Start training";
       if (on) { lastTs = performance.now(); carry = 0; requestAnimationFrame(frame); }
     }
     function setSpeed(mult) {

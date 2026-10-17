@@ -57,7 +57,7 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
 <!-- 1. PAYOFF & P/L                                              -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📈 The bent payoff: calls, puts, and P/L</h3>
+  <h3>The bent payoff: calls, puts, and P/L</h3>
   <p style="margin-top:0">
     Owning the stock is a straight line: gain a dollar when it rises, lose one when it falls. An option
     <em>bends</em> that line at the <strong>strike</strong> K. A <strong>call</strong> is the right to
@@ -108,7 +108,7 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
 <!-- 2. INTRINSIC vs TIME VALUE                                   -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>⏳ Before expiry: intrinsic value plus time value</h3>
+  <h3>Before expiry: intrinsic value plus time value</h3>
   <p style="margin-top:0">
     Before maturity an option is worth <em>more</em> than its intrinsic payoff, because the future is
     still uncertain — there's time for the bet to come good. The live price is a smooth curve sitting
@@ -145,7 +145,7 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
 <!-- 3. VOLATILITY — THE KEYSTONE                                 -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🌪️ Volatility is the whole game</h3>
+  <h3>Volatility is the whole game</h3>
   <p style="margin-top:0">
     Here is the engine room. Under the <strong>risk-neutral</strong> measure the stock drifts at the
     risk-free rate and its terminal price is <strong>log-normal</strong>. The option is worth the
@@ -187,7 +187,7 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
 <!-- 4. BLACK–SCHOLES                                             -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧮 Black–Scholes in closed form</h3>
+  <h3>Black–Scholes in closed form</h3>
   <p style="margin-top:0">
     Where does the formula come from? Build a portfolio of the option and &minus;&Delta; shares so the
     random moves cancel. A hedged, riskless portfolio must earn the risk-free rate — that no-arbitrage
@@ -246,7 +246,7 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
 <!-- 5. THE GREEKS                                                -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🔢 The Greeks: slopes, curvature, and decay</h3>
+  <h3>The Greeks: slopes, curvature, and decay</h3>
   <p style="margin-top:0">
     The Greeks are just partial derivatives of the price — its sensitivities to each input. Two of them
     are right there in the picture: <strong>delta</strong> is the <em>slope</em> of the price curve, and
@@ -302,7 +302,7 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
 <!-- 6. MONTE CARLO — SHOWPIECE                                   -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎲 Proof by simulation: Monte-Carlo onto Black–Scholes</h3>
+  <h3>Proof by simulation: Monte-Carlo onto Black–Scholes</h3>
   <p style="margin-top:0">
     If the price really is a risk-neutral expectation, we should be able to <em>just sample it</em>. Draw
     thousands of terminal prices S<sub>T</sub> from the log-normal, take each discounted payoff, and
@@ -314,7 +314,7 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
   </div>
 
   <div class="ot-toggle">
-    <button class="se-btn" id="ot6-start">▶ Start</button>
+    <button class="se-btn" id="ot6-start">▶︎ Start</button>
     <button class="se-btn sec" id="ot6-step">Step +500</button>
     <button class="se-reset" id="ot6-reset">Reset</button>
     <span style="flex:1"></span>
@@ -808,9 +808,9 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
       if (n >= NMAX) { stop(); return; }
       timer = requestAnimationFrame(loop);
     }
-    function start() { if (timer) return; bStart.textContent = "⏸ Pause"; timer = requestAnimationFrame(loop); }
-    function stop() { if (timer) cancelAnimationFrame(timer); timer = null; bStart.textContent = n >= NMAX ? "▶ Start" : "▶ Resume"; }
-    function reset() { stop(); n = 0; sum = 0; running = []; bins.fill(0); binMax = 0; bStart.textContent = "▶ Start"; update(0); }
+    function start() { if (timer) return; bStart.textContent = "❚❚ Pause"; timer = requestAnimationFrame(loop); }
+    function stop() { if (timer) cancelAnimationFrame(timer); timer = null; bStart.textContent = n >= NMAX ? "▶︎ Start" : "▶︎ Resume"; }
+    function reset() { stop(); n = 0; sum = 0; running = []; bins.fill(0); binMax = 0; bStart.textContent = "▶︎ Start"; update(0); }
 
     bStart.onclick = () => { timer ? stop() : start(); };
     bStep.onclick = () => { stop(); batch(500); };

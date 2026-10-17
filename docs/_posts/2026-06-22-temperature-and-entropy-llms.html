@@ -56,7 +56,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
 <!-- 1. SOFTMAX WITH TEMPERATURE = BOLTZMANN DISTRIBUTION         -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🌡️ The same distribution, two names</h3>
+  <h3>The same distribution, two names</h3>
   <p style="margin-top:0">
     A model scores each candidate token with a real number called a <strong>logit</strong>
     <em>z<sub>i</sub></em>. Temperature sampling rescales those logits by <em>T</em> and runs them
@@ -89,7 +89,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
     </div>
     <div class="te-panel">
       <div class="te-controls" style="margin-top:0">
-        <span style="font-size:0.85rem">🌡️ T</span>
+        <span style="font-size:0.85rem">T</span>
         <input type="range" id="te1-T" min="0" max="1000" value="651" style="flex:1">
         <span class="te-readout" id="te1-Tval">1.00</span>
       </div>
@@ -99,9 +99,9 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
       </div>
       <div style="text-align:center;margin:0.3rem 0"><span id="te1-tag" class="se-tag">—</span></div>
       <div class="te-presets">
-        <button class="se-btn sec" id="te1-cold">🧊 Greedy (T→0)</button>
-        <button class="se-btn sec" id="te1-warm">🌡️ T = 1</button>
-        <button class="se-btn sec" id="te1-hot">🔥 Uniform (T→∞)</button>
+        <button class="se-btn sec" id="te1-cold">Greedy (T→0)</button>
+        <button class="se-btn sec" id="te1-warm">T = 1</button>
+        <button class="se-btn sec" id="te1-hot">Uniform (T→∞)</button>
       </div>
     </div>
   </div>
@@ -129,7 +129,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
 <!-- 2. THE TWO LIMITS                                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🧊🔥 The two ends of the dial</h3>
+  <h3>The two ends of the dial</h3>
   <p style="margin-top:0">
     Both extremes are worth naming because both are used in practice, and both pin down the entropy
     exactly. Slide the temperature in the demo above to either edge to see them.
@@ -162,7 +162,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
 <!-- 3. MAXIMUM ENTROPY / FREE ENERGY                            -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>⚖️ One dial, two appetites: energy vs entropy</h3>
+  <h3>One dial, two appetites: energy vs entropy</h3>
   <p style="margin-top:0">
     There is a deeper reason temperature controls entropy, and it is the reason the Boltzmann
     distribution turns up everywhere. Among <em>all</em> distributions with a given expected energy
@@ -188,7 +188,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
   </p>
 
   <div class="te-controls">
-    <span style="font-size:0.85rem">🌡️ T</span>
+    <span style="font-size:0.85rem">T</span>
     <input type="range" id="te2-T" min="0" max="1000" value="651" style="flex:1;max-width:340px">
     <span class="te-readout" id="te2-Tval">1.00</span>
   </div>
@@ -225,7 +225,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
 <!-- 4. THE HEAT-CAPACITY PEAK                                    -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📈 The sweet spot: where entropy rises fastest</h3>
+  <h3>The sweet spot: where entropy rises fastest</h3>
   <p style="margin-top:0">
     "Entropy increases with temperature" is true, but it does not increase <em>evenly</em>. The right
     chart above is the rate <em>dS/dT</em>, and it has a hump. There is a characteristic temperature
@@ -267,7 +267,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
 <!-- 5. SAMPLER                                                   -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>🎲 Sampling at temperature: the entropy you actually get</h3>
+  <h3>Sampling at temperature: the entropy you actually get</h3>
   <p style="margin-top:0">
     Entropy is an expectation, so take the average. This is the same sampler from the
     <a href="/shannon-entropy-visually/">Shannon entropy note</a>, but now temperature sets the target:
@@ -277,12 +277,12 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
   </p>
 
   <div class="te-controls">
-    <span style="font-size:0.85rem">🌡️ T</span>
+    <span style="font-size:0.85rem">T</span>
     <input type="range" id="te3-T" min="0" max="1000" value="651" style="flex:1;max-width:300px">
     <span class="te-readout" id="te3-Tval">1.00</span>
   </div>
   <div class="te-controls">
-    <button class="se-btn" id="te3-run">▶ Run sampler</button>
+    <button class="se-btn" id="te3-run">▶︎ Run sampler</button>
     <button class="se-btn sec" id="te3-step">Draw 25</button>
     <button class="se-reset" id="te3-reset">↺ Reset</button>
   </div>
@@ -312,7 +312,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
 <!-- 6. LITERATURE + CONSEQUENCES                                 -->
 <!-- ============================================================ -->
 <div class="se-section">
-  <h3>📚 Where this lives in the literature</h3>
+  <h3>Where this lives in the literature</h3>
   <p style="margin-top:0">
     The temperature–entropy link is not a folk heuristic; it is the bridge between information theory
     and statistical mechanics, and it has been discussed for decades under several names.
@@ -337,7 +337,7 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
       distribution.</li>
   </ul>
 
-  <h3 style="margin-top:1.4rem">🎯 The consequences worth remembering</h3>
+  <h3 style="margin-top:1.4rem">The consequences worth remembering</h3>
   <ul style="line-height:1.75">
     <li><strong>Monotone, and provably so.</strong> <em>dS/dT = Var(E)/T<sup>3</sup> &ge; 0</em>: heating
       never lowers entropy.</li>
@@ -659,8 +659,8 @@ excerpt: "The temperature parameter in an LLM divides the logits before the soft
       draw();
       raf = requestAnimationFrame(loop);
     }
-    function start() { running = true; runBtn.textContent = "⏸ Pause"; last = 0; acc = 0; raf = requestAnimationFrame(loop); }
-    function stop() { running = false; runBtn.textContent = "▶ Run sampler"; if (raf) cancelAnimationFrame(raf); }
+    function start() { running = true; runBtn.textContent = "❚❚ Pause"; last = 0; acc = 0; raf = requestAnimationFrame(loop); }
+    function stop() { running = false; runBtn.textContent = "▶︎ Run sampler"; if (raf) cancelAnimationFrame(raf); }
 
     runBtn.addEventListener("click", () => { running ? stop() : start(); });
     document.getElementById("te3-step").addEventListener("click", () => { for (let i = 0; i < 25; i++) drawOne(); draw(); });
