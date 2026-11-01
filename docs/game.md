@@ -417,12 +417,13 @@ function gameOver() {
 // ---------------------------------------------------------------------------
 // AI mode — tabular Q-learning
 //
-// State (a few hundred entries at most): danger straight/left/right relative
-// to the current heading, the heading itself, and the sign of the food's
-// offset from the head. Actions are relative (straight / turn left / turn
+// State (a few thousand entries at most): danger straight/left/right relative
+// to the current heading, the heading itself, and the sign of the food's and
+// the tail's offset from the head. The tail direction is a cheap hint for
+// escaping: the tail is the one cell guaranteed to free up. Actions are relative (straight / turn left / turn
 // right), so the agent can never reverse into its own neck.
 // ---------------------------------------------------------------------------
-const BRAIN_KEY = 'snake-ai-brain-v1';
+const BRAIN_KEY = 'snake-ai-brain-v2';   // bump when the state format changes
 const STARVE_LIMIT = 200;      // steps without food before the episode is cut off
 const HISTORY_MAX = 200;       // episodes kept for the sparkline
 const AVG_WINDOW = 50;         // rolling-average window for the stats readout
@@ -472,7 +473,10 @@ function getStateKey() {
   const dR = checkCollision(nextCell(head, turnDir(direction, 2))) ? 1 : 0;
   const fx = Math.sign(food.x - head.x);
   const fy = Math.sign(food.y - head.y);
-  return dS + '' + dL + dR + '|' + direction + '|' + fx + ',' + fy;
+  const tail = snake[snake.length - 1];
+  const tx = Math.sign(tail.x - head.x);
+  const ty = Math.sign(tail.y - head.y);
+  return dS + '' + dL + dR + '|' + direction + '|' + fx + ',' + fy + '|' + tx + ',' + ty;
 }
 
 function getQ(stateKey) {
@@ -752,6 +756,8 @@ function saveBrain() {
 
 function loadBrain() {
   try {
+    localStorage.removeItem('snake-ai-brain-v1');  // old state format, unusable
+
     const raw = localStorage.getItem(BRAIN_KEY);
     if (!raw) return;
     const data = JSON.parse(raw);
