@@ -6,7 +6,7 @@ permalink: /projects/
 
 <div class="projects">
   <p class="projects-header">
-    Selected GitHub projects — Kaggle Playground Series entries, coursework from Politecnico di Milano and KTH,
+    Selected GitHub projects — an ongoing Kaggle Playground Series project, coursework from Politecnico di Milano and KTH,
     two ACM RecSys Challenge entries, a hackathon, and this site itself.
     Full list on
     <a href="https://github.com/Alexdruso" target="_blank" rel="noopener">GitHub</a>.
@@ -20,7 +20,7 @@ permalink: /projects/
   {% for project in projects %}
     <article class="project-card">
       <div class="project-meta">
-        <span class="project-year">{{ project.year }}</span>
+        <span class="project-year">{{ project.period | default: project.year }}</span>
         {% if project.role %}<span class="role-chip">{{ project.role }}</span>{% endif %}
       </div>
 
@@ -30,7 +30,18 @@ permalink: /projects/
 
       {% if project.context %}<p class="project-context">{{ project.context }}</p>{% endif %}
 
-      <p class="project-description">{{ project.description }}</p>
+      <p class="project-description">{{ project.description | markdownify | remove: "<p>" | remove: "</p>" | strip }}</p>
+
+      {% if project.entries %}
+        <ul class="project-entries">
+          {% for entry in project.entries %}
+            <li>
+              <a href="{{ entry.url }}" target="_blank" rel="noopener">{{ entry.name }}</a>
+              <span class="project-entry-summary">{{ entry.summary }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
 
       {% if project.tags %}
         <p class="project-tags">

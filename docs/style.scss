@@ -1492,6 +1492,31 @@ footer {
   color: $darkGray;
 }
 
+.project-entries {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+  font-size: 0.92em;
+
+  li {
+    margin-bottom: 0.35rem;
+  }
+
+  a {
+    color: $darkerGray;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      color: $blue;
+    }
+  }
+}
+
+.project-entry-summary {
+  display: block;
+  color: $darkGray;
+}
+
 .project-tags {
   display: flex;
   flex-wrap: wrap;
@@ -1557,6 +1582,18 @@ footer {
 
   .project-year {
     color: $dark-gray;
+  }
+
+  .project-entries a {
+    color: $dark-text;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+
+  .project-entry-summary {
+    color: $dark-text;
   }
 
   .role-chip {
