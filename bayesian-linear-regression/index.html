@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Software Engineer at Optiver">
+    <meta name="author" content="Alessandro Sanvito">
+    <title>Bayesian Linear Regression: Ridge, Plus the Error Bars – Alessandro Sanvito</title>
+
+        <link rel="canonical" href="https://alexdruso.github.io/bayesian-linear-regression/" />
+    <meta property="og:url" content="https://alexdruso.github.io/bayesian-linear-regression/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:image" content="https://alexdruso.github.io/images/me.jpg" />
+    <meta name="twitter:card" content="summary" />
+
+    
+    <meta name="description" content="Bayesian linear regression treats the weights as a random variable and returns their whole posterior distribution instead of one best vector. Its posterior mean is exactly the ridge solution with λ = σ²/τ²; what it adds is a covariance over the weights, an error bar on every prediction that splits into noise and model uncertainty, and a way to set λ from the training data alone." />
+    <meta property="og:description" content="Bayesian linear regression treats the weights as a random variable and returns their whole posterior distribution instead of one best vector. Its posterior mean is exactly the ridge solution with λ = σ²/τ²; what it adds is a covariance over the weights, an error bar on every prediction that splits into noise and model uncertainty, and a way to set λ from the training data alone." />
+    
+    <meta name="author" content="Alessandro Sanvito" />
+
+    
+    <meta property="og:title" content="Bayesian Linear Regression: Ridge, Plus the Error Bars" />
+    <meta property="twitter:title" content="Bayesian Linear Regression: Ridge, Plus the Error Bars" />
+    
+
+    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link rel="alternate" type="application/rss+xml" title="Alessandro Sanvito - Software Engineer at Optiver" href="/feed.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  </head>
+
+  <body>
+    <div class="wrapper-masthead">
+      <div class="container">
+        <header class="masthead clearfix">
+          <a href="/" class="site-avatar"><img src="/images/me.jpg" alt="Alessandro Sanvito" /></a>
+
+          <div class="site-info">
+            <h1 class="site-name"><a href="/">Alessandro Sanvito</a></h1>
+            <p class="site-description">Software Engineer at Optiver</p>
+          </div>
+
+          <nav>
+            
+              <a href="/" >
+                <i class="fas fa-user"></i>
+                About Me
+              </a>
+            
+              <a href="/publications/" >
+                <i class="fas fa-graduation-cap"></i>
+                Publications
+              </a>
+            
+              <a href="/projects/" >
+                <i class="fas fa-code-branch"></i>
+                Projects
+              </a>
+            
+              <a href="/study-notes/" >
+                <i class="fas fa-book-open"></i>
+                Study Notes
+              </a>
+            
+              <a href="/cv/" >
+                <i class="fas fa-file-alt"></i>
+                CV
+              </a>
+            
+              <a href="/game/" >
+                <i class="fas fa-gamepad"></i>
+                Snake
+              </a>
+            
+            <button class="nav-search" aria-label="Search the site (Ctrl+K or ⌘K)">
+              <i class="fas fa-search"></i><span class="nav-search-label">Search</span><kbd>⌘K</kbd>
+            </button>
+          </nav>
+        </header>
+      </div>
+    </div>
+
+    <div id="main" role="main" class="container">
+      <article class="post">
+  <h1>Bayesian Linear Regression: Ridge, Plus the Error Bars</h1>
+
+  <div class="entry">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* ============================================================
+   Study Notes — shared design system
+   Editorial: a single reading column, serif prose, sans headings
+   and demos, numbered sections divided by hairlines (no boxes),
+   one cyan-teal accent, monospace numerals, glow in dark only.
+   Adaptive light + dark via tokens. Every selector is scoped
+   under .study-note (plus the post title/date on note pages)
+   so nothing leaks to the rest of the site.
+   ============================================================ */
+.study-note {
+  --sn-accent: #0891b2;
+  --sn-accent-strong: #06b6d4;
+  --sn-accent-soft: rgba(8, 145, 178, 0.10);
+  --sn-accent-line: rgba(8, 145, 178, 0.30);
+  --sn-on-accent: #ffffff;
+
+  --sn-panel: #ffffff;
+  --sn-panel-inset: #f6f8fa;
+  --sn-section: #f7f9fb;
+  --sn-border: rgba(15, 23, 42, 0.08);
+  --sn-grid: rgba(15, 23, 42, 0.10);
+
+  --sn-text: #1f2933;
+  --sn-muted: #64748b;
+
+  --sn-good: #0f9d8c;  --sn-good-bg: rgba(15, 157, 140, 0.10);
+  --sn-warn: #b07d18;  --sn-warn-bg: rgba(176, 125, 24, 0.10);
+  --sn-bad:  #b4544b;  --sn-bad-bg:  rgba(180, 84, 75, 0.10);
+
+  --sn-radius: 6px;
+  --sn-radius-sm: 4px;
+  --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-column: 760px;
+  --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
+  --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --sn-glow: none;
+  --sn-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Roboto Mono", Menlo, Consolas, monospace;
+}
+.dark-theme .study-note {
+  --sn-accent: #22d3ee;
+  --sn-accent-strong: #67e8f9;
+  --sn-accent-soft: rgba(34, 211, 238, 0.12);
+  --sn-accent-line: rgba(34, 211, 238, 0.35);
+  --sn-on-accent: #06141a;
+
+  --sn-panel: #11131c;
+  --sn-panel-inset: #161a26;
+  --sn-section: #14161f;
+  --sn-border: rgba(148, 163, 184, 0.14);
+  --sn-grid: rgba(148, 163, 184, 0.16);
+
+  --sn-text: #e2e8f0;
+  --sn-muted: #94a3b8;
+
+  --sn-good: #34d399;  --sn-good-bg: rgba(52, 211, 153, 0.12);
+  --sn-warn: #e2b04a;  --sn-warn-bg: rgba(226, 176, 74, 0.12);
+  --sn-bad:  #f0857c;  --sn-bad-bg:  rgba(240, 133, 124, 0.12);
+
+  --sn-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --sn-glow: 0 0 0 1px var(--sn-accent-line), 0 0 16px rgba(34, 211, 238, 0.18);
+}
+
+/* ---- reading column: title, body and date share one measure ---- */
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.post > h1 {
+  max-width: 760px;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-weight: 600;
+  font-size: 2.5em;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
+@media (max-width: 640px) { .post > h1 { font-size: 2em; } }
+
+/* ---- prose is serif; headings, demos and controls stay sans ---- */
+.study-note > p,
+.study-note > ul,
+.study-note > ol,
+.study-note > div > p,
+.study-note > div > ul,
+.study-note > div > ol {
+  font-family: var(--sn-serif);
+  font-size: 1.15rem;
+  line-height: 1.7;
+}
+
+/* ---- restore sub/sup (flattened by the global Meyer reset) ---- */
+.study-note sub,
+.study-note sup {
+  font-size: 0.72em;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+.study-note sup { top: -0.5em; }
+.study-note sub { bottom: -0.22em; }
+
+/* ---- sections: numbered, divided by a hairline, no box ---- */
+.study-note .se-section,
+.study-note .bm-section,
+.study-note .mdp-section {
+  counter-increment: sn-sec;
+  margin: 3rem 0 0;
+  padding: 2.25rem 0 0;
+  border-top: 1px solid var(--sn-border);
+}
+.study-note .se-section h3,
+.study-note .bm-section h3,
+.study-note .mdp-section h3 {
+  margin: 0 0 1rem;
+  color: var(--sn-text);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.015em;
+}
+.study-note .se-section h3::before,
+.study-note .bm-section h3::before,
+.study-note .mdp-section h3::before {
+  content: counter(sn-sec, decimal-leading-zero);
+  display: block;
+  margin-bottom: 0.4rem;
+  font-family: var(--sn-mono);
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--sn-accent);
+}
+.study-note h4 { color: var(--sn-text); }
+
+/* ---- equation boxes ---- */
+.study-note .se-equation,
+.study-note .bm-equation,
+.study-note .equation-box {
+  padding: 0.6rem 0;
+  margin: 1.5rem 0;
+  font-family: var(--sn-serif);
+  font-size: 1.25rem;
+  text-align: center;
+  overflow-x: auto;
+}
+.study-note .se-equation .big,
+.study-note .bm-equation .big { font-size: 1.25rem; }
+
+/* ---- callout / note: a quiet pull-quote ---- */
+.study-note .se-note,
+.study-note .bm-note {
+  border-left: 2px solid var(--sn-accent);
+  padding: 0.2rem 0 0.2rem 1.3rem;
+  margin: 1.75rem 0;
+  font-family: var(--sn-serif);
+  font-size: 1.15rem;
+  font-style: italic;
+  line-height: 1.65;
+}
+.study-note .se-note strong,
+.study-note .bm-note strong { font-style: normal; }
+
+/* ---- example box ---- */
+.study-note .se-example,
+.study-note .bm-example,
+.study-note .example-box {
+  background: var(--sn-panel-inset);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.9rem 1rem;
+  line-height: 1.55;
+  font-size: 0.9rem;
+  margin: 1rem 0;
+}
+
+/* ---- chart containers ---- */
+.study-note .se-chartwrap,
+.study-note .bm-chartwrap,
+.study-note .graph-wrap {
+  background: var(--sn-panel-inset);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.5rem;
+}
+.study-note .graph-wrap { overflow-x: auto; }
+
+/* ---- primary buttons ---- */
+.study-note .se-btn,
+.study-note .bm-btn,
+.study-note .vi-btn {
+  padding: 0.5rem 1.1rem;
+  border: none;
+  border-radius: var(--sn-radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-on-accent);
+  background: var(--sn-accent);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.2s var(--sn-ease), background 0.2s var(--sn-ease);
+}
+.study-note .se-btn:hover:not(:disabled),
+.study-note .bm-btn:hover:not(:disabled),
+.study-note .vi-btn:hover:not(:disabled) {
+  background: var(--sn-accent-strong);
+  transform: translateY(-1px);
+  box-shadow: var(--sn-glow);
+}
+.study-note .se-btn:disabled,
+.study-note .bm-btn:disabled,
+.study-note .vi-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+/* secondary variant */
+.study-note .se-btn.sec,
+.study-note .bm-btn.sec,
+.study-note .vi-btn.sec {
+  background: transparent;
+  color: var(--sn-accent);
+  box-shadow: inset 0 0 0 1px var(--sn-accent-line);
+}
+.study-note .se-btn.sec:hover:not(:disabled),
+.study-note .bm-btn.sec:hover:not(:disabled),
+.study-note .vi-btn.sec:hover:not(:disabled) {
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+}
+
+/* ---- ghost / reset buttons ---- */
+.study-note .se-reset,
+.study-note .bm-reset,
+.study-note .reset-link {
+  background: none;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.4rem 0.85rem;
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--sn-muted);
+  transition: background 0.15s var(--sn-ease), border-color 0.15s var(--sn-ease), color 0.15s var(--sn-ease);
+}
+.study-note .se-reset:hover,
+.study-note .bm-reset:hover,
+.study-note .reset-link:hover {
+  background: var(--sn-accent-soft);
+  border-color: var(--sn-accent-line);
+  color: var(--sn-accent);
+}
+
+/* ---- range sliders: flat, single-accent ---- */
+.study-note input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+  outline: none;
+  cursor: pointer;
+}
+.study-note input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+  transition: transform 0.15s var(--sn-ease), box-shadow 0.15s var(--sn-ease);
+}
+.study-note input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.study-note input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sn-accent);
+  border: none;
+  box-shadow: 0 0 0 4px var(--sn-accent-soft);
+}
+.study-note input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--sn-border);
+}
+
+/* ---- status pills ---- */
+.study-note .se-tag,
+.study-note .bm-tag {
+  display: inline-block;
+  padding: 0.22rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  transition: background 0.2s var(--sn-ease), color 0.2s var(--sn-ease);
+}
+.study-note .se-tag.good, .study-note .bm-tag.good { background: var(--sn-good-bg); color: var(--sn-good); }
+.study-note .se-tag.warn, .study-note .bm-tag.warn { background: var(--sn-warn-bg); color: var(--sn-warn); }
+.study-note .se-tag.hot,  .study-note .bm-tag.hot  { background: var(--sn-bad-bg);  color: var(--sn-bad); }
+
+/* ---- numerals: monospace, tabular, accent (size kept per-note) ---- */
+.study-note .se-stat .val,
+.study-note .bm-stat .val,
+.study-note .score-item .sval,
+.study-note .compare-score {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  color: var(--sn-accent);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.study-note .se-readout,
+.study-note .bm-temp-readout {
+  font-family: var(--sn-mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--sn-accent);
+}
+
+/* ---- svg text (scoped; replaces the old leaky global rule) ---- */
+.study-note svg text { fill: var(--sn-muted); }
+</style>
+
+
+<div class="study-note">
+
+<style>
+/* Note-specific LAYOUT only. Prefix `blr-` (Bayesian linear regression). */
+.blr-flex { display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-start; }
+.blr-flex > div { flex: 1 1 260px; min-width: 0; }
+.blr-cap { font-size: 0.8rem; letter-spacing: 0.01em; color: var(--sn-muted); margin: 0 0 0.3rem; text-align: center; }
+
+.blr-ctrl { display: grid; grid-template-columns: 150px 1fr 76px; gap: 0.6rem; align-items: center; margin: 0.45rem 0; }
+.blr-ctrl .nm { font-size: 0.85rem; }
+.blr-ctrl .pv { font-size: 0.85rem; text-align: right; font-family: var(--sn-mono); font-variant-numeric: tabular-nums; color: var(--sn-accent); font-weight: 600; }
+@media (max-width: 520px) { .blr-ctrl { grid-template-columns: 1fr 64px; } .blr-ctrl .nm { grid-column: 1 / -1; margin-bottom: -0.3rem; } }
+
+.blr-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin: 0.6rem 0; }
+.blr-seg { display: inline-flex; border: 1px solid var(--sn-border); border-radius: var(--sn-radius); overflow: hidden; }
+.blr-seg button { font: inherit; font-size: 0.82rem; padding: 0.35rem 0.8rem; border: 0; background: var(--sn-panel-inset); color: var(--sn-muted); cursor: pointer; transition: background 0.15s var(--sn-ease), color 0.15s var(--sn-ease); }
+.blr-seg button.on { background: var(--sn-accent); color: var(--sn-on-accent); }
+
+.blr-stats { display: flex; gap: 1.4rem; justify-content: center; flex-wrap: wrap; margin: 0.7rem 0 0.2rem; }
+.blr-stat { text-align: center; }
+.blr-stat .lab { font-size: 0.74rem; color: var(--sn-muted); }
+.blr-stat .val { font-family: var(--sn-mono); font-variant-numeric: tabular-nums; color: var(--sn-accent); font-weight: 700; font-size: 1.15rem; line-height: 1.2; }
+
+.blr-legend { font-size: 0.78rem; color: var(--sn-muted); display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-top: 0.35rem; }
+.blr-legend i { display: inline-block; width: 18px; height: 0; vertical-align: middle; margin-right: 5px; border-top: 2px solid var(--sn-accent); }
+.blr-legend i.dash { border-top: 2px dashed var(--sn-muted); }
+.blr-legend i.thin { border-top: 1.5px solid var(--sn-text); opacity: 0.7; }
+.blr-legend i.band { height: 10px; border: 0; background: var(--sn-accent); opacity: 0.3; }
+.blr-legend i.band2 { height: 10px; border: 0; background: var(--sn-accent); opacity: 0.12; }
+
+.blr-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0.8rem 0; }
+.blr-table th, .blr-table td { padding: 0.45rem 0.5rem; border-bottom: 1px solid var(--sn-border); text-align: left; vertical-align: top; }
+.blr-table th { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sn-muted); font-weight: 600; }
+.blr-table td.m { font-family: var(--sn-mono); font-size: 0.8rem; }
+.blr-table tr.hl td { background: var(--sn-accent-soft); }
+.blr-scroll { overflow-x: auto; }
+
+.study-note svg.blr-click { cursor: crosshair; touch-action: manipulation; }
+</style>
+
+<p>
+  <strong>Bayesian linear regression</strong> is ordinary linear regression in which the weight
+  vector <em>w</em> is treated as a random variable: it gets a prior distribution, and fitting the
+  model means computing the <em>posterior</em> distribution of <em>w</em> given the data, rather
+  than a single best estimate. The question this note answers is what that buys over ridge or
+  lasso, which already look like "regression with a prior".
+</p>
+
+<div class="se-note">
+  <strong>Ridge regression is the peak of the Bayesian posterior; Bayesian linear regression keeps
+  the whole posterior.</strong> The posterior mean is exactly the ridge solution with
+  λ = σ²/τ². The extra information is the posterior covariance, which turns into an error bar on
+  every prediction and into a criterion for choosing λ from the training data alone.
+</div>
+
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>The same model, read as probability</h3>
+  <p style="margin-top:0">
+    Start from the model that least squares already assumes implicitly. With features
+    φ(x) (the raw inputs, or any fixed basis expansion of them), each target is a linear
+    function plus Gaussian noise:
+  </p>
+  <div class="se-equation"><span class="big">y<sub>n</sub> = w<sup>T</sup>φ(x<sub>n</sub>) + ε<sub>n</sub>, &nbsp; ε<sub>n</sub> ~ N(0, σ²)</span></div>
+  <p>
+    Maximising this likelihood is ordinary least squares. Now add a prior on the weights:
+    each one is zero-mean Gaussian with variance τ². It is convenient to work with precisions
+    (inverse variances): <strong>α = 1/τ²</strong> for the prior and <strong>β = 1/σ²</strong>
+    for the noise. Bayes' rule gives the posterior up to a constant, and its negative log is
+  </p>
+  <div class="se-equation"><span class="big">−ln p(w | y) = (β/2) Σ<sub>n</sub> (y<sub>n</sub> − w<sup>T</sup>φ<sub>n</sub>)² + (α/2) ‖w‖² + const</span></div>
+  <p>
+    Multiply by 2/β and this is the ridge objective
+    ‖y − Φw‖² + λ‖w‖² with
+  </p>
+  <div class="se-equation"><span class="big">λ = α / β = σ² / τ²</span></div>
+  <p>
+    So the ridge penalty is not an arbitrary knob: it is the ratio of the noise variance to the
+    prior variance of the weights. Large λ means noisy data or a strong belief that weights are
+    small. Swapping the Gaussian prior for a Laplace prior, p(w<sub>j</sub>) ∝ exp(−|w<sub>j</sub>|/b),
+    turns the penalty into ‖w‖₁ and gives the lasso (with λ = σ²/b for the
+    ½‖y − Φw‖² + λ‖w‖₁ convention).
+  </p>
+  <div class="blr-scroll">
+  <table class="blr-table">
+    <thead><tr><th>Method</th><th>Prior on w</th><th>What it returns</th></tr></thead>
+    <tbody>
+      <tr><td>OLS</td><td>flat (none)</td><td>maximum-likelihood point</td></tr>
+      <tr><td>Ridge</td><td>Gaussian N(0, τ²)</td><td>posterior <strong>mode</strong> (MAP)</td></tr>
+      <tr><td>Lasso</td><td>Laplace(0, b)</td><td>posterior <strong>mode</strong> (MAP)</td></tr>
+      <tr class="hl"><td>Bayesian LR</td><td>Gaussian N(0, τ²)</td><td>the <strong>whole posterior</strong> N(m<sub>N</sub>, S<sub>N</sub>)</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>
+    Ridge and lasso are already Bayesian in their assumptions; they just stop at the peak.
+    Everything else in this note comes from not stopping there.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>Prior × likelihood, one weight at a time</h3>
+  <p style="margin-top:0">
+    The cleanest picture uses a single weight: a line through the origin, y = w·x + ε, with true
+    slope 0.5. The posterior over w is the prior multiplied by the likelihood and renormalised.
+    The ridge or lasso estimate is the location of the posterior's peak; the shaded region is
+    the 95% credible interval, which no point estimate gives you.
+  </p>
+
+  <div class="blr-btns">
+    <span style="font-size:0.85rem">Prior:</span>
+    <span class="blr-seg" id="blr1-prior">
+      <button data-p="gauss" class="on">Gaussian (ridge)</button><button data-p="laplace">Laplace (lasso)</button>
+    </span>
+  </div>
+  <div class="blr-ctrl"><span class="nm">data points n</span><input type="range" class="se-slider" id="blr1-n" min="0" max="50" step="1" value="3"><span class="pv" id="blr1-n-v"></span></div>
+  <div class="blr-ctrl"><span class="nm">noise σ</span><input type="range" class="se-slider" id="blr1-s" min="0.1" max="1.5" step="0.05" value="0.6"><span class="pv" id="blr1-s-v"></span></div>
+  <div class="blr-ctrl"><span class="nm">prior width τ</span><input type="range" class="se-slider" id="blr1-t" min="0.05" max="2" step="0.05" value="0.5"><span class="pv" id="blr1-t-v"></span></div>
+
+  <div class="blr-flex">
+    <div>
+      <p class="blr-cap">Density over the slope w</p>
+      <div class="graph-wrap"><svg id="blr1-dens" viewBox="0 0 400 240" width="100%"></svg></div>
+      <div class="blr-legend"><span><i class="dash"></i>prior</span><span><i class="thin"></i>likelihood (rescaled)</span><span><i></i>posterior</span></div>
+    </div>
+    <div>
+      <p class="blr-cap">Data and plausible lines</p>
+      <div class="graph-wrap"><svg id="blr1-data" viewBox="0 0 400 240" width="100%"></svg></div>
+      <div class="blr-legend"><span><i></i>MAP line</span><span><i class="band"></i>95% of slopes</span><span><i class="dash"></i>true line</span></div>
+    </div>
+  </div>
+  <div class="blr-stats">
+    <div class="blr-stat"><div class="lab">OLS slope</div><div class="val" id="blr1-ols">–</div></div>
+    <div class="blr-stat"><div class="lab" id="blr1-maplab">MAP = ridge</div><div class="val" id="blr1-map">–</div></div>
+    <div class="blr-stat"><div class="lab">posterior mean</div><div class="val" id="blr1-mean">–</div></div>
+    <div class="blr-stat"><div class="lab">95% interval</div><div class="val" id="blr1-ci">–</div></div>
+  </div>
+  <p>Things to try:</p>
+  <ul>
+    <li>Set n = 0: the posterior is the prior. Add points and the likelihood narrows and drags the posterior toward the data; with n = 50 the prior barely matters.</li>
+    <li>Shrink τ: the prior dominates and the estimate is pulled to 0 (that is the "shrinkage" in ridge). Raise σ: each point is less informative, so the same thing happens. Only the ratio σ²/τ² matters for the peak.</li>
+    <li>Switch to the Laplace prior and shrink τ (or use few points): the peak snaps to <em>exactly</em> 0, which is how lasso produces sparse solutions. The posterior <em>mean</em>, however, is not zero: the mass on either side of the kink still pulls it away. A fully Bayesian lasso averages instead of picking the peak, and so does not give exact zeros.</li>
+  </ul>
+</div>
+
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>The posterior in closed form</h3>
+  <p style="margin-top:0">
+    With a Gaussian prior and Gaussian noise, the posterior is again Gaussian (the prior is
+    <em>conjugate</em>), so it is fully described by a mean vector and a covariance matrix.
+    With design matrix Φ (one row φ(x<sub>n</sub>)<sup>T</sup> per data point):
+  </p>
+  <div class="se-equation"><span class="big">p(w | y) = N(w | m<sub>N</sub>, S<sub>N</sub>)</span></div>
+  <div class="se-equation"><span class="big">S<sub>N</sub><sup>−1</sup> = α I + β Φ<sup>T</sup>Φ</span></div>
+  <div class="se-equation"><span class="big">m<sub>N</sub> = β S<sub>N</sub> Φ<sup>T</sup>y = (Φ<sup>T</sup>Φ + (α/β) I)<sup>−1</sup> Φ<sup>T</sup>y</span></div>
+  <p>
+    The second form of m<sub>N</sub> is the ridge closed form, term for term. Three readings of
+    the covariance are worth keeping:
+  </p>
+  <ul>
+    <li><strong>Precisions add.</strong> The prior contributes αI. Each data point contributes
+      βφ<sub>n</sub>φ<sub>n</sub><sup>T</sup>, a rank-one increase in certainty along the direction
+      φ<sub>n</sub> and no information in the directions orthogonal to it.</li>
+    <li><strong>S<sub>N</sub> does not depend on y.</strong> How uncertain the weights are depends
+      only on <em>where</em> you measured (and on σ), not on the values you observed. This is
+      also why Bayesian linear models are used for experimental design.</li>
+    <li><strong>Learning is sequential.</strong> Today's posterior is tomorrow's prior: updating
+      one point at a time, with N(m<sub>N</sub>, S<sub>N</sub>) as the prior for point N+1, gives
+      exactly the same result as the batch formula.</li>
+  </ul>
+  <p>
+    With intercept and slope, y = w₀ + w₁x, the weight space is a plane and the posterior is an
+    ellipse in it. The demo below draws points from the true line w = (−0.3, 0.5) one at a time.
+    The left panel is the posterior over (w₀, w₁); the right panel shows lines drawn from it.
+    The dashed line in weight space is the set of weights that fit the newest point exactly:
+    each observation constrains one direction and leaves the other free, so the ellipse
+    collapses perpendicular to that line.
+  </p>
+
+  <div class="blr-btns">
+    <button class="se-btn" id="blr2-add1">+1 point</button>
+    <button class="se-btn sec" id="blr2-add10">+10 points</button>
+    <button class="se-reset" id="blr2-reset">Reset</button>
+  </div>
+  <div class="blr-ctrl"><span class="nm">prior precision α</span><input type="range" class="se-slider" id="blr2-a" min="-1" max="2" step="0.05" value="0.30"><span class="pv" id="blr2-a-v"></span></div>
+  <div class="blr-ctrl"><span class="nm">noise σ</span><input type="range" class="se-slider" id="blr2-s" min="0.05" max="0.8" step="0.05" value="0.2"><span class="pv" id="blr2-s-v"></span></div>
+
+  <div class="blr-flex">
+    <div>
+      <p class="blr-cap">Weight space: posterior over (w₀, w₁)</p>
+      <div class="graph-wrap"><svg id="blr2-w" viewBox="0 0 300 300" width="100%"></svg></div>
+      <div class="blr-legend"><span>● mean (= ridge)</span><span>+ true w</span><span>○ OLS</span></div>
+    </div>
+    <div>
+      <p class="blr-cap">Data space: lines sampled from the posterior</p>
+      <div class="graph-wrap"><svg id="blr2-d" viewBox="0 0 300 300" width="100%"></svg></div>
+      <div class="blr-legend"><span><i></i>samples</span><span><i class="dash"></i>true line</span></div>
+    </div>
+  </div>
+  <div class="blr-stats">
+    <div class="blr-stat"><div class="lab">n</div><div class="val" id="blr2-n">0</div></div>
+    <div class="blr-stat"><div class="lab">mean (w₀, w₁)</div><div class="val" id="blr2-m">–</div></div>
+    <div class="blr-stat"><div class="lab">sd (w₀, w₁)</div><div class="val" id="blr2-sd">–</div></div>
+    <div class="blr-stat"><div class="lab">corr</div><div class="val" id="blr2-r">–</div></div>
+    <div class="blr-stat"><div class="lab">λ = α/β</div><div class="val" id="blr2-l">–</div></div>
+  </div>
+  <p>
+    With zero points the samples are the prior: random lines of every slope. After one point
+    every sample passes near it but still pivots freely, which is the long thin ellipse. After a
+    handful the samples agree and the ellipse closes around the true weights. The posterior
+    correlation between w₀ and w₁ also shows a familiar effect: if all x values sit on one side
+    of zero, raising the intercept and lowering the slope fit the data almost equally well.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>The predictive distribution: where the error bars come from</h3>
+  <p style="margin-top:0">
+    For a new input x*, the Bayesian prediction averages the model's prediction over every
+    plausible weight vector, weighted by the posterior. For this model the integral is again
+    Gaussian:
+  </p>
+  <div class="se-equation"><span class="big">p(y* | x*, data) = N( m<sub>N</sub><sup>T</sup>φ(x*), &nbsp;σ<sub>N</sub>²(x*) )</span></div>
+  <div class="se-equation"><span class="big">σ<sub>N</sub>²(x*) = σ² + φ(x*)<sup>T</sup> S<sub>N</sub> φ(x*)</span></div>
+  <p>
+    The mean is the ridge prediction. The variance has two parts:
+  </p>
+  <ul>
+    <li><strong>σ², the noise (aleatoric) term.</strong> Irreducible; it is the same everywhere
+      and no amount of data removes it.</li>
+    <li><strong>φ(x*)<sup>T</sup>S<sub>N</sub>φ(x*), the model (epistemic) term.</strong> The
+      uncertainty about w, projected onto the features at x*. It shrinks as data arrives near
+      x* and stays large where there is none. It never increases when a point is added.</li>
+  </ul>
+  <p>
+    The demo fits a nonlinear function with a fixed basis: a bias plus nine Gaussian bumps
+    spread over [0, 1]. The model is still linear in w, so every formula above applies
+    unchanged. <strong>Tap or click the chart to add points</strong>; the data initially has a
+    gap in the middle.
+  </p>
+
+  <div class="blr-btns">
+    <button class="se-btn" id="blr3-new">New sample</button>
+    <button class="se-btn sec" id="blr3-samp">Show function samples</button>
+    <button class="se-reset" id="blr3-clear">Clear points</button>
+  </div>
+  <div class="blr-ctrl"><span class="nm">prior precision α</span><input type="range" class="se-slider" id="blr3-a" min="-3" max="3" step="0.05" value="0.30"><span class="pv" id="blr3-a-v"></span></div>
+  <div class="blr-ctrl"><span class="nm">noise σ</span><input type="range" class="se-slider" id="blr3-s" min="0.05" max="0.8" step="0.01" value="0.2"><span class="pv" id="blr3-s-v"></span></div>
+  <div class="blr-ctrl"><span class="nm">probe x*</span><input type="range" class="se-slider" id="blr3-x" min="0" max="1" step="0.005" value="0.52"><span class="pv" id="blr3-x-v"></span></div>
+
+  <div class="graph-wrap"><svg id="blr3-svg" class="blr-click" viewBox="0 0 640 320" width="100%"></svg></div>
+  <div class="blr-legend"><span><i></i>mean (= ridge fit)</span><span><i class="band"></i>±2 sd, model only</span><span><i class="band2"></i>±2 sd, model + noise</span><span><i class="dash"></i>true sin(2πx)</span></div>
+  <div class="blr-stats">
+    <div class="blr-stat"><div class="lab">mean at x*</div><div class="val" id="blr3-mu">–</div></div>
+    <div class="blr-stat"><div class="lab">noise sd σ</div><div class="val" id="blr3-sn">–</div></div>
+    <div class="blr-stat"><div class="lab">model sd</div><div class="val" id="blr3-sm">–</div></div>
+    <div class="blr-stat"><div class="lab">total sd</div><div class="val" id="blr3-st">–</div></div>
+  </div>
+  <p>
+    Move the probe into the gap: the model term dominates there and the band widens, while
+    near clusters of points it is dominated by σ. Ridge regression returns only the solid line,
+    with no signal that the middle of the curve is a guess. Turn on function samples to see the
+    same thing as a spread of plausible curves, which agree where there is data and fan out
+    where there is not.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>Choosing λ without cross-validation: the evidence</h3>
+  <p style="margin-top:0">
+    With ridge, λ is chosen by cross-validation. The Bayesian setup offers a different route.
+    Integrating the weights out gives the probability of the observed targets as a function
+    of the hyperparameters alone, called the <strong>marginal likelihood</strong> or
+    <strong>evidence</strong>:
+  </p>
+  <div class="se-equation"><span class="big">p(y | α, β) = ∫ p(y | w, β) p(w | α) dw</span></div>
+  <p>
+    For this model it has a closed form (M is the number of weights, N the number of points):
+  </p>
+  <div class="se-equation"><span class="big">ln p(y | α, β) = (M/2) ln α + (N/2) ln β − E(m<sub>N</sub>) − ½ ln|S<sub>N</sub><sup>−1</sup>| − (N/2) ln 2π</span></div>
+  <div class="se-equation"><span class="big">E(m) = (β/2) ‖y − Φm‖² + (α/2) ‖m‖²</span></div>
+  <p>
+    E(m<sub>N</sub>) is the regularised fit, which favours flexible models. The log-determinant
+    and ln α terms penalise how much the posterior had to shrink relative to the prior, which
+    favours simple ones. The balance is a built-in Occam's razor: a model that could have
+    explained many datasets spreads its probability thinly and is penalised for it, even if it
+    fits this one well.
+  </p>
+  <p>
+    Maximising the evidence over α and β (called <em>empirical Bayes</em>, <em>type-II maximum
+    likelihood</em> or the <em>evidence approximation</em>) has a simple fixed-point solution:
+  </p>
+  <div class="se-equation"><span class="big">γ = M − α tr(S<sub>N</sub>), &nbsp; α ← γ / ‖m<sub>N</sub>‖², &nbsp; σ² ← ‖y − Φm<sub>N</sub>‖² / (N − γ)</span></div>
+  <p>
+    γ lies between 0 and M and counts the <em>effective number of parameters</em>: weights that
+    the data determines well, as opposed to ones held near zero by the prior. The noise update
+    is the familiar residual variance with degrees of freedom N − γ. This uses only the training
+    data; no held-out fold is needed.
+  </p>
+  <p>
+    The left chart below is the log evidence for the data in the previous demo as α varies
+    (σ fixed at its current value). The right chart compares polynomial models of increasing
+    degree on the same data, each with its own α and σ set by maximising its evidence. The
+    dashed line is the training error (RMSE), which only falls as the degree grows; the evidence
+    rises while extra flexibility explains real structure, then levels off or falls once the
+    extra terms only buy the ability to fit noise.
+  </p>
+  <div class="blr-btns">
+    <button class="se-btn" id="blr4-opt">Maximise evidence (α and σ)</button>
+    <span style="font-size:0.8rem;color:var(--sn-muted)" id="blr4-msg">Updates the sliders above.</span>
+  </div>
+  <div class="blr-flex">
+    <div>
+      <p class="blr-cap">Log evidence vs α (RBF model)</p>
+      <div class="graph-wrap"><svg id="blr4-a" viewBox="0 0 360 230" width="100%"></svg></div>
+    </div>
+    <div>
+      <p class="blr-cap">Log evidence (dots) and training RMSE (dashed) vs polynomial degree</p>
+      <div class="graph-wrap"><svg id="blr4-d" viewBox="0 0 360 230" width="100%"></svg></div>
+    </div>
+  </div>
+  <div class="blr-stats">
+    <div class="blr-stat"><div class="lab">log evidence</div><div class="val" id="blr4-ev">–</div></div>
+    <div class="blr-stat"><div class="lab">effective params γ</div><div class="val" id="blr4-g">–</div></div>
+    <div class="blr-stat"><div class="lab">of M</div><div class="val">10</div></div>
+    <div class="blr-stat"><div class="lab">λ = α/β</div><div class="val" id="blr4-l">–</div></div>
+  </div>
+  <p>
+    Add or remove points in the previous demo and both charts update. With very few points the
+    evidence prefers low-degree polynomials and strong regularisation; as data accumulates it
+    supports more flexibility. The evidence is a statement about the model family as well as
+    the data: if the model is badly misspecified, maximising it can still produce overconfident
+    error bars, so it complements rather than replaces checking predictions on held-out data.
+  </p>
+</div>
+
+<!-- ============================================================ -->
+<div class="se-section">
+  <h3>Summary and where it leads</h3>
+  <div class="blr-scroll">
+  <table class="blr-table">
+    <thead><tr><th></th><th>Ridge</th><th>Bayesian linear regression</th></tr></thead>
+    <tbody>
+      <tr><td>Weights</td><td>one vector m<sub>N</sub></td><td>N(m<sub>N</sub>, S<sub>N</sub>), same m<sub>N</sub></td></tr>
+      <tr><td>Prediction</td><td>m<sub>N</sub><sup>T</sup>φ(x*)</td><td>same mean, plus variance σ² + φ<sup>T</sup>S<sub>N</sub>φ</td></tr>
+      <tr><td>Penalty</td><td>λ, a tuning knob</td><td>λ = σ²/τ², a ratio of variances</td></tr>
+      <tr><td>Choosing it</td><td>cross-validation</td><td>maximise the evidence (or put priors on α, β)</td></tr>
+      <tr><td>Cost</td><td>solve an M×M system</td><td>the same factorisation gives S<sub>N</sub></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Extensions that follow directly from this setup:</p>
+  <ul>
+    <li><strong>Unknown noise.</strong> Treat σ² as random too, with an inverse-gamma prior
+      (the Normal-inverse-gamma conjugate prior). The predictive distribution becomes a
+      Student-t, with heavier tails when there is little data.</li>
+    <li><strong>Non-Gaussian priors.</strong> A Laplace or horseshoe prior has no closed-form
+      posterior; it needs MCMC or variational approximations. The Bayesian lasso (Park and
+      Casella, 2008) is the Laplace case.</li>
+    <li><strong>One α per weight.</strong> Giving each weight its own prior precision and
+      maximising the evidence drives many α<sub>j</sub> to infinity, pruning those weights.
+      This is automatic relevance determination, the basis of the relevance vector machine
+      (Tipping, 2001).</li>
+    <li><strong>Infinitely many basis functions.</strong> The predictive distribution depends on
+      the features only through inner products φ(x)<sup>T</sup>φ(x′). Replacing them with a
+      kernel gives a Gaussian process. This also fixes a weakness visible with localised basis
+      functions: far from every basis centre φ(x*) ≈ 0, so the model variance collapses back
+      to a small value exactly where the model knows least.</li>
+  </ul>
+  <p style="font-size:0.85rem;color:var(--sn-muted)">
+    Reference: C. M. Bishop, <em>Pattern Recognition and Machine Learning</em> (2006),
+    sections 3.3–3.5, which these formulas and the weight-space and predictive demos follow.
+  </p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  const SN = document.querySelector(".study-note");
+  const readCols = () => {
+    const cs = getComputedStyle(SN), c = n => cs.getPropertyValue(n).trim();
+    return { accent: c("--sn-accent"), strong: c("--sn-accent-strong"), text: c("--sn-text"),
+             muted: c("--sn-muted"), grid: c("--sn-grid"), inset: c("--sn-panel-inset"),
+             panel: c("--sn-panel") };
+  };
+  let COL = readCols();
+  const redraw = [];
+  new MutationObserver(() => { COL = readCols(); redraw.forEach(f => f()); })
+    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  const $ = id => document.getElementById(id);
+
+  // ---------- helpers ----------
+  const px = document.createElement("canvas"); px.width = px.height = 1;
+  const pctx = px.getContext("2d", { willReadFrequently: true });
+  function rgb(c) {
+    pctx.clearRect(0, 0, 1, 1); pctx.fillStyle = "#000"; pctx.fillStyle = c; pctx.fillRect(0, 0, 1, 1);
+    const d = pctx.getImageData(0, 0, 1, 1).data; return [d[0], d[1], d[2]];
+  }
+  function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function gauss(r) { let u = 0; while (u === 0) u = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * r()); }
+  const fmt = (v, d = 2) => (Math.abs(v) < 0.5 * Math.pow(10, -d) ? 0 : v).toFixed(d);
+  const fmtS = v => v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(1) : v >= 1 ? v.toFixed(2) : v.toPrecision(2);
+
+  // ---------- small dense linear algebra ----------
+  function chol(A) {
+    const n = A.length, L = A.map(() => new Array(n).fill(0));
+    for (let i = 0; i < n; i++) for (let j = 0; j <= i; j++) {
+      let s = A[i][j]; for (let k = 0; k < j; k++) s -= L[i][k] * L[j][k];
+      if (i === j) L[i][i] = Math.sqrt(Math.max(s, 1e-14)); else L[i][j] = s / L[j][j];
+    }
+    return L;
+  }
+  function cholSolve(L, b) {
+    const n = L.length, z = new Array(n), x = new Array(n);
+    for (let i = 0; i < n; i++) { let s = b[i]; for (let k = 0; k < i; k++) s -= L[i][k] * z[k]; z[i] = s / L[i][i]; }
+    for (let i = n - 1; i >= 0; i--) { let s = z[i]; for (let k = i + 1; k < n; k++) s -= L[k][i] * x[k]; x[i] = s / L[i][i]; }
+    return x;
+  }
+  function cholInv(L) {
+    const n = L.length, cols = [];
+    for (let j = 0; j < n; j++) { const e = new Array(n).fill(0); e[j] = 1; cols.push(cholSolve(L, e)); }
+    return cols.map((_, i) => cols.map(c => c[i]));
+  }
+  const dot = (a, b) => a.reduce((s, v, i) => s + v * b[i], 0);
+  const quad = (S, v) => { let s = 0; for (let i = 0; i < v.length; i++) for (let j = 0; j < v.length; j++) s += v[i] * S[i][j] * v[j]; return s; };
+
+  // Posterior for features Phi (N x M), targets y.
+  function posterior(Phi, y, M, alpha, beta) {
+    const A = []; for (let i = 0; i < M; i++) A.push(new Array(M).fill(0));
+    const b = new Array(M).fill(0);
+    for (let i = 0; i < M; i++) A[i][i] = alpha;
+    Phi.forEach((f, n) => { for (let i = 0; i < M; i++) { b[i] += beta * f[i] * y[n]; for (let j = 0; j < M; j++) A[i][j] += beta * f[i] * f[j]; } });
+    const L = chol(A), m = cholSolve(L, b), S = cholInv(L);
+    let logdetA = 0; for (let i = 0; i < M; i++) logdetA += 2 * Math.log(L[i][i]);
+    return { m, S, logdetA };
+  }
+  function logEvidence(Phi, y, M, alpha, beta, post) {
+    const P = post || posterior(Phi, y, M, alpha, beta), N = y.length;
+    let rss = 0; Phi.forEach((f, n) => { const r = y[n] - dot(f, P.m); rss += r * r; });
+    const E = beta / 2 * rss + alpha / 2 * dot(P.m, P.m);
+    return M / 2 * Math.log(alpha) + N / 2 * Math.log(beta) - E - P.logdetA / 2 - N / 2 * Math.log(2 * Math.PI);
+  }
+  function axisText(x, y, s, anchor = "middle", size = 10) {
+    return `<text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${size}" fill="${COL.muted}">${s}</text>`;
+  }
+
+  // =====================================================================
+  // Demo 1: one weight, prior x likelihood
+  // =====================================================================
+  (function () {
+    const TRUE_W = 0.5, NMAX = 50, r = mulberry32(31);
+    const xs = [], zs = [];
+    for (let i = 0; i < NMAX; i++) { xs.push(2 * r() - 1); zs.push(gauss(r)); }
+    const G = []; for (let i = 0; i <= 1400; i++) G.push(i / 400 - 1.5);   // w grid [-1.5, 2], includes 0 exactly
+    const dw = 1 / 400;
+    let prior = "gauss";
+    const sN = $("blr1-n"), sS = $("blr1-s"), sT = $("blr1-t");
+    const svgD = $("blr1-dens"), svgL = $("blr1-data");
+
+    function normalize(logp) {
+      const mx = Math.max(...logp), p = logp.map(v => Math.exp(v - mx)), z = p.reduce((a, b) => a + b, 0) * dw;
+      return p.map(v => v / z);
+    }
+    function draw() {
+      const n = +sN.value, sig = +sS.value, tau = +sT.value, b = tau / Math.SQRT2;
+      $("blr1-n-v").textContent = n; $("blr1-s-v").textContent = sig.toFixed(2); $("blr1-t-v").textContent = tau.toFixed(2);
+      const X = xs.slice(0, n), Y = X.map((x, i) => TRUE_W * x + sig * zs[i]);
+      let sxx = 0, sxy = 0, syy = 0; X.forEach((x, i) => { sxx += x * x; sxy += x * Y[i]; syy += Y[i] * Y[i]; });
+      const lp = G.map(w => prior === "gauss" ? -w * w / (2 * tau * tau) : -Math.abs(w) / b);
+      const ll = G.map(w => -(syy - 2 * w * sxy + w * w * sxx) / (2 * sig * sig));
+      const pPr = normalize(lp), pLi = normalize(ll), pPo = normalize(lp.map((v, i) => v + ll[i]));
+      // stats
+      let iMap = 0; pPo.forEach((v, i) => { if (v > pPo[iMap]) iMap = i; });
+      const wMap = G[iMap];
+      const mean = pPo.reduce((s, v, i) => s + v * G[i], 0) * dw;
+      let cdf = 0, lo = G[0], hi = G[G.length - 1], gotLo = false;
+      for (let i = 0; i < G.length; i++) { cdf += pPo[i] * dw; if (!gotLo && cdf >= 0.025) { lo = G[i]; gotLo = true; } if (cdf >= 0.975) { hi = G[i]; break; } }
+      $("blr1-ols").textContent = n ? fmt(sxy / sxx) : "–";
+      $("blr1-map").textContent = fmt(wMap);
+      $("blr1-maplab").textContent = prior === "gauss" ? `MAP = ridge, λ=${fmtS(sig * sig / (tau * tau))}` : `MAP = lasso, λ=${fmtS(sig * sig / b)}`;
+      $("blr1-mean").textContent = fmt(mean);
+      $("blr1-ci").textContent = `[${fmt(lo)}, ${fmt(hi)}]`;
+
+      // density chart
+      const W = 400, H = 240, L0 = 30, R0 = 10, T0 = 10, B0 = 28;
+      const ymax = Math.max(Math.max(...pPo), Math.max(...pPr), Math.min(Math.max(...pLi), Math.max(...pPo) * 1.6)) * 1.08;
+      const PX = w => L0 + (w + 1.5) / 3.5 * (W - L0 - R0), PY = v => H - B0 - Math.min(v / ymax, 1.02) * (H - T0 - B0);
+      const path = p => p.map((v, i) => (i % 4 ? null : `${PX(G[i]).toFixed(1)},${PY(v).toFixed(1)}`)).filter(Boolean).join(" ");
+      let ci = "";
+      for (let i = 0; i < G.length; i += 4) if (G[i] >= lo && G[i] <= hi) ci += `${PX(G[i]).toFixed(1)},${PY(pPo[i]).toFixed(1)} `;
+      let s = `<line x1="${L0}" y1="${H - B0}" x2="${W - R0}" y2="${H - B0}" stroke="${COL.grid}"/>`;
+      [-1, 0, 1, 2].forEach(t => { s += `<line x1="${PX(t)}" y1="${T0}" x2="${PX(t)}" y2="${H - B0}" stroke="${COL.grid}"/>` + axisText(PX(t), H - B0 + 14, t); });
+      s += axisText((L0 + W - R0) / 2, H - 2, "slope w");
+      s += `<polygon points="${PX(lo)},${PY(0)} ${ci} ${PX(hi)},${PY(0)}" fill="${COL.accent}" fill-opacity="0.18"/>`;
+      s += `<polyline points="${path(pPr)}" fill="none" stroke="${COL.muted}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+      if (n) s += `<polyline points="${path(pLi)}" fill="none" stroke="${COL.text}" stroke-opacity="0.7" stroke-width="1.3"/>`;
+      s += `<polyline points="${path(pPo)}" fill="none" stroke="${COL.accent}" stroke-width="2.4"/>`;
+      s += `<line x1="${PX(TRUE_W)}" y1="${T0}" x2="${PX(TRUE_W)}" y2="${H - B0}" stroke="${COL.muted}" stroke-dasharray="2 3"/>` + axisText(PX(TRUE_W) + 3, T0 + 10, "true", "start", 9);
+      s += `<circle cx="${PX(wMap)}" cy="${PY(pPo[iMap])}" r="4.5" fill="${COL.accent}"/>`;
+      s += `<line x1="${PX(mean)}" y1="${H - B0 - 7}" x2="${PX(mean)}" y2="${H - B0 + 3}" stroke="${COL.accent}" stroke-width="2"/>`;
+      svgD.innerHTML = s;
+
+      // data chart
+      const DX = x => 30 + (x + 1) / 2 * (W - 40), DY = y => H / 2 - 4 - y / 2 * (H / 2 - 16);
+      let d = `<line x1="30" y1="${DY(0)}" x2="${W - 10}" y2="${DY(0)}" stroke="${COL.grid}"/><line x1="${DX(0)}" y1="10" x2="${DX(0)}" y2="${H - 18}" stroke="${COL.grid}"/>`;
+      d += axisText(DX(1) - 4, DY(0) + 13, "x", "end") + axisText(DX(0) + 5, 18, "y", "start");
+      d += `<polygon points="${DX(-1)},${DY(-lo)} ${DX(1)},${DY(lo)} ${DX(1)},${DY(hi)} ${DX(-1)},${DY(-hi)}" fill="${COL.accent}" fill-opacity="0.15"/>`;
+      d += `<line x1="${DX(-1)}" y1="${DY(-TRUE_W)}" x2="${DX(1)}" y2="${DY(TRUE_W)}" stroke="${COL.muted}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+      d += `<line x1="${DX(-1)}" y1="${DY(-wMap)}" x2="${DX(1)}" y2="${DY(wMap)}" stroke="${COL.accent}" stroke-width="2.4"/>`;
+      X.forEach((x, i) => { const yy = Math.max(-2.1, Math.min(2.1, Y[i])); d += `<circle cx="${DX(x)}" cy="${DY(yy)}" r="3.2" fill="${COL.text}" fill-opacity="0.75"/>`; });
+      svgL.innerHTML = d;
+    }
+    $("blr1-prior").addEventListener("click", e => {
+      const btn = e.target.closest("button"); if (!btn) return;
+      prior = btn.dataset.p;
+      $("blr1-prior").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === btn));
+      draw();
+    });
+    [sN, sS, sT].forEach(el => el.addEventListener("input", draw));
+    redraw.push(draw); draw();
+  })();
+
+  // =====================================================================
+  // Demo 2: weight space, sequential updates
+  // =====================================================================
+  (function () {
+    const TW = [-0.3, 0.5];
+    let r, pts;
+    const zS = (() => { const rr = mulberry32(99), z = []; for (let i = 0; i < 10; i++) z.push([gauss(rr), gauss(rr)]); return z; })();
+    const sA = $("blr2-a"), sS = $("blr2-s"), svgW = $("blr2-w"), svgD = $("blr2-d");
+    const off = document.createElement("canvas"), RES = 110; off.width = off.height = RES;
+    const octx = off.getContext("2d");
+    function reset() { r = mulberry32(2024); pts = []; draw(); }
+    function add(k) { for (let i = 0; i < k; i++) { const x = 2 * r() - 1; pts.push({ x, z: gauss(r) }); } draw(); }
+
+    function draw() {
+      const alpha = Math.pow(10, +sA.value), sig = +sS.value, beta = 1 / (sig * sig);
+      $("blr2-a-v").textContent = fmtS(alpha); $("blr2-s-v").textContent = sig.toFixed(2);
+      const Phi = pts.map(p => [1, p.x]), y = pts.map(p => TW[0] + TW[1] * p.x + sig * p.z);
+      const P = posterior(Phi, y, 2, alpha, beta), m = P.m, S = P.S;
+      const sd0 = Math.sqrt(S[0][0]), sd1 = Math.sqrt(S[1][1]), rho = S[0][1] / (sd0 * sd1);
+      $("blr2-n").textContent = pts.length;
+      $("blr2-m").textContent = `(${fmt(m[0])}, ${fmt(m[1])})`;
+      $("blr2-sd").textContent = `(${fmt(sd0)}, ${fmt(sd1)})`;
+      $("blr2-r").textContent = fmt(rho);
+      $("blr2-l").textContent = fmtS(alpha / beta);
+
+      // weight-space heatmap
+      const W = 300, pad = 26, span = W - 2 * pad;
+      const WX = w => pad + (w + 1) / 2 * span, WY = w => pad + (1 - w) / 2 * span;
+      const det = S[0][0] * S[1][1] - S[0][1] * S[0][1];
+      const iS = [[S[1][1] / det, -S[0][1] / det], [-S[0][1] / det, S[0][0] / det]];
+      const c0 = rgb(COL.inset), c1 = rgb(COL.accent), img = octx.createImageData(RES, RES);
+      for (let j = 0; j < RES; j++) for (let i = 0; i < RES; i++) {
+        const w0 = -1 + 2 * (i + 0.5) / RES - m[0], w1 = 1 - 2 * (j + 0.5) / RES - m[1];
+        const d2 = iS[0][0] * w0 * w0 + 2 * iS[0][1] * w0 * w1 + iS[1][1] * w1 * w1;
+        const v = Math.exp(-0.5 * d2) * 0.85, k = 4 * (j * RES + i);
+        img.data[k] = c0[0] + (c1[0] - c0[0]) * v; img.data[k + 1] = c0[1] + (c1[1] - c0[1]) * v;
+        img.data[k + 2] = c0[2] + (c1[2] - c0[2]) * v; img.data[k + 3] = 255;
+      }
+      octx.putImageData(img, 0, 0);
+      let s = `<defs><clipPath id="blr2-clip"><rect x="${pad}" y="${pad}" width="${span}" height="${span}"/></clipPath></defs>`;
+      s += `<image href="${off.toDataURL()}" x="${pad}" y="${pad}" width="${span}" height="${span}" preserveAspectRatio="none" style="image-rendering:auto"/>`;
+      s += `<g clip-path="url(#blr2-clip)">`;
+      s += `<line x1="${WX(0)}" y1="${pad}" x2="${WX(0)}" y2="${W - pad}" stroke="${COL.grid}"/><line x1="${pad}" y1="${WY(0)}" x2="${W - pad}" y2="${WY(0)}" stroke="${COL.grid}"/>`;
+      // ellipses (1 and 2 sd)
+      const tr = S[0][0] + S[1][1], disc = Math.sqrt(Math.max(tr * tr / 4 - det, 0));
+      const l1 = tr / 2 + disc, l2 = Math.max(tr / 2 - disc, 1e-12);
+      const ang = 0.5 * Math.atan2(2 * S[0][1], S[0][0] - S[1][1]) * 180 / Math.PI;
+      [1, 2].forEach(k => {
+        s += `<ellipse cx="${WX(m[0])}" cy="${WY(m[1])}" rx="${k * Math.sqrt(l1) * span / 2}" ry="${k * Math.sqrt(l2) * span / 2}" transform="rotate(${-ang} ${WX(m[0])} ${WY(m[1])})" fill="none" stroke="${COL.accent}" stroke-width="${k === 1 ? 1.6 : 1}" stroke-opacity="${k === 1 ? 0.95 : 0.6}"/>`;
+      });
+      // newest point's constraint line: w0 + w1 x = y
+      if (pts.length) {
+        const p = pts[pts.length - 1], yy = y[y.length - 1];
+        let a, b2;
+        if (Math.abs(p.x) < 1) { a = [yy - 2 * p.x, 2]; b2 = [yy + 2 * p.x, -2]; }
+        else { a = [-2, (yy + 2) / p.x]; b2 = [2, (yy - 2) / p.x]; }
+        s += `<line x1="${WX(a[0])}" y1="${WY(a[1])}" x2="${WX(b2[0])}" y2="${WY(b2[1])}" stroke="${COL.text}" stroke-opacity="0.55" stroke-width="1.2" stroke-dasharray="5 4"/>`;
+      }
+      // OLS point
+      if (pts.length >= 2) {
+        const O = posterior(Phi, y, 2, 1e-9, 1);
+        s += `<circle cx="${WX(O.m[0])}" cy="${WY(O.m[1])}" r="5" fill="none" stroke="${COL.text}" stroke-width="1.4"/>`;
+      }
+      s += `</g>`;
+      const tx = WX(TW[0]), ty = WY(TW[1]);
+      s += `<path d="M${tx - 6},${ty}H${tx + 6}M${tx},${ty - 6}V${ty + 6}" stroke="${COL.text}" stroke-width="2"/>`;
+      s += `<circle cx="${WX(m[0])}" cy="${WY(m[1])}" r="4" fill="${COL.accent}" stroke="${COL.panel}" stroke-width="1.2"/>`;
+      s += `<rect x="${pad}" y="${pad}" width="${span}" height="${span}" fill="none" stroke="${COL.grid}"/>`;
+      [-1, 0, 1].forEach(t => { s += axisText(WX(t), W - pad + 13, t) + axisText(pad - 5, WY(t) + 3, t, "end"); });
+      s += axisText(W - pad, W - 3, "w₀ (intercept)", "end") + axisText(pad + 2, pad - 8, "w₁ (slope)", "start");
+      svgW.innerHTML = s;
+
+      // data space
+      const DX = x => pad + (x + 1) / 2 * span, DY = v => pad + (1 - v) / 2 * span;
+      let d = `<defs><clipPath id="blr2-clipd"><rect x="${pad}" y="${pad}" width="${span}" height="${span}"/></clipPath></defs>`;
+      d += `<rect x="${pad}" y="${pad}" width="${span}" height="${span}" fill="none" stroke="${COL.grid}"/>`;
+      d += `<g clip-path="url(#blr2-clipd)"><line x1="${DX(0)}" y1="${pad}" x2="${DX(0)}" y2="${W - pad}" stroke="${COL.grid}"/><line x1="${pad}" y1="${DY(0)}" x2="${W - pad}" y2="${DY(0)}" stroke="${COL.grid}"/>`;
+      // samples w = m + L z
+      const a0 = Math.sqrt(S[0][0]), l10 = S[0][1] / a0, l11 = Math.sqrt(Math.max(S[1][1] - l10 * l10, 0));
+      zS.forEach(z => {
+        const w0 = m[0] + a0 * z[0], w1 = m[1] + l10 * z[0] + l11 * z[1];
+        d += `<line x1="${DX(-1)}" y1="${DY(w0 - w1)}" x2="${DX(1)}" y2="${DY(w0 + w1)}" stroke="${COL.accent}" stroke-width="1.3" stroke-opacity="0.6"/>`;
+      });
+      d += `<line x1="${DX(-1)}" y1="${DY(TW[0] - TW[1])}" x2="${DX(1)}" y2="${DY(TW[0] + TW[1])}" stroke="${COL.muted}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+      pts.forEach((p, i) => {
+        const last = i === pts.length - 1;
+        d += `<circle cx="${DX(p.x)}" cy="${DY(y[i])}" r="${last ? 4.5 : 3.2}" fill="${last ? COL.accent : COL.text}" fill-opacity="${last ? 1 : 0.7}" ${last ? `stroke="${COL.text}" stroke-width="1.2"` : ""}/>`;
+      });
+      d += `</g>`;
+      [-1, 0, 1].forEach(t => { d += axisText(DX(t), W - pad + 13, t) + axisText(pad - 5, DY(t) + 3, t, "end"); });
+      d += axisText(W - pad, W - 3, "x", "end") + axisText(pad + 2, pad - 8, "y", "start");
+      svgD.innerHTML = d;
+    }
+    $("blr2-add1").addEventListener("click", () => add(1));
+    $("blr2-add10").addEventListener("click", () => add(10));
+    $("blr2-reset").addEventListener("click", reset);
+    [sA, sS].forEach(el => el.addEventListener("input", draw));
+    redraw.push(draw); reset();
+  })();
+
+  // =====================================================================
+  // Demo 3 + 4: predictive distribution and evidence (shared data)
+  // =====================================================================
+  (function () {
+    const CENT = [0, 1, 2, 3, 4, 5, 6, 7, 8].map(j => j / 8), WID = 0.12, M = 10;
+    const phi = x => [1].concat(CENT.map(c => Math.exp(-(x - c) * (x - c) / (2 * WID * WID))));
+    const truth = x => Math.sin(2 * Math.PI * x);
+    const YL = -2, YH = 2;
+    let pts = [], seed = 11, showSamp = false;
+    const sA = $("blr3-a"), sS = $("blr3-s"), sX = $("blr3-x"), svg = $("blr3-svg");
+    const W = 640, H = 320, L0 = 34, R0 = 12, T0 = 12, B0 = 26;
+    const PX = x => L0 + x * (W - L0 - R0), PY = v => T0 + (YH - v) / (YH - YL) * (H - T0 - B0);
+    const sampZ = (() => { const rr = mulberry32(5), out = []; for (let k = 0; k < 6; k++) { const z = []; for (let i = 0; i < M; i++) z.push(gauss(rr)); out.push(z); } return out; })();
+
+    function newSample() {
+      const r = mulberry32(seed++); pts = [];
+      while (pts.length < 14) { const x = r(); if (x > 0.36 && x < 0.66) continue; pts.push({ x, y: truth(x) + 0.2 * gauss(r) }); }
+      drawAll();
+    }
+    function state() {
+      const alpha = Math.pow(10, +sA.value), sig = +sS.value, beta = 1 / (sig * sig);
+      const Phi = pts.map(p => phi(p.x)), y = pts.map(p => p.y);
+      return { alpha, sig, beta, Phi, y, P: posterior(Phi, y, M, alpha, beta) };
+    }
+
+    function draw3() {
+      const st = state(), { m, S } = st.P;
+      $("blr3-a-v").textContent = fmtS(st.alpha); $("blr3-s-v").textContent = st.sig.toFixed(2);
+      const xs = []; for (let i = 0; i <= 200; i++) xs.push(i / 200);
+      const mu = [], vm = [];
+      xs.forEach(x => { const f = phi(x); mu.push(dot(f, m)); vm.push(quad(S, f)); });
+      const band = (k, withNoise) => {
+        const up = xs.map((x, i) => `${PX(x).toFixed(1)},${PY(mu[i] + k * Math.sqrt(vm[i] + (withNoise ? st.sig * st.sig : 0))).toFixed(1)}`);
+        const dn = xs.map((x, i) => `${PX(x).toFixed(1)},${PY(mu[i] - k * Math.sqrt(vm[i] + (withNoise ? st.sig * st.sig : 0))).toFixed(1)}`).reverse();
+        return up.concat(dn).join(" ");
+      };
+      let s = `<defs><clipPath id="blr3-clip"><rect x="${L0}" y="${T0}" width="${W - L0 - R0}" height="${H - T0 - B0}"/></clipPath></defs>`;
+      [-2, -1, 0, 1, 2].forEach(t => { s += `<line x1="${L0}" y1="${PY(t)}" x2="${W - R0}" y2="${PY(t)}" stroke="${COL.grid}"/>` + axisText(L0 - 6, PY(t) + 3, t, "end"); });
+      [0, 0.25, 0.5, 0.75, 1].forEach(t => { s += axisText(PX(t), H - B0 + 15, t); });
+      s += axisText(W - R0, H - 2, "x", "end");
+      s += `<g clip-path="url(#blr3-clip)">`;
+      s += `<polygon points="${band(2, true)}" fill="${COL.accent}" fill-opacity="0.12"/>`;
+      s += `<polygon points="${band(2, false)}" fill="${COL.accent}" fill-opacity="0.26"/>`;
+      s += `<polyline points="${xs.map(x => `${PX(x).toFixed(1)},${PY(truth(x)).toFixed(1)}`).join(" ")}" fill="none" stroke="${COL.muted}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+      if (showSamp) {
+        const Lc = chol(S);
+        sampZ.forEach(z => {
+          const w = m.map((v, i) => { let s2 = v; for (let k = 0; k <= i; k++) s2 += Lc[i][k] * z[k]; return s2; });
+          s += `<polyline points="${xs.map(x => `${PX(x).toFixed(1)},${PY(dot(phi(x), w)).toFixed(1)}`).join(" ")}" fill="none" stroke="${COL.accent}" stroke-width="1.1" stroke-opacity="0.75"/>`;
+        });
+      }
+      s += `<polyline points="${xs.map((x, i) => `${PX(x).toFixed(1)},${PY(mu[i]).toFixed(1)}`).join(" ")}" fill="none" stroke="${COL.accent}" stroke-width="2.6"/>`;
+      // probe
+      const xp = +sX.value, fp = phi(xp), mp = dot(fp, m), vmp = quad(S, fp), sdT = Math.sqrt(vmp + st.sig * st.sig);
+      s += `<line x1="${PX(xp)}" y1="${T0}" x2="${PX(xp)}" y2="${H - B0}" stroke="${COL.text}" stroke-opacity="0.45" stroke-dasharray="3 3"/>`;
+      s += `<line x1="${PX(xp)}" y1="${PY(mp - 2 * sdT)}" x2="${PX(xp)}" y2="${PY(mp + 2 * sdT)}" stroke="${COL.text}" stroke-width="2" stroke-opacity="0.7"/>`;
+      s += `<circle cx="${PX(xp)}" cy="${PY(mp)}" r="4" fill="${COL.panel}" stroke="${COL.text}" stroke-width="1.5"/>`;
+      pts.forEach(p => { s += `<circle cx="${PX(p.x)}" cy="${PY(p.y)}" r="3.6" fill="${COL.text}" fill-opacity="0.8" stroke="${COL.panel}" stroke-width="1"/>`; });
+      s += `</g>`;
+      if (!pts.length) s += `<text x="${(L0 + W - R0) / 2}" y="${T0 + 22}" text-anchor="middle" font-size="12" fill="${COL.muted}">No data: this is the prior predictive. Tap to add points.</text>`;
+      svg.innerHTML = s;
+      $("blr3-x-v").textContent = xp.toFixed(2);
+      $("blr3-mu").textContent = fmt(mp); $("blr3-sn").textContent = st.sig.toFixed(2);
+      $("blr3-sm").textContent = Math.sqrt(vmp).toFixed(2); $("blr3-st").textContent = sdT.toFixed(2);
+    }
+
+    // ----- evidence demo -----
+    const svgA = $("blr4-a"), svgDg = $("blr4-d");
+    const polyPhi = (x, D) => { const f = []; for (let k = 0; k <= D; k++) f.push(Math.pow(2 * x - 1, k)); return f; };
+    function draw4() {
+      const st = state(), N = pts.length;
+      const W2 = 360, H2 = 230, l = 44, rr = 12, t = 12, b = 30;
+      if (N === 0) {
+        const msg = `<text x="${W2 / 2}" y="${H2 / 2}" text-anchor="middle" font-size="12" fill="${COL.muted}">Add points in the demo above</text>`;
+        svgA.innerHTML = msg; svgDg.innerHTML = msg;
+        ["blr4-ev", "blr4-g", "blr4-l"].forEach(id => $(id).textContent = "–");
+        return;
+      }
+      const ev = logEvidence(st.Phi, st.y, M, st.alpha, st.beta, st.P);
+      let trS = 0; for (let i = 0; i < M; i++) trS += st.P.S[i][i];
+      $("blr4-ev").textContent = ev.toFixed(1);
+      $("blr4-g").textContent = (M - st.alpha * trS).toFixed(1);
+      $("blr4-l").textContent = fmtS(st.alpha / st.beta);
+
+      // evidence vs log10 alpha
+      const la = []; for (let i = 0; i <= 120; i++) la.push(-3 + 6 * i / 120);
+      const ev2 = la.map(a => logEvidence(st.Phi, st.y, M, Math.pow(10, a), st.beta));
+      let lo = Math.min(...ev2), hi = Math.max(...ev2); const padv = (hi - lo) * 0.08 + 0.5; lo -= padv; hi += padv;
+      const AX = a => l + (a + 3) / 6 * (W2 - l - rr), AY = v => t + (hi - v) / (hi - lo) * (H2 - t - b);
+      let iBest = 0; ev2.forEach((v, i) => { if (v > ev2[iBest]) iBest = i; });
+      let s = `<line x1="${l}" y1="${H2 - b}" x2="${W2 - rr}" y2="${H2 - b}" stroke="${COL.grid}"/><line x1="${l}" y1="${t}" x2="${l}" y2="${H2 - b}" stroke="${COL.grid}"/>`;
+      [-3, -2, -1, 0, 1, 2, 3].forEach(a => { s += axisText(AX(a), H2 - b + 14, a === 0 ? "1" : `10${a < 0 ? "⁻" : ""}${"⁰¹²³"[Math.abs(a)]}`); });
+      s += axisText((l + W2 - rr) / 2, H2 - 2, "prior precision α (log scale)");
+      [lo + padv, hi - padv].forEach(v => { s += axisText(l - 5, AY(v) + 3, v.toFixed(0), "end"); });
+      s += `<polyline points="${la.map((a, i) => `${AX(a).toFixed(1)},${AY(ev2[i]).toFixed(1)}`).join(" ")}" fill="none" stroke="${COL.accent}" stroke-width="2.2"/>`;
+      s += `<line x1="${AX(la[iBest])}" y1="${t}" x2="${AX(la[iBest])}" y2="${H2 - b}" stroke="${COL.muted}" stroke-dasharray="3 3"/>` + axisText(AX(la[iBest]) + 4, t + 10, "max", "start", 9);
+      const ca = Math.max(-3, Math.min(3, +sA.value));
+      s += `<circle cx="${AX(ca)}" cy="${AY(ev)}" r="5" fill="${COL.accent}" stroke="${COL.panel}" stroke-width="1.5"/>`;
+      svgA.innerHTML = s;
+
+      // evidence vs polynomial degree
+      const degs = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      const fits = degs.map(D => maxEvidence(pts.map(p => polyPhi(p.x, D)), st.y, D + 1, 1, 25));
+      const evd = fits.map(o => o.ev), rm = fits.map(o => o.rmse);
+      let lo2 = Math.min(...evd), hi2 = Math.max(...evd); const pad2 = (hi2 - lo2) * 0.1 + 0.5; lo2 -= pad2; hi2 += pad2;
+      const rmMax = Math.max(...rm) * 1.1 || 1, RY = v => t + (1 - v / rmMax) * (H2 - t - b);
+      const DXp = D => l + (D + 0.5) / 10 * (W2 - l - rr), DYp = v => t + (hi2 - v) / (hi2 - lo2) * (H2 - t - b);
+      let jBest = 0; evd.forEach((v, i) => { if (v > evd[jBest]) jBest = i; });
+      let d = `<line x1="${l}" y1="${H2 - b}" x2="${W2 - rr}" y2="${H2 - b}" stroke="${COL.grid}"/><line x1="${l}" y1="${t}" x2="${l}" y2="${H2 - b}" stroke="${COL.grid}"/>`;
+      [lo2 + pad2, hi2 - pad2].forEach(v => { d += axisText(l - 5, DYp(v) + 3, v.toFixed(0), "end"); });
+      d += `<polyline points="${degs.map(D => `${DXp(D).toFixed(1)},${DYp(evd[D]).toFixed(1)}`).join(" ")}" fill="none" stroke="${COL.accent}" stroke-width="1.6" stroke-opacity="0.7"/>`;
+      degs.forEach(D => {
+        const best = D === jBest;
+        d += `<circle cx="${DXp(D)}" cy="${DYp(evd[D])}" r="${best ? 5.5 : 3.5}" fill="${best ? COL.accent : COL.panel}" stroke="${COL.accent}" stroke-width="1.6"/>`;
+        if (best) d += axisText(DXp(D), DYp(evd[D]) - 9, "best", "middle", 9);
+        d += axisText(DXp(D), H2 - b + 14, D);
+      });
+      d += `<polyline points="${degs.map(D => `${DXp(D).toFixed(1)},${RY(rm[D]).toFixed(1)}`).join(" ")}" fill="none" stroke="${COL.text}" stroke-opacity="0.6" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+      d += axisText((l + W2 - rr) / 2, H2 - 2, "polynomial degree");
+      svgDg.innerHTML = d;
+    }
+    function drawAll() { draw3(); draw4(); }
+
+    // Fixed-point evidence maximisation (MacKay / Bishop 3.92, 3.95), clamped to slider ranges.
+    function maxEvidence(Phi, y, Mm, alpha, beta) {
+      const N = y.length; let it = 0, P;
+      for (; it < 500; it++) {
+        P = posterior(Phi, y, Mm, alpha, beta);
+        let trS = 0; for (let i = 0; i < Mm; i++) trS += P.S[i][i];
+        const g = Mm - alpha * trS;
+        let rss = 0; Phi.forEach((f, n) => { const r = y[n] - dot(f, P.m); rss += r * r; });
+        const a2 = Math.min(1e3, Math.max(1e-3, g / Math.max(dot(P.m, P.m), 1e-12)));
+        const b2 = Math.min(400, Math.max(1 / 0.64, Math.max(N - g, 1e-6) / Math.max(rss, 1e-12)));
+        const done = Math.abs(Math.log(a2 / alpha)) < 1e-6 && Math.abs(Math.log(b2 / beta)) < 1e-6;
+        alpha = a2; beta = b2; if (done) break;
+      }
+      P = posterior(Phi, y, Mm, alpha, beta);
+      let rss = 0; Phi.forEach((f, n) => { const r = y[n] - dot(f, P.m); rss += r * r; });
+      return { alpha, beta, it, ev: logEvidence(Phi, y, Mm, alpha, beta, P), rmse: Math.sqrt(rss / N) };
+    }
+
+    function optimise() {
+      const N = pts.length;
+      if (N < 3) { $("blr4-msg").textContent = "Needs at least 3 points."; return; }
+      const Phi = pts.map(p => phi(p.x)), y = pts.map(p => p.y);
+      const o = maxEvidence(Phi, y, M, Math.pow(10, +sA.value), 1 / Math.pow(+sS.value, 2));
+      const alpha = o.alpha, beta = o.beta, it = o.it;
+      sA.value = Math.log10(alpha).toFixed(2);
+      sS.value = (1 / Math.sqrt(beta)).toFixed(2);
+      $("blr4-msg").textContent = `Converged in ${it + 1} iterations: α = ${fmtS(alpha)}, σ = ${(1 / Math.sqrt(beta)).toFixed(2)} (true σ = 0.20).`;
+      drawAll();
+    }
+
+    svg.addEventListener("click", e => {
+      const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+      const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+      const x = (p.x - L0) / (W - L0 - R0), yv = YH - (p.y - T0) / (H - T0 - B0) * (YH - YL);
+      if (x < 0 || x > 1 || yv < YL || yv > YH) return;
+      pts.push({ x, y: yv }); drawAll();
+    });
+    $("blr3-new").addEventListener("click", newSample);
+    $("blr3-clear").addEventListener("click", () => { pts = []; drawAll(); });
+    $("blr3-samp").addEventListener("click", e => { showSamp = !showSamp; e.target.textContent = showSamp ? "Hide function samples" : "Show function samples"; draw3(); });
+    [sA, sS].forEach(el => el.addEventListener("input", () => { $("blr4-msg").textContent = "Updates the sliders above."; drawAll(); }));
+    sX.addEventListener("input", draw3);
+    $("blr4-opt").addEventListener("click", optimise);
+    redraw.push(drawAll); newSample();
+  })();
+})();
+</script>
+
+</div>
+
+  </div>
+
+  <div class="date">
+    Written on November 10, 2026
+  </div>
+</article>
+
+    </div>
+
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          
+<a href="mailto:alessandro.sanvito@gmail.com"><i class="svg-icon email"></i></a>
+
+
+<a href="https://github.com/Alexdruso"><i class="svg-icon github"></i></a>
+
+<a href="https://www.linkedin.com/in/alessandro-sanvito"><i class="svg-icon linkedin"></i></a>
+
+<a href="/feed.xml"><i class="svg-icon rss"></i></a>
+
+
+
+
+        </footer>
+      </div>
+    </div>
+
+    <button class="theme-toggle" aria-label="Toggle dark mode">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
+    <script>
+      // Theme switcher
+      const themeToggle = document.querySelector('.theme-toggle');
+      const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+      
+      // Check for saved theme preference or use system preference
+      const currentTheme = localStorage.getItem('theme') || 
+        (prefersDarkScheme.matches ? 'dark' : 'light');
+      
+      // Apply theme on load
+      if (currentTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+
+      // Toggle theme
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.body.classList.toggle('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+
+      // Listen for system theme changes
+      prefersDarkScheme.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+          document.body.classList.toggle('dark-theme', e.matches);
+        }
+      });
+    </script>
+
+    <div class="cmdk-backdrop" id="cmdk" hidden>
+  <div class="cmdk" role="dialog" aria-modal="true" aria-label="Site search">
+    <div class="cmdk-input-row">
+      <i class="fas fa-search" aria-hidden="true"></i>
+      <input id="cmdk-input" type="text" placeholder="Search pages, study notes, projects, publications…" autocomplete="off" spellcheck="false" />
+      <kbd>esc</kbd>
+    </div>
+    <ul class="cmdk-results" id="cmdk-results" role="listbox"></ul>
+    <div class="cmdk-foot">↑ ↓ to navigate &nbsp;·&nbsp; ↵ to open &nbsp;·&nbsp; esc to close</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var backdrop = document.getElementById('cmdk');
+  var input = document.getElementById('cmdk-input');
+  var list = document.getElementById('cmdk-results');
+  var index = null;
+  var results = [];
+  var active = 0;
+
+  function load() {
+    if (index) return Promise.resolve(index);
+    return fetch('/search.json')
+      .then(function (r) { return r.json(); })
+      .then(function (data) { index = data; return index; });
+  }
+
+  // Subsequence fuzzy match; contiguous runs and word starts score higher.
+  // Returns {score, positions} or null.
+  function fuzzy(query, text) {
+    var q = query.toLowerCase(), s = text.toLowerCase();
+    var qi = 0, score = 0, run = 0, positions = [];
+    for (var i = 0; i < s.length && qi < q.length; i++) {
+      if (s[i] === q[qi]) {
+        positions.push(i);
+        run++;
+        score += 1 + run * 2 + (i === 0 || s[i - 1] === ' ' ? 4 : 0);
+        qi++;
+      } else {
+        run = 0;
+      }
+    }
+    return qi === q.length ? { score: score, positions: positions } : null;
+  }
+
+  function highlight(title, positions) {
+    var out = '', set = {};
+    positions.forEach(function (p) { set[p] = true; });
+    for (var i = 0; i < title.length; i++) {
+      var ch = title[i].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      out += set[i] ? '<mark>' + ch + '</mark>' : ch;
+    }
+    return out;
+  }
+
+  function search(query) {
+    if (!index) return;
+    if (!query) {
+      results = index.map(function (item) { return { item: item, positions: [] }; });
+    } else {
+      results = [];
+      index.forEach(function (item) {
+        var m = fuzzy(query, item.title);
+        if (m) {
+          results.push({ item: item, positions: m.positions, score: m.score + 20 });
+        } else if (item.text && fuzzy(query, item.text)) {
+          results.push({ item: item, positions: [], score: 1 });
+        }
+      });
+      results.sort(function (a, b) { return b.score - a.score; });
+    }
+    results = results.slice(0, 12);
+    active = 0;
+    render(query);
+  }
+
+  function render() {
+    if (!results.length) {
+      list.innerHTML = '<div class="cmdk-empty">No matches.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    results.forEach(function (r, i) {
+      var li = document.createElement('li');
+      li.setAttribute('role', 'option');
+      li.className = i === active ? 'active' : '';
+      li.innerHTML =
+        '<span class="cmdk-title">' + highlight(r.item.title, r.positions) + '</span>' +
+        '<span class="cmdk-type">' + r.item.type + '</span>';
+      li.addEventListener('click', function () { go(r.item); });
+      li.addEventListener('mousemove', function () {
+        if (active !== i) { active = i; render(); }
+      });
+      list.appendChild(li);
+    });
+    var el = list.children[active];
+    if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
+  }
+
+  function go(item) {
+    window.location.href = '' + item.url;
+  }
+
+  function open() {
+    backdrop.hidden = false;
+    input.value = '';
+    load().then(function () { search(''); });
+    input.focus();
+  }
+
+  function close() {
+    backdrop.hidden = true;
+  }
+
+  window.addEventListener('keydown', function (e) {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      backdrop.hidden ? open() : close();
+      return;
+    }
+    if (backdrop.hidden) return;
+    if (e.key === 'Escape') {
+      close();
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (results.length) { active = (active + 1) % results.length; render(); }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (results.length) { active = (active - 1 + results.length) % results.length; render(); }
+    } else if (e.key === 'Enter') {
+      if (results[active]) go(results[active].item);
+    }
+  });
+
+  input.addEventListener('input', function () { search(input.value.trim()); });
+  backdrop.addEventListener('click', function (e) {
+    if (e.target === backdrop) close();
+  });
+
+  var navBtn = document.querySelector('.nav-search');
+  if (navBtn) navBtn.addEventListener('click', open);
+})();
+</script>
+
+
+    
+<script data-goatcounter="https://alexdruso.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+
+
+  </body>
+</html>

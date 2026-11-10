@@ -186,6 +186,13 @@
   
   
   {
+    "title": "Bayesian Linear Regression: Ridge, Plus the Error Bars",
+    "url": "/bayesian-linear-regression/",
+    "type": "Study Note",
+    "text": "Bayesian linear regression treats the weights as a random variable and returns their whole posterior distribution instead of one best vector. Its posterior mean is exactly the ridge solution with λ = σ²/τ²; what it adds is a covariance over the weights, an error bar on every prediction that split..."
+  },
+  
+  {
     "title": "Graph Neural Networks: Learning by Passing Messages Along Edges",
     "url": "/graph-neural-networks/",
     "type": "Study Note",
