@@ -22,7 +22,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Fast pre-merge check: build the Jekyll site and proof internal links/images.
+  # Fast pre-merge check: build the Astro site and check internal links/images.
   # No CV/LaTeX or deploy steps — those only run on master (see the build job).
   verify:
     if: github.event_name == 'pull_request'
@@ -30,25 +30,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: docs
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
 
-      - name: Build Jekyll site
+      - name: Install site dependencies
         working-directory: docs
-        run: bundle exec jekyll build
+        run: npm ci
 
-      - name: Proof internal links and images
+      - name: Build Astro site
         working-directory: docs
-        # Force a UTF-8 locale so Nokogiri parses the posts' em dashes etc.
-        # instead of silently reading zero links under a US-ASCII locale.
-        env:
-          LANG: C.UTF-8
-          LC_ALL: C.UTF-8
-        run: bundle exec htmlproofer _site --disable-external --allow-hash-href
+        run: npm run build
+
+      - name: Check internal links and images
+        working-directory: docs
+        run: npm run check-links
 
   build:
     if: github.event_name != 'pull_request'
@@ -61,12 +60,16 @@ jobs:
           ref: ${{ github.ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          ruby-version: '3.3'
-          bundler-cache: true
-          working-directory: docs
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install site dependencies
+        working-directory: docs
+        run: npm ci
 
       - name: Install TeX Live and xelatex
         run: |
@@ -84,7 +87,7 @@ jobs:
         run: |
           git config --global user.name 'GitHub Actions'
           git config --global user.email 'github-actions@github.com'
-          git add docs/public/Alessandro_Sanvito_CV.pdf
+          git add docs/static/public/Alessandro_Sanvito_CV.pdf
           if git diff --staged --quiet; then
             echo "No changes to commit"
             exit 0
@@ -107,13 +110,17 @@ jobs:
           echo "Failed to push CV update after multiple attempts"
           exit 1
 
-      - name: Build Jekyll site
+      - name: Build Astro site
         working-directory: docs
-        run: bundle exec jekyll build
+        run: npm run build
+
+      - name: Check internal links and images
+        working-directory: docs
+        run: npm run check-links
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_site
+          publish_dir: ./docs/dist
           commit_message: "Update site and CV"

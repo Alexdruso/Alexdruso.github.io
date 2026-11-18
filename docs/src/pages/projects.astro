@@ -1,0 +1,58 @@
+---
+import { marked } from 'marked';
+import Page from '../layouts/Page.astro';
+import { projects as allProjects } from '../lib/data';
+
+// Newest year first; projects sharing a year keep the reverse-chronological
+// order they are written in inside projects.yml (Array#sort is stable).
+const projects = [...allProjects].sort((a, b) => b.year - a.year);
+const inline = (md: string) => marked.parseInline(md) as string;
+---
+<Page title="Projects | Alessandro Sanvito">
+  <div class="projects">
+    <p class="projects-header">
+      Selected GitHub projects — an ongoing Kaggle Playground Series project, coursework from Politecnico di Milano and KTH,
+      two ACM RecSys Challenge entries, a hackathon, and this site itself.
+      Full list on
+      <a href="https://github.com/Alexdruso" target="_blank" rel="noopener">GitHub</a>.
+    </p>
+
+    {projects.map((project) => (
+      <article class="project-card">
+        <div class="project-meta">
+          <span class="project-year">{project.period ?? project.year}</span>
+          {project.role && <span class="role-chip">{project.role}</span>}
+        </div>
+
+        <h2 class="project-title">
+          <a href={project.repo} target="_blank" rel="noopener">{project.title}</a>
+        </h2>
+
+        {project.context && <p class="project-context">{project.context}</p>}
+
+        <p class="project-description" set:html={inline(project.description)} />
+
+        {project.entries && (
+          <ul class="project-entries">
+            {project.entries.map((entry) => (
+              <li>
+                <a href={entry.url} target="_blank" rel="noopener">{entry.name}</a>
+                <span class="project-entry-summary">{entry.summary}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {project.tags && (
+          <p class="project-tags">
+            {project.tags.map((tag) => <span class="tag-chip">{tag}</span>)}
+          </p>
+        )}
+
+        <p class="project-links">
+          <a href={project.repo} target="_blank" rel="noopener"><i class="fab fa-github"></i> View on GitHub</a>
+        </p>
+      </article>
+    ))}
+  </div>
+</Page>

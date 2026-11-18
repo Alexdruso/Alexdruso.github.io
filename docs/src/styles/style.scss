@@ -1,0 +1,2118 @@
+
+//
+// IMPORTS
+//
+
+@import "reset";
+@import "variables";
+// Syntax highlighting @import is at the bottom of this file
+
+/**************/
+/* BASE RULES */
+/**************/
+
+html {
+  font-size: 100%;
+}
+
+body {
+  background: $white;
+  font: 17px/1.6 $serif;
+  font-optical-sizing: auto;
+  color: $darkGray;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  margin: 0 auto;
+  max-width: 1200px;
+  padding: 0 40px;
+  width: 100%;
+
+  @include mobile {
+    padding: 0 20px;
+  }
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: $serif;
+  color: $darkerGray;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 1.5em 0 0.8em;
+  padding: 0;
+
+  @include mobile {
+    line-height: 1.4;
+  }
+}
+
+h1 {
+  font-size: 2.5em;
+  letter-spacing: -0.5px;
+  a {
+    color: inherit;
+  }
+}
+
+h2 {
+  font-size: 2em;
+  letter-spacing: -0.3px;
+}
+
+h3 {
+  font-size: 1.5em;
+  letter-spacing: -0.2px;
+}
+
+h4 {
+  font-size: 1.2em;
+  color: $gray;
+}
+
+p {
+  margin: 1.2em 0;
+  line-height: 1.8;
+}
+
+a {
+  color: $blue;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  &:hover, &:active {
+    color: darken($blue, 10%);
+  }
+}
+
+ul, ol {
+  margin: 1.2em 0;
+  padding-left: 30px;
+}
+
+ul {
+  list-style-type: disc;
+}
+
+ol {
+  list-style-type: decimal;
+}
+
+ol ul, ul ol, ul ul, ol ol {
+  margin: 0;
+}
+
+ul ul, ol ul {
+  list-style-type: circle;
+}
+
+em, i {
+  font-style: italic;
+}
+
+strong, b {
+  font-weight: 600;
+}
+
+img {
+  max-width: 100%;
+  // Keep the intrinsic aspect ratio when max-width shrinks an image that has
+  // width/height attributes; otherwise the height attribute wins and stretches it.
+  height: auto;
+  border-radius: 4px;
+}
+
+// Fixes images in popup boxes from Google Translate
+.gmnoprint img {
+  max-width: none;
+}
+
+.date {
+  font-style: italic;
+  color: $gray;
+}
+
+// Specify the color of the selection
+::-moz-selection {
+  color: $black;
+  background: $lightGray;
+}
+::selection {
+  color: $black;
+  background: $lightGray;
+}
+
+// Nicolas Gallagher's micro clearfix hack
+// http://nicolasgallagher.com/micro-clearfix-hack/
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+/*********************/
+/* LAYOUT / SECTIONS */
+/*********************/
+
+//
+// .masthead
+//
+
+.wrapper-masthead {
+  margin-bottom: 50px;
+  background-color: $white;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border-top: 3px solid $blue;
+  border-bottom: 1px solid $lightBlue;
+}
+
+.masthead {
+  padding: 30px 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px 40px;
+
+  // The legacy .clearfix pseudo-elements would become empty flex items here and
+  // each claim a 40px gap, pushing the nav onto two rows.
+  &::before,
+  &::after {
+    display: none;
+  }
+
+  @include mobile {
+    flex-direction: column;
+    gap: 0;
+    text-align: center;
+  }
+}
+
+.site-avatar {
+  width: 100px;
+  height: 100px;
+  flex-shrink: 0;
+
+  @include mobile {
+    margin: 0 auto 15px;
+  }
+
+  img {
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+}
+
+.site-info {
+  flex: 0 1 auto;
+  margin-left: -15px; // avatar-to-name spacing (masthead gap is 40px)
+
+  @include mobile {
+    margin-left: 0;
+  }
+}
+
+.site-name {
+  margin: 0;
+  color: $accentBlue;
+  cursor: pointer;
+  font-family: $serif;
+  font-weight: 600;
+  font-size: 30px;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+}
+
+.site-description {
+  margin: 8px 0 0 0;
+  color: $gray;
+  font-size: 18px;
+
+  @include mobile {
+    margin: 5px 0;
+  }
+}
+
+nav {
+  // Flex + wrap so links break between items, never between an icon and its
+  // label; right-aligned to sit opposite the name.
+  flex: 1 1 480px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px 20px;
+  font-family: $sans;
+  font-size: 16.5px;
+
+  // Not enough room beside the name: give the nav its own row.
+  @media screen and (max-width: 1100px) {
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+
+  @include mobile {
+    flex: none;
+    // Flex + gap keeps every row of links on the same vertical rhythm, and lets
+    // the search button claim a row of its own (see .nav-search).
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 12px 24px;
+    margin: 18px 0 0;
+    font-size: 16px;
+  }
+
+  a {
+    color: $accentBlue;
+    white-space: nowrap;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    transition: color 0.2s ease;
+
+    @include mobile {
+      margin: 0;
+      color: $blue;
+    }
+
+    &:hover {
+      color: $blue;
+    }
+
+    i {
+      margin-right: 5px;
+    }
+
+    &.active {
+      color: $blue;
+      font-weight: 600;
+    }
+  }
+}
+
+//
+// .main
+//
+
+.posts > .post {
+  padding-bottom: 2em;
+  border-bottom: 1px solid $lightGray;
+}
+
+.posts > .post:last-child {
+  padding-bottom: 1em;
+  border-bottom: none;
+}
+
+.post {
+  blockquote {
+    margin: 1.8em .8em;
+    border-left: 4px solid $accentBlue;
+    padding: 0.1em 1em;
+    color: $gray;
+    font-size: 22px;
+    font-style: italic;
+    background-color: $lightBlue;
+  }
+
+  .comments {
+    margin-top: 10px;
+  }
+
+  .read-more {
+    text-transform: uppercase;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: $accentBlue;
+    
+    &:hover {
+      color: $blue;
+    }
+  }
+}
+
+.wrapper-footer {
+  margin-top: 50px;
+  border-top: 1px solid $lightBlue;
+  border-bottom: 1px solid $lightBlue;
+  background-color: $white;
+}
+
+footer {
+  padding: 20px 0;
+  text-align: center;
+}
+
+// Theme toggle button
+.theme-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: $blue;
+  color: $white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  z-index: 1000;
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  &:hover {
+    transform: scale(1.1);
+    background: $accentBlue;
+  }
+
+  .dark-theme & {
+    background: $dark-accent;
+    &:hover {
+      background: $dark-accent-hover;
+    }
+  }
+}
+
+// Dark theme styles
+.dark-theme {
+  background-color: $dark-bg;
+  color: $dark-text;
+
+  .wrapper-masthead {
+    background-color: $dark-bg;
+    border-color: $dark-border;
+  }
+
+  .site-name {
+    color: $dark-accent;
+  }
+
+  nav {
+    a {
+      color: $dark-accent;
+      &:hover {
+        color: $dark-accent-hover;
+      }
+    }
+  }
+
+  // Main content area
+  #main {
+    h1, h2, h3, h4, h5, h6 {
+      color: #ffffff;
+    }
+  }
+
+  .post {
+    background-color: $dark-bg;
+    border-color: $dark-border;
+    
+    h1, h2, h3, h4, h5, h6 {
+      color: #ffffff;
+    }
+
+    a {
+      color: $dark-accent;
+      &:hover {
+        color: $dark-accent-hover;
+      }
+    }
+  }
+
+  blockquote {
+    background-color: rgba($dark-accent, 0.1);
+    border-color: $dark-accent;
+    color: $dark-text;
+  }
+
+  .wrapper-footer {
+    background-color: $dark-bg;
+    border-color: $dark-border;
+  }
+
+  .site-footer {
+    color: $dark-gray;
+  }
+
+  // Blog specific dark theme adjustments
+  .blog-header {
+    h1 {
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+  }
+
+  .post {
+    h2 a {
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      &:hover {
+        color: $dark-accent-hover;
+        text-shadow: none;
+      }
+    }
+  }
+}
+
+// Blog styles
+.blog-header {
+  text-align: center;
+  margin-bottom: 3em;
+  padding: 0 0 2em;
+  border-bottom: 1px solid $lightGray;
+
+  h1 {
+    font-size: 2.5em;
+    margin: 0 0 0.5em;
+    color: $accentBlue;
+  }
+
+  .blog-description {
+    font-size: 1.2em;
+    color: $gray;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+.post {
+  margin-bottom: 3em;
+  padding-bottom: 2em;
+  border-bottom: 1px solid $lightGray;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .post-meta {
+    margin-bottom: 1em;
+    font-size: 0.9em;
+    color: $gray;
+
+    .post-date {
+      margin-right: 1em;
+    }
+
+    .post-categories {
+      .post-category {
+        display: inline-block;
+        padding: 0.2em 0.6em;
+        margin-right: 0.5em;
+        background-color: $lightBlue;
+        color: $accentBlue;
+        border-radius: 3px;
+        font-size: 0.9em;
+      }
+    }
+  }
+
+  h2 {
+    font-size: 1.8em;
+    margin: 0.5em 0;
+    
+    a {
+      color: $accentBlue;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $blue;
+      }
+    }
+  }
+
+  .entry {
+    margin: 1.5em 0;
+    line-height: 1.8;
+  }
+
+  .read-more {
+    display: inline-block;
+    font-weight: 600;
+    color: $accentBlue;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: $blue;
+      transform: translateX(5px);
+    }
+  }
+}
+
+.no-posts {
+  text-align: center;
+  padding: 3em 0;
+  color: $gray;
+  font-size: 1.2em;
+}
+
+// Dark theme adjustments for blog
+.dark-theme {
+  .blog-header {
+    border-color: $dark-border;
+
+    h1 {
+      color: $dark-accent;
+    }
+
+    .blog-description {
+      color: $dark-gray;
+    }
+  }
+
+  .post {
+    border-color: $dark-border;
+
+    .post-meta {
+      color: $dark-gray;
+
+      .post-categories .post-category {
+        background-color: rgba($dark-accent, 0.1);
+        color: $dark-accent;
+      }
+    }
+
+    h2 a {
+      color: $dark-accent;
+      &:hover {
+        color: $dark-accent-hover;
+      }
+    }
+
+    .read-more {
+      color: $dark-accent;
+      &:hover {
+        color: $dark-accent-hover;
+      }
+    }
+  }
+
+  .no-posts {
+    color: $dark-gray;
+  }
+}
+
+// CV Page Styles
+.cv-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2em 0;
+}
+
+.cv-header {
+  text-align: center;
+  margin-bottom: 3em;
+  padding-bottom: 2em;
+  border-bottom: 2px solid $lightBlue;
+
+  h1 {
+    font-size: 2.5em;
+    margin-bottom: 0.2em;
+    color: $accentBlue;
+  }
+
+  .cv-title {
+    font-size: 1.5em;
+    color: $gray;
+    margin-bottom: 1em;
+  }
+
+  .cv-contact {
+    p {
+      margin: 0.5em 0;
+      color: $gray;
+    }
+  }
+}
+
+.cv-section {
+  margin-bottom: 3em;
+
+  h2 {
+    color: $accentBlue;
+    border-bottom: 1px solid $lightBlue;
+    padding-bottom: 0.5em;
+    margin-bottom: 1.5em;
+  }
+}
+
+.cv-entry {
+  margin-bottom: 2em;
+
+  .cv-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    margin-bottom: 0.5em;
+
+    h3 {
+      margin: 0;
+      color: $darkerGray;
+    }
+
+    .cv-company {
+      color: $accentBlue;
+      font-weight: 500;
+    }
+
+    .cv-date {
+      color: $gray;
+      font-size: 0.9em;
+    }
+  }
+
+  .cv-location {
+    color: $gray;
+    font-style: italic;
+    margin-bottom: 1em;
+  }
+
+  ul {
+    margin: 0;
+    padding-left: 1.5em;
+  }
+}
+
+.cv-skills {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2em;
+
+  .skill-category {
+    h3 {
+      color: $accentBlue;
+      margin-bottom: 1em;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        margin-bottom: 0.5em;
+        color: $darkerGray;
+      }
+    }
+  }
+}
+
+.cv-download {
+  text-align: center;
+  margin-top: 3em;
+  padding-top: 2em;
+  border-top: 2px solid $lightBlue;
+
+  .download-button {
+    display: inline-block;
+    padding: 1em 2em;
+    background-color: $accentBlue;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background-color: $blue;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// Dark theme adjustments for CV
+.dark-theme {
+  .cv-header {
+    border-color: $dark-border;
+
+    h1 {
+      color: $white;
+    }
+
+    .cv-title, .cv-contact p {
+      color: $dark-gray;
+    }
+  }
+
+  .cv-section h2 {
+    color: $white;
+    border-color: $dark-border;
+  }
+
+  .cv-entry {
+    .cv-entry-header {
+      h3 {
+        color: $white;
+      }
+
+      .cv-company {
+        color: $dark-accent;
+      }
+    }
+
+    .cv-location {
+      color: $dark-gray;
+    }
+
+    ul li {
+      color: $dark-text;
+    }
+  }
+
+  .cv-skills {
+    .skill-category {
+      h3 {
+        color: $white;
+      }
+
+      ul li {
+        color: $dark-text;
+      }
+    }
+  }
+
+  .cv-download {
+    border-color: $dark-border;
+
+    .download-button {
+      background-color: $dark-accent;
+      &:hover {
+        background-color: $dark-accent-hover;
+      }
+    }
+  }
+}
+
+// PDF Container Styles
+.pdf-container {
+  max-width: 1000px;
+  margin: 2em auto;
+  padding: 0 20px;
+  
+  iframe {
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+}
+
+// Dark theme adjustments for PDF container
+.dark-theme {
+  .pdf-container iframe {
+    border-color: $dark-border;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  }
+}
+
+// Settled on moving the import of syntax highlighting to the bottom of the CSS
+// ... Otherwise it really bloats up the top of the CSS file and makes it difficult to find the start
+@import "highlights";
+@import "svg-icons";
+
+// About page: a single centered reading column (~70ch) so lines stay a
+// comfortable length on wide screens.
+.about-text {
+  max-width: 680px;
+  margin: 0 auto;
+
+  > :first-child {
+    margin-top: 0;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    margin: 2em 0 0.4em;
+    padding-top: 1.2em;
+    border-top: 1px solid $lightGray;
+  }
+
+  p {
+    margin: 0.9em 0;
+  }
+}
+
+.about-lede {
+  font-size: 1.15em;
+  line-height: 1.65;
+}
+
+.dark-theme .about-text h2 {
+  border-color: $dark-border;
+}
+
+// Game styles
+.game-container {
+  // Board colors — read by the canvas JS at runtime so drawing follows the theme
+  --board-bg: #f0f0f0;
+  --board-snake: #4CAF50;
+  --board-snake-head: #388E3C;
+  --board-food: #FF5722;
+
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem;
+  text-align: center;
+
+  h1 {
+    margin: 0 0 0.5em;
+    color: $accentBlue;
+  }
+}
+
+.game-description {
+  margin-bottom: 2rem;
+  color: $darkGray;
+}
+
+.game-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+#gameCanvas {
+  border: 2px solid $lightBlue;
+  border-radius: 8px;
+  background-color: $white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  // Let the game handle swipes instead of the browser scrolling/zooming
+  touch-action: none;
+}
+
+// On-screen directional pad — hidden on desktop, shown on touch devices
+.dpad {
+  display: none;
+  grid-template-columns: repeat(3, 56px);
+  grid-template-rows: repeat(3, 56px);
+  gap: 0.4rem;
+  margin-top: 1rem;
+  justify-content: center;
+}
+
+.dpad-btn {
+  font-size: 1.3rem;
+  line-height: 1;
+  border: none;
+  border-radius: 8px;
+  background-color: $lightBlue;
+  color: $darkGray;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dpad-btn:active {
+  background-color: $accentBlue;
+  color: $white;
+}
+
+.dpad-up    { grid-column: 2; grid-row: 1; }
+.dpad-left  { grid-column: 1; grid-row: 2; }
+.dpad-right { grid-column: 3; grid-row: 2; }
+.dpad-down  { grid-column: 2; grid-row: 3; }
+
+// Show the pad on touch-primary devices
+@media (hover: none) and (pointer: coarse) {
+  .dpad {
+    display: grid;
+  }
+}
+
+.game-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.score {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: $darkGray;
+}
+
+#startButton, #resetButton {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#startButton {
+  background-color: $accentBlue;
+  color: $white;
+}
+
+#resetButton {
+  background-color: $lightBlue;
+  color: $darkGray;
+}
+
+#startButton:hover, #resetButton:hover {
+  opacity: 0.9;
+}
+
+// Mode switch (play yourself vs watch the AI learn)
+.mode-switch {
+  display: inline-flex;
+  border: 1px solid $lightBlue;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.mode-btn {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  background-color: $white;
+  color: $darkGray;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &.active {
+    background-color: $accentBlue;
+    color: $white;
+  }
+
+  &:not(.active):hover {
+    background-color: $lightBlue;
+  }
+}
+
+// Hide the touch d-pad while the AI is driving
+.game-container.ai-mode .dpad {
+  display: none;
+}
+
+// AI training panel
+.ai-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.ai-speed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ai-speed-label {
+  font-size: 0.9rem;
+  color: $gray;
+}
+
+.speed-btn {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  background-color: $lightBlue;
+  color: $darkGray;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &.active {
+    background-color: $accentBlue;
+    color: $white;
+  }
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.ai-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.4rem 1.4rem;
+}
+
+.ai-stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 3.2rem;
+
+  .ai-stat-value {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: $darkGray;
+  }
+
+  .ai-stat-label {
+    font-size: 0.75rem;
+    color: $gray;
+  }
+}
+
+.ai-spark {
+  // Sparkline colors — read by the canvas JS at runtime so it follows the theme
+  --spark-bg: #{$white};
+  --spark-grid: #{$lightGray};
+  --spark-raw: #{rgba($accentBlue, 0.35)};
+  --spark-avg: #{$accentBlue};
+  --spark-text: #{$gray};
+
+  width: 100%;
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 90px;
+    border: 1px solid $lightBlue;
+    border-radius: 4px;
+  }
+}
+
+#resetBrainButton {
+  padding: 0.35rem 0.8rem;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  background-color: $lightBlue;
+  color: $darkGray;
+  cursor: pointer;
+  transition: background-color 0.3s;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+// Dark theme adjustments for game
+.dark-theme {
+  .game-container {
+    --board-bg: #22262e;
+    --board-snake: #66bb6a;
+    --board-snake-head: #a5d6a7;
+    --board-food: #ff7043;
+  }
+
+  .game-description {
+    color: $dark-text;
+  }
+
+  .mode-switch {
+    border-color: $dark-border;
+  }
+
+  .mode-btn {
+    background-color: $dark-bg;
+    color: $dark-text;
+
+    &.active {
+      background-color: $dark-accent;
+      color: $dark-bg;
+    }
+
+    &:not(.active):hover {
+      background-color: $dark-border;
+    }
+  }
+
+  .ai-speed-label {
+    color: $dark-gray;
+  }
+
+  .speed-btn {
+    background-color: $dark-border;
+    color: $dark-text;
+
+    &.active {
+      background-color: $dark-accent;
+      color: $dark-bg;
+    }
+  }
+
+  .ai-stat {
+    .ai-stat-value {
+      color: $dark-text;
+    }
+
+    .ai-stat-label {
+      color: $dark-gray;
+    }
+  }
+
+  .ai-spark {
+    --spark-bg: #11131c;
+    --spark-grid: #{$dark-border};
+    --spark-raw: #{rgba($dark-accent, 0.4)};
+    --spark-avg: #{$dark-accent};
+    --spark-text: #{$dark-gray};
+
+    canvas {
+      border-color: $dark-border;
+    }
+  }
+
+  #resetBrainButton {
+    background-color: $dark-border;
+    color: $dark-text;
+  }
+
+  #gameCanvas {
+    border-color: $dark-border;
+    background-color: $dark-bg;
+  }
+
+  .score {
+    color: $dark-text;
+  }
+
+  #startButton {
+    background-color: $dark-accent;
+    &:hover {
+      background-color: $dark-accent-hover;
+    }
+  }
+
+  #resetButton {
+    background-color: $dark-border;
+    color: $dark-text;
+  }
+
+  .dpad-btn {
+    background-color: $dark-border;
+    color: $dark-text;
+
+    &:active {
+      background-color: $dark-accent;
+      color: $white;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .game-container {
+    padding: 1rem;
+  }
+  
+  #gameCanvas {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+  }
+  
+  .game-controls {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+// Publications
+.publications {
+  margin-bottom: 3rem;
+}
+
+.publications-header {
+  color: $gray;
+  font-size: 0.95em;
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $lightGray;
+}
+
+.publication-card {
+  padding: 1.25rem 0 1.5rem;
+  border-bottom: 1px solid $lightGray;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.publication-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85em;
+}
+
+.venue-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+
+  &.venue-top {
+    background-color: $accentBlue;
+    color: $white;
+  }
+
+  &.venue-strong {
+    background-color: $lightBlue;
+    color: $accentBlue;
+  }
+}
+
+.publication-year {
+  color: $gray;
+  font-weight: 500;
+}
+
+.first-author-chip {
+  background-color: #fff4d6;
+  color: #8a6d00;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8em;
+}
+
+.publication-title {
+  font-size: 1.2em;
+  margin: 0.2rem 0 0.4rem;
+  line-height: 1.35;
+
+  a {
+    color: $darkerGray;
+    text-decoration: none;
+    border-bottom: none;
+
+    &:hover {
+      color: $blue;
+    }
+  }
+}
+
+.publication-authors {
+  color: $gray;
+  font-size: 0.95em;
+  margin: 0 0 0.5rem;
+
+  strong {
+    color: $darkerGray;
+  }
+}
+
+.publication-tldr {
+  margin: 0 0 0.5rem;
+  color: $darkGray;
+}
+
+.publication-links {
+  margin: 0;
+  font-size: 0.9em;
+
+  a {
+    color: $blue;
+    text-decoration: none;
+    margin-right: 1rem;
+
+    i {
+      margin-right: 0.25rem;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Dark theme adjustments for publications
+.dark-theme {
+  .publications-header {
+    color: $dark-gray;
+    border-bottom-color: $dark-border;
+  }
+
+  .publication-card {
+    border-bottom-color: $dark-border;
+  }
+
+  .publication-title a {
+    color: $dark-text;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+
+  .publication-authors {
+    color: $dark-gray;
+
+    strong {
+      color: $dark-text;
+    }
+  }
+
+  .publication-tldr {
+    color: $dark-text;
+  }
+
+  .publication-year {
+    color: $dark-gray;
+  }
+
+  .venue-badge.venue-top {
+    background-color: $dark-accent;
+    color: $dark-bg;
+  }
+
+  .venue-badge.venue-strong {
+    background-color: $dark-border;
+    color: $dark-accent-hover;
+  }
+
+  .first-author-chip {
+    background-color: #4a3d00;
+    color: #ffe27a;
+  }
+
+  .publication-links a {
+    color: $dark-accent;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+}
+
+@include mobile {
+  .publication-title {
+    font-size: 1.1em;
+  }
+
+  .publication-meta {
+    font-size: 0.8em;
+  }
+}
+
+// Projects
+.projects {
+  margin-bottom: 3rem;
+}
+
+.projects-header {
+  color: $gray;
+  font-size: 0.95em;
+  margin: 0 0 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid $lightGray;
+}
+
+.project-card {
+  padding: 1.25rem 0 1.5rem;
+  border-bottom: 1px solid $lightGray;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.85em;
+}
+
+.project-year {
+  color: $gray;
+  font-weight: 500;
+}
+
+.role-chip {
+  background-color: $lightBlue;
+  color: $accentBlue;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.8em;
+}
+
+.project-title {
+  font-size: 1.2em;
+  margin: 0.2rem 0 0.4rem;
+  line-height: 1.35;
+
+  a {
+    color: $darkerGray;
+    text-decoration: none;
+    border-bottom: none;
+
+    &:hover {
+      color: $blue;
+    }
+  }
+}
+
+.project-context {
+  color: $gray;
+  font-style: italic;
+  font-size: 0.95em;
+  margin: 0 0 0.5rem;
+}
+
+.project-description {
+  margin: 0 0 0.5rem;
+  color: $darkGray;
+}
+
+.project-entries {
+  margin: 0 0 0.75rem;
+  padding-left: 1.1rem;
+  font-size: 0.92em;
+
+  li {
+    margin-bottom: 0.35rem;
+  }
+
+  a {
+    color: $darkerGray;
+    font-weight: 600;
+    text-decoration: none;
+
+    &:hover {
+      color: $blue;
+    }
+  }
+}
+
+.project-entry-summary {
+  display: block;
+  color: $darkGray;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 0.6rem;
+}
+
+.tag-chip {
+  display: inline-block;
+  background-color: $lightGray;
+  color: $darkGray;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75em;
+  font-weight: 500;
+}
+
+.project-links {
+  margin: 0;
+  font-size: 0.9em;
+
+  a {
+    color: $blue;
+    text-decoration: none;
+    margin-right: 1rem;
+
+    i {
+      margin-right: 0.25rem;
+    }
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Dark theme adjustments for projects
+.dark-theme {
+  .projects-header {
+    color: $dark-gray;
+    border-bottom-color: $dark-border;
+  }
+
+  .project-card {
+    border-bottom-color: $dark-border;
+  }
+
+  .project-title a {
+    color: $dark-text;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+
+  .project-context {
+    color: $dark-gray;
+  }
+
+  .project-description {
+    color: $dark-text;
+  }
+
+  .project-year {
+    color: $dark-gray;
+  }
+
+  .project-entries a {
+    color: $dark-text;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+
+  .project-entry-summary {
+    color: $dark-text;
+  }
+
+  .role-chip {
+    background-color: $dark-border;
+    color: $dark-accent-hover;
+  }
+
+  .tag-chip {
+    background-color: $dark-border;
+    color: $dark-text;
+  }
+
+  .project-links a {
+    color: $dark-accent;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+}
+
+@include mobile {
+  .project-title {
+    font-size: 1.1em;
+  }
+
+  .project-meta {
+    font-size: 0.8em;
+  }
+}
+
+// Study-notes index — preview cards with JS-drawn thumbnails.
+// Thumbnails use the study-note cyan (--thumb-*) so the cards visually
+// belong to the notes' design system; JS reads these tokens at runtime.
+.note-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.8rem;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.note-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $lightGray;
+  border-radius: 12px;
+  overflow: hidden;
+  background: $white;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+  }
+}
+
+.note-thumb {
+  --thumb-accent: #0891b2;
+  --thumb-accent-strong: #06b6d4;
+  --thumb-soft: rgba(8, 145, 178, 0.12);
+  --thumb-muted: rgba(15, 23, 42, 0.35);
+  --thumb-grid: rgba(15, 23, 42, 0.08);
+
+  display: block;
+  background: #f6f8fa;
+  border-bottom: 1px solid $lightGray;
+
+  canvas {
+    display: block;
+    width: 100%;
+    height: 150px;
+    border-radius: 0;
+  }
+}
+
+.note-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 1.1rem 1.3rem 1.2rem;
+
+  .post-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4em 0.8em;
+    margin-bottom: 0.6em;
+    font-size: 0.8em;
+    color: $gray;
+  }
+
+  .post-categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35em;
+  }
+
+  .post-category {
+    padding: 0.15em 0.55em;
+    background-color: $lightBlue;
+    color: $accentBlue;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+
+  h2 {
+    margin: 0 0 0.4em;
+    font-size: 1.15em;
+    line-height: 1.35;
+
+    a {
+      color: $darkerGray;
+
+      &:hover {
+        color: $blue;
+      }
+    }
+  }
+}
+
+.note-card-excerpt {
+  flex: 1;
+  margin: 0 0 0.8em;
+  font-size: 0.88em;
+  line-height: 1.6;
+  color: $gray;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  p {
+    margin: 0;
+    display: inline;
+  }
+}
+
+.dark-theme {
+  .note-card {
+    background: #11131c;
+    border-color: $dark-border;
+
+    &:hover {
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  .note-thumb {
+    --thumb-accent: #22d3ee;
+    --thumb-accent-strong: #67e8f9;
+    --thumb-soft: rgba(34, 211, 238, 0.14);
+    --thumb-muted: rgba(148, 163, 184, 0.55);
+    --thumb-grid: rgba(148, 163, 184, 0.14);
+
+    background: #161a26;
+    border-bottom-color: $dark-border;
+  }
+
+  .note-card-body h2 a {
+    color: $dark-text;
+
+    &:hover {
+      color: $dark-accent-hover;
+    }
+  }
+
+  .note-card-excerpt {
+    color: $dark-gray;
+  }
+
+  .note-card-body .post-category {
+    background-color: rgba($dark-accent, 0.1);
+    color: $dark-accent;
+  }
+}
+
+// Command palette (⌘K)
+.nav-search {
+  padding: 0.35em 0.7em;
+  border: 1px solid $lightGray;
+  border-radius: 8px;
+  background: transparent;
+  color: $gray;
+  font-family: $sans;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  i {
+    margin-right: 6px;
+  }
+
+  kbd {
+    font-family: inherit;
+    font-size: 0.85em;
+    padding: 0.1em 0.4em;
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+    background: $white;
+  }
+
+  // The word "Search" is only spelled out on touch layouts, where the ⌘K hint
+  // is meaningless; on desktop the icon + shortcut carry the meaning.
+  .nav-search-label {
+    display: none;
+  }
+
+  &:hover {
+    border-color: $accentBlue;
+    color: $accentBlue;
+  }
+
+  @include mobile {
+    // Own full-width row under the links, so it stops interrupting the grid of
+    // nav items and gets a proper touch target.
+    flex: 0 0 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    max-width: 320px;
+    min-height: 44px;
+    margin: 2px auto 0;
+    padding: 0 1em;
+    border-radius: 10px;
+    background: rgba(65, 131, 196, 0.06);
+    border-color: rgba(65, 131, 196, 0.25);
+    color: $gray;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+
+    i {
+      margin-right: 0;
+    }
+
+    kbd {
+      display: none;
+    }
+
+    .nav-search-label {
+      display: inline;
+    }
+  }
+}
+
+.dark-theme .nav-search {
+  border-color: $dark-border;
+  color: $dark-gray;
+
+  kbd {
+    border-color: $dark-border;
+    background: $dark-bg;
+  }
+
+  &:hover {
+    border-color: $dark-accent;
+    color: $dark-accent;
+  }
+
+  @include mobile {
+    background: rgba(100, 181, 246, 0.08);
+    border-color: rgba(100, 181, 246, 0.28);
+  }
+}
+
+.cmdk-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12vh 20px 20px;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.cmdk {
+  width: 100%;
+  max-width: 620px;
+  background: $white;
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.35);
+  overflow: hidden;
+}
+
+.cmdk-input-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.9rem 1.1rem;
+  border-bottom: 1px solid $lightGray;
+  color: $gray;
+
+  input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: $sans;
+    font-size: 1.05em;
+    color: $darkerGray;
+  }
+
+  kbd {
+    font-size: 0.75em;
+    padding: 0.15em 0.5em;
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+    color: $gray;
+  }
+}
+
+.cmdk-results {
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  max-height: 46vh;
+  overflow-y: auto;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    padding: 0.55rem 0.8rem;
+    border-radius: 8px;
+    cursor: pointer;
+
+    &.active {
+      background: $lightBlue;
+    }
+
+    mark {
+      background: none;
+      color: $accentBlue;
+      font-weight: 700;
+    }
+  }
+}
+
+.cmdk-title {
+  flex: 1;
+  color: $darkerGray;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cmdk-type {
+  flex-shrink: 0;
+  font-size: 0.72em;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.15em 0.55em;
+  border-radius: 999px;
+  background: $lightBlue;
+  color: $accentBlue;
+}
+
+.cmdk-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: $gray;
+}
+
+.cmdk-foot {
+  padding: 0.5rem 1.1rem;
+  border-top: 1px solid $lightGray;
+  font-size: 0.75em;
+  color: $gray;
+}
+
+.dark-theme {
+  .cmdk {
+    background: #11131c;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  }
+
+  .cmdk-input-row {
+    border-bottom-color: $dark-border;
+    color: $dark-gray;
+
+    input {
+      color: $dark-text;
+    }
+
+    kbd {
+      border-color: $dark-border;
+      color: $dark-gray;
+    }
+  }
+
+  .cmdk-results li {
+    &.active {
+      background: rgba(100, 181, 246, 0.12);
+    }
+
+    mark {
+      color: $dark-accent;
+    }
+  }
+
+  .cmdk-title {
+    color: $dark-text;
+  }
+
+  .cmdk-type {
+    background: rgba(100, 181, 246, 0.14);
+    color: $dark-accent;
+  }
+
+  .cmdk-empty,
+  .cmdk-foot {
+    color: $dark-gray;
+  }
+
+  .cmdk-foot {
+    border-top-color: $dark-border;
+  }
+}
+
+// 404 page
+.not-found {
+  max-width: 560px;
+  margin: 2em auto 3em;
+  text-align: center;
+
+  .not-found-code {
+    margin: 0;
+    font-size: 5em;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -2px;
+    color: $accentBlue;
+  }
+
+  h1 {
+    margin: 0.3em 0 0.4em;
+    font-size: 1.8em;
+  }
+
+  p {
+    color: $gray;
+  }
+
+  .not-found-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6em;
+    margin: 1.5em 0;
+
+    a {
+      padding: 0.45em 1em;
+      border: 1px solid $lightGray;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+  }
+
+  kbd {
+    font-family: inherit;
+    font-size: 0.85em;
+    padding: 0.1em 0.4em;
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+  }
+}
+
+.dark-theme .not-found {
+  .not-found-code {
+    color: $dark-accent;
+  }
+
+  p {
+    color: $dark-gray;
+  }
+
+  .not-found-links a,
+  kbd {
+    border-color: $dark-border;
+  }
+}
+
+// Typography: interface elements in sans
+// Body text and headings are set in the serif (see `body` and `h1..h6` above).
+// Navigation, metadata, chips, buttons and form controls use the companion sans
+// so the reading text stays distinct from the chrome around it.
+nav,
+button,
+input,
+select,
+textarea,
+.date,
+.post-meta,
+.publication-meta,
+.publication-links,
+.project-meta,
+.project-tags,
+.project-links,
+.cv-download,
+.read-more,
+.game-container,
+.cmdk {
+  font-family: $sans;
+}
+
+.date {
+  font-style: normal;
+  font-size: 0.9em;
+}
+
+// Old-style figures sit inside running text the way they do in print; tables
+// and data keep lining, tabular figures so columns align.
+.entry p,
+.entry li {
+  font-variant-numeric: oldstyle-nums proportional-nums;
+}
+table,
+.publication-year,
+.project-year {
+  font-variant-numeric: lining-nums tabular-nums;
+}

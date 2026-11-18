@@ -1,0 +1,113 @@
+---
+// The site shell (formerly _layouts/default.html): masthead + nav, footer,
+// dark-mode toggle, command palette and analytics.
+import '../styles/style.scss';
+import Meta from '../components/Meta.astro';
+import FooterLinks from '../components/FooterLinks.astro';
+import CommandPalette from '../components/CommandPalette.astro';
+import Analytics from '../components/Analytics.astro';
+import { SITE } from '../site';
+import { navigation } from '../lib/data';
+
+interface Props {
+  title?: string;
+  excerpt?: string;
+  article?: boolean;
+}
+const { title, excerpt, article } = Astro.props;
+const path = Astro.url.pathname;
+---
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{title ? `${title} – ${SITE.name}` : SITE.name}</title>
+
+    <Meta title={title} excerpt={excerpt} article={article} />
+
+    <link rel="alternate" type="application/atom+xml" title={`${SITE.name} - ${SITE.description}`} href="/feed.xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  </head>
+
+  <body>
+    <div class="wrapper-masthead">
+      <div class="container">
+        <header class="masthead clearfix">
+          <a href="/" class="site-avatar"><img src={SITE.avatar} alt={SITE.name} /></a>
+
+          <div class="site-info">
+            <h1 class="site-name"><a href="/">{SITE.name}</a></h1>
+            <p class="site-description">{SITE.description}</p>
+          </div>
+
+          <nav>
+            {navigation.map((item) => (
+              <a href={item.url} class={path === item.url ? 'active' : undefined}>
+                {item.icon && <i class={`fas ${item.icon}`}></i>}{' '}{item.title}
+              </a>
+            ))}
+            <button class="nav-search" aria-label="Search the site (Ctrl+K or ⌘K)">
+              <i class="fas fa-search"></i><span class="nav-search-label">Search</span><kbd>⌘K</kbd>
+            </button>
+          </nav>
+        </header>
+      </div>
+    </div>
+
+    <div id="main" role="main" class="container">
+      <slot />
+    </div>
+
+    <div class="wrapper-footer">
+      <div class="container">
+        <footer class="footer">
+          <FooterLinks />
+        </footer>
+      </div>
+    </div>
+
+    <button class="theme-toggle" aria-label="Toggle dark mode">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+
+    <!-- Inline (not bundled) so the saved theme applies before first paint. -->
+    <script is:inline>
+      // Theme switcher
+      const themeToggle = document.querySelector('.theme-toggle');
+      const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+      // Check for saved theme preference or use system preference
+      const currentTheme = localStorage.getItem('theme') ||
+        (prefersDarkScheme.matches ? 'dark' : 'light');
+
+      // Apply theme on load
+      if (currentTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+
+      // Toggle theme
+      themeToggle.addEventListener('click', () => {
+        const isDark = document.body.classList.toggle('dark-theme');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+      });
+
+      // Listen for system theme changes
+      prefersDarkScheme.addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+          document.body.classList.toggle('dark-theme', e.matches);
+        }
+      });
+    </script>
+
+    <CommandPalette />
+
+    <Analytics />
+  </body>
+</html>

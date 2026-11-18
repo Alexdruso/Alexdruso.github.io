@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// driver.mjs — build the Jekyll site and screenshot a study note in light + dark.
+// driver.mjs — build the Astro site and screenshot a study note in light + dark.
 //
 // Usage (run from the repo root):
 //   node .claude/skills/add-study-note/driver.mjs <slug> [--no-build]
@@ -7,8 +7,8 @@
 //   <slug>      the post's permalink slug, i.e. the filename without the
 //               YYYY-MM-DD- prefix and .html suffix.
 //               e.g. file 2026-06-16-shannon-entropy-visually.html -> slug
-//               "shannon-entropy-visually" (permalink is /:title/).
-//   --no-build  skip `jekyll build`, just re-screenshot the existing _site.
+//               "shannon-entropy-visually" (served at /slug/).
+//   --no-build  skip `npm run build`, just re-screenshot the existing dist/.
 //
 // Output: PNGs written to .claude/skills/add-study-note/screenshots/
 //   <slug>-light.png, <slug>-dark.png, index-light.png (the /study-notes/ list)
@@ -16,7 +16,7 @@
 // Why this shape: a study note is a visual web page whose whole point is the
 // interactive demos and the cyan/teal theming in BOTH light and dark mode. The
 // only way to verify a new note is to render it and look at it. This script does
-// exactly that with zero global tooling: it serves the built _site over a local
+// exactly that with zero global tooling: it serves the built dist/ over a local
 // http server and drives a headless Chrome (puppeteer-core + the
 // chrome-headless-shell that `npx puppeteer browsers install` drops in
 // ~/.cache/puppeteer).
@@ -31,7 +31,7 @@ import puppeteer from "puppeteer-core";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(__dirname, "../../..");
 const DOCS = path.join(REPO, "docs");
-const SITE = path.join(DOCS, "_site");
+const SITE = path.join(DOCS, "dist");
 const OUT = path.join(__dirname, "screenshots");
 
 const args = process.argv.slice(2);
@@ -53,22 +53,11 @@ function findChrome() {
 }
 
 function build() {
-  // `bundle exec jekyll` can fail to resolve the binstub under rbenv; invoking
-  // the gem's exe through ruby is the reliable path.
-  console.log("• building site (bundle exec jekyll build) ...");
-  const jekyllExe = spawnSync("bundle", ["show", "jekyll"], { cwd: DOCS, encoding: "utf8" });
-  if (jekyllExe.status !== 0) {
-    console.error(jekyllExe.stderr || "bundle show jekyll failed");
-    process.exit(1);
-  }
-  const exe = path.join(jekyllExe.stdout.trim(), "exe", "jekyll");
-  const r = spawnSync("bundle", ["exec", "ruby", exe, "build"], {
-    cwd: DOCS,
-    encoding: "utf8",
-  });
+  console.log("• building site (npm run build) ...");
+  const r = spawnSync("npm", ["run", "build"], { cwd: DOCS, encoding: "utf8" });
   process.stdout.write(r.stdout || "");
   if (r.status !== 0) {
-    console.error(r.stderr || "jekyll build failed");
+    console.error(r.stderr || "astro build failed (run `npm ci` in docs/ first?)");
     process.exit(1);
   }
   console.log("• build done");
@@ -110,7 +99,7 @@ async function shoot(page, url, file, dark) {
 (async () => {
   if (!noBuild) build();
   if (!fs.existsSync(path.join(SITE, slug, "index.html"))) {
-    console.error(`✗ _site/${slug}/index.html not found — wrong slug, or the post failed to build.`);
+    console.error(`✗ dist/${slug}/index.html not found — wrong slug, or the post failed to build.`);
     console.error(`  built posts:`, fs.readdirSync(SITE).filter((d) => fs.existsSync(path.join(SITE, d, "index.html"))).join(", "));
     process.exit(1);
   }

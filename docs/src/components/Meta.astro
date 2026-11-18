@@ -1,0 +1,23 @@
+---
+import { SITE, absoluteUrl } from '../site';
+import { stripHtml } from '../lib/notes';
+
+interface Props {
+  title?: string;
+  excerpt?: string;
+  article?: boolean;
+}
+const { title, excerpt, article = false } = Astro.props;
+const url = absoluteUrl(Astro.url.pathname);
+const description = excerpt ? stripHtml(excerpt) : SITE.description;
+---
+<meta name="description" content={description} />
+<meta name="author" content={SITE.name} />
+<link rel="canonical" href={url} />
+<meta property="og:url" content={url} />
+<meta property="og:type" content={article ? 'article' : 'website'} />
+<meta property="og:image" content={absoluteUrl(SITE.avatar)} />
+<meta name="twitter:card" content="summary" />
+<meta property="og:description" content={description} />
+{title && <meta property="og:title" content={title} />}
+{title && <meta property="twitter:title" content={title} />}
