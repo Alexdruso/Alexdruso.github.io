@@ -119,6 +119,9 @@ strong, b {
 
 img {
   max-width: 100%;
+  // Keep the intrinsic aspect ratio when max-width shrinks an image that has
+  // width/height attributes; otherwise the height attribute wins and stretches it.
+  height: auto;
   border-radius: 4px;
 }
 
