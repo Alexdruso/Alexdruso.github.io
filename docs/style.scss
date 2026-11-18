@@ -823,26 +823,11 @@ footer {
 @import "highlights";
 @import "svg-icons";
 
-// About page: one reading column for every section, with the portrait in a
-// narrow side column that stays in view while the text scrolls. Keeping all
-// text in the same ~66ch column avoids the dead gap beside the photo and the
-// over-long lines below it.
-.about {
-  display: grid;
-  grid-template-columns: minmax(0, 640px) 280px;
-  grid-template-areas: "text photo";
-  justify-content: center;
-  column-gap: 64px;
-  align-items: start;
-
-  @media screen and (max-width: 960px) {
-    grid-template-columns: minmax(0, 640px);
-    grid-template-areas: "photo" "text";
-  }
-}
-
+// About page: a single centered reading column (~70ch) so lines stay a
+// comfortable length on wide screens.
 .about-text {
-  grid-area: text;
+  max-width: 680px;
+  margin: 0 auto;
 
   > :first-child {
     margin-top: 0;
@@ -865,38 +850,8 @@ footer {
   line-height: 1.65;
 }
 
-.about-photo {
-  grid-area: photo;
-  position: sticky;
-  top: 32px;
-  margin: 0.4em 0 0;
-
-  img {
-    display: block;
-    width: 100%;
-    height: auto;
-    aspect-ratio: 4 / 5;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  }
-
-  @media screen and (max-width: 960px) {
-    position: static;
-    width: 100%;
-    max-width: 320px;
-    margin: 0 0 2em;
-  }
-}
-
-.dark-theme {
-  .about-text h2 {
-    border-color: $dark-border;
-  }
-
-  .about-photo img {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
-  }
+.dark-theme .about-text h2 {
+  border-color: $dark-border;
 }
 
 // Game styles
