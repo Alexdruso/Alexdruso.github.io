@@ -3,9 +3,10 @@
 //
 
 // Typography
-$helvetica: "Helvetica Neue", Helvetica, Arial, sans-serif;
-$helveticaNeue: "Helvetica Neue", Helvetica, Arial, sans-serif;
-$georgia: Georgia, Cambria, "Times New Roman", Times, serif;
+// Source Serif 4 for reading text and headings; Source Sans 3 (its companion
+// face) for interface elements. Both are loaded in _layouts/default.html.
+$serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, Cambria, serif;
+$sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
 // Font Sizes
 $base-font-size: 16px;

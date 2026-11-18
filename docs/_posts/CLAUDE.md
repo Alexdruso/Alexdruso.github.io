@@ -90,8 +90,10 @@ gradients. Accent reference: `#0891b2` (light) / `#22d3ee` (dark) / `#06b6d4` (m
 ## Layout & typography (handled by `study-note-styles.html`)
 
 - The note, its title and its date sit in one ~760px reading column.
-- Prose (`p`/`ul`/`ol` directly under `.study-note` or a section) is set in the serif
-  (`--sn-serif`, Source Serif 4); headings, demos, controls and captions stay sans.
+- Prose (`p`/`ul`/`ol` directly under `.study-note` or a section) and headings are set
+  in the serif (`--sn-serif`, Source Serif 4, matching the rest of the site); demos,
+  controls and captions use the companion sans (`--sn-sans`, Source Sans 3), which
+  `.study-note` sets as its default. Both faces are loaded by `_layouts/default.html`.
 - Sections (`se-section`/`bm-section`/`mdp-section`) are **not boxes**: a hairline rule
   above, a mono accent number, then a plain `h3`. Don't add backgrounds/borders back.
 - `se-note` is a quiet italic pull-quote; `se-equation` is unboxed, centered serif;
