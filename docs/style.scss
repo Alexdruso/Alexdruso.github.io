@@ -20,7 +20,8 @@ html {
 
 body {
   background: $white;
-  font: 16px/1.6 $helvetica;
+  font: 17px/1.6 $serif;
+  font-optical-sizing: auto;
   color: $darkGray;
   -webkit-font-smoothing: antialiased;
 }
@@ -33,7 +34,7 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: $helveticaNeue;
+  font-family: $serif;
   color: $darkerGray;
   font-weight: 600;
   line-height: 1.4;
@@ -207,7 +208,7 @@ img {
   margin: 0;
   color: $accentBlue;
   cursor: pointer;
-  font-family: $helveticaNeue;
+  font-family: $serif;
   font-weight: 600;
   font-size: 32px;
   letter-spacing: -0.5px;
@@ -233,7 +234,7 @@ nav {
   align-items: center;
   justify-content: flex-end;
   gap: 10px 26px;
-  font-family: $helveticaNeue;
+  font-family: $sans;
   font-size: 18px;
 
   // Not enough room beside the name: give the nav its own row.
@@ -1780,7 +1781,7 @@ footer {
   border-radius: 8px;
   background: transparent;
   color: $gray;
-  font-family: $helveticaNeue;
+  font-family: $sans;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1901,7 +1902,7 @@ footer {
     border: none;
     outline: none;
     background: transparent;
-    font-family: $helveticaNeue;
+    font-family: $sans;
     font-size: 1.05em;
     color: $darkerGray;
   }
@@ -2085,4 +2086,44 @@ footer {
   kbd {
     border-color: $dark-border;
   }
+}
+
+// Typography: interface elements in sans
+// Body text and headings are set in the serif (see `body` and `h1..h6` above).
+// Navigation, metadata, chips, buttons and form controls use the companion sans
+// so the reading text stays distinct from the chrome around it.
+nav,
+button,
+input,
+select,
+textarea,
+.date,
+.post-meta,
+.publication-meta,
+.publication-links,
+.project-meta,
+.project-tags,
+.project-links,
+.cv-download,
+.read-more,
+.game-container,
+.cmdk {
+  font-family: $sans;
+}
+
+.date {
+  font-style: normal;
+  font-size: 0.9em;
+}
+
+// Old-style figures sit inside running text the way they do in print; tables
+// and data keep lining, tabular figures so columns align.
+.entry p,
+.entry li {
+  font-variant-numeric: oldstyle-nums proportional-nums;
+}
+table,
+.publication-year,
+.project-year {
+  font-variant-numeric: lining-nums tabular-nums;
 }

@@ -160,9 +160,14 @@
 %-------------------------------------------------------------------------------
 %                Configuration for fonts
 %-------------------------------------------------------------------------------
-% Set font for header (default is Roboto)
-\newfontfamily\headerfont{Roboto}
-\newfontfamily\headerfontlight{Roboto}
+% Header and section titles use Source Serif (texlive-fonts-extra), matching the
+% serif headings on the website; body text stays in its companion Source Sans.
+\newfontfamily\headerfont{SourceSerifPro}[
+  Extension=.otf, UprightFont=*-Regular, ItalicFont=*-RegularIt,
+  BoldFont=*-Semibold, BoldItalicFont=*-SemiboldIt]
+\newfontfamily\headerfontlight{SourceSerifPro}[
+  Extension=.otf, UprightFont=*-Light, ItalicFont=*-LightIt,
+  BoldFont=*-Semibold, BoldItalicFont=*-SemiboldIt]
 
 \newcommand*{\footerfont}{\sourcesanspro}
 \newcommand*{\bodyfont}{\sourcesanspro}
@@ -180,7 +185,7 @@
 \newcommand*{\headersocialstyle}[1]{{\fontsize{6.8pt}{1em}\headerfont\color{text} #1}}
 \newcommand*{\headerquotestyle}[1]{{\fontsize{9pt}{1em}\bodyfont\itshape\color{darktext} #1}}
 \newcommand*{\footerstyle}[1]{{\fontsize{8pt}{1em}\footerfont\scshape\color{lighttext} #1}}
-\newcommand*{\sectionstyle}[1]{{\fontsize{16pt}{1em}\bodyfont\bfseries\color{text}\@sectioncolor #1}}
+\newcommand*{\sectionstyle}[1]{{\fontsize{16pt}{1em}\headerfont\bfseries\color{text}\@sectioncolor #1}}
 \newcommand*{\subsectionstyle}[1]{{\fontsize{12pt}{1em}\bodyfont\scshape\textcolor{text}{#1}}}
 \newcommand*{\paragraphstyle}{\fontsize{9pt}{1em}\bodyfontlight\upshape\color{text}}
 
