@@ -3,11 +3,6 @@ title: About Me
 layout: page
 ---
 
-<div class="about">
-<figure class="about-photo">
-  <img src="/images/alessandro.jpeg" alt="Alessandro Sanvito" width="1536" height="2048" />
-</figure>
-
 <div class="about-text" markdown="1">
 
 <p class="about-lede">I'm <strong>Alessandro Sanvito</strong>, a Software Engineer at <strong>Optiver</strong> in Amsterdam. I work in the Quantitative Volatility Strategies team, building systematic options strategies and the data infrastructure behind them.</p>
@@ -24,5 +19,4 @@ My ML background spans deep learning (PyTorch, TensorFlow) with a focus on compu
 
 Find me on [LinkedIn](https://www.linkedin.com/in/alessandro-sanvito/) and [GitHub](https://github.com/Alexdruso), or download my [CV](/public/Alessandro_Sanvito_CV.pdf).
 
-</div>
 </div>
