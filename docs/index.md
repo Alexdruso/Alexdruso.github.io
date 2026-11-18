@@ -3,16 +3,16 @@ title: About Me
 layout: page
 ---
 
-<div class="about-container">
-  <div class="about-content">
-    <p>I'm <strong>Alessandro Sanvito</strong>, a Software Engineer at <strong>Optiver</strong> in Amsterdam. I work in the Quantitative Volatility Strategies team, building systematic options strategies and the data infrastructure behind them.</p>
-    <p>Before Optiver, I was an AI Research Intern at <strong>Mercedes-Benz</strong> in Böblingen, where I researched neural scene representations for autonomous driving, from reconstructing scenes through fog to complete 3D human avatars from limited viewpoints. That work led to papers at <a href="/publications/">ICCV and IEEE IV</a>.</p>
-    <p>I hold dual master's degrees from <strong>KTH Royal Institute of Technology</strong> (ICT Innovation, Data Science) and <strong>Politecnico di Milano</strong> (Computer Science and Engineering, 110/110 cum laude).</p>
-  </div>
-  <div class="profile-picture">
-    <img src="/images/alessandro.jpeg" alt="Alessandro Sanvito" />
-  </div>
-</div>
+<div class="about">
+<figure class="about-photo">
+  <img src="/images/alessandro.jpeg" alt="Alessandro Sanvito" width="1536" height="2048" />
+</figure>
+
+<div class="about-text" markdown="1">
+
+<p class="about-lede">I'm <strong>Alessandro Sanvito</strong>, a Software Engineer at <strong>Optiver</strong> in Amsterdam. I work in the Quantitative Volatility Strategies team, building systematic options strategies and the data infrastructure behind them.</p>
+<p>Before Optiver, I was an AI Research Intern at <strong>Mercedes-Benz</strong> in Böblingen, where I researched neural scene representations for autonomous driving, from reconstructing scenes through fog to complete 3D human avatars from limited viewpoints. That work led to papers at <a href="/publications/">ICCV and IEEE IV</a>.</p>
+<p>I hold dual master's degrees from <strong>KTH Royal Institute of Technology</strong> (ICT Innovation, Data Science) and <strong>Politecnico di Milano</strong> (Computer Science and Engineering, 110/110 cum laude).</p>
 
 ## What I work with
 
@@ -23,3 +23,6 @@ My ML background spans deep learning (PyTorch, TensorFlow) with a focus on compu
 ## Get in touch
 
 Find me on [LinkedIn](https://www.linkedin.com/in/alessandro-sanvito/) and [GitHub](https://github.com/Alexdruso), or download my [CV](/public/Alessandro_Sanvito_CV.pdf).
+
+</div>
+</div>
