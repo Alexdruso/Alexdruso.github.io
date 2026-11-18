@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-11-10T22:07:35+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">Bayesian Linear Regression: Ridge, Plus the Error Bars</title><link href="https://alexdruso.github.io/bayesian-linear-regression/" rel="alternate" type="text/html" title="Bayesian Linear Regression: Ridge, Plus the Error Bars" /><published>2026-11-10T00:00:00+00:00</published><updated>2026-11-10T00:00:00+00:00</updated><id>https://alexdruso.github.io/bayesian-linear-regression</id><content type="html" xml:base="https://alexdruso.github.io/bayesian-linear-regression/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.4">Jekyll</generator><link href="https://alexdruso.github.io/feed.xml" rel="self" type="application/atom+xml" /><link href="https://alexdruso.github.io/" rel="alternate" type="text/html" /><updated>2026-11-18T23:07:14+00:00</updated><id>https://alexdruso.github.io/feed.xml</id><title type="html">Alessandro Sanvito</title><subtitle>Software Engineer at Optiver</subtitle><entry><title type="html">Bayesian Linear Regression: Ridge, Plus the Error Bars</title><link href="https://alexdruso.github.io/bayesian-linear-regression/" rel="alternate" type="text/html" title="Bayesian Linear Regression: Ridge, Plus the Error Bars" /><published>2026-11-10T00:00:00+00:00</published><updated>2026-11-10T00:00:00+00:00</updated><id>https://alexdruso.github.io/bayesian-linear-regression</id><content type="html" xml:base="https://alexdruso.github.io/bayesian-linear-regression/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -32,6 +31,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -63,7 +63,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -77,7 +77,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -1121,8 +1121,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Statistics" /><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Bayesian linear regression treats the weights as a random variable and returns their whole posterior distribution instead of one best vector. Its posterior mean is exactly the ridge solution with λ = σ²/τ²; what it adds is a covariance over the weights, an error bar on every prediction that splits into noise and model uncertainty, and a way to set λ from the training data alone.]]></summary></entry><entry><title type="html">Graph Neural Networks: Learning by Passing Messages Along Edges</title><link href="https://alexdruso.github.io/graph-neural-networks/" rel="alternate" type="text/html" title="Graph Neural Networks: Learning by Passing Messages Along Edges" /><published>2026-08-09T00:00:00+00:00</published><updated>2026-08-09T00:00:00+00:00</updated><id>https://alexdruso.github.io/graph-neural-networks</id><content type="html" xml:base="https://alexdruso.github.io/graph-neural-networks/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Statistics" /><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Bayesian linear regression treats the weights as a random variable and returns their whole posterior distribution instead of one best vector. Its posterior mean is exactly the ridge solution with λ = σ²/τ²; what it adds is a covariance over the weights, an error bar on every prediction that splits into noise and model uncertainty, and a way to set λ from the training data alone.]]></summary></entry><entry><title type="html">Graph Neural Networks: Learning by Passing Messages Along Edges</title><link href="https://alexdruso.github.io/graph-neural-networks/" rel="alternate" type="text/html" title="Graph Neural Networks: Learning by Passing Messages Along Edges" /><published>2026-08-09T00:00:00+00:00</published><updated>2026-08-09T00:00:00+00:00</updated><id>https://alexdruso.github.io/graph-neural-networks</id><content type="html" xml:base="https://alexdruso.github.io/graph-neural-networks/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -1155,6 +1154,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -1186,7 +1186,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -1200,7 +1200,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -3220,8 +3220,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Deep Learning" /><category term="Graph Neural Networks" /><category term="Interactive" /><summary type="html"><![CDATA[A graph neural network updates every node from its own features and an order-invariant aggregate of its neighbours' — the only form a layer can take when node indices carry no meaning. That single constraint produces message passing, message passing produces the GCN layer, the choice of aggregator sets a hard ceiling on which neighbourhoods a layer can tell apart, and repeated averaging drives every representation toward the same degree-dominated fixed point.]]></summary></entry><entry><title type="html">Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer</title><link href="https://alexdruso.github.io/attention-heads-playground/" rel="alternate" type="text/html" title="Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer" /><published>2026-07-28T00:00:00+00:00</published><updated>2026-07-28T00:00:00+00:00</updated><id>https://alexdruso.github.io/attention-heads-playground</id><content type="html" xml:base="https://alexdruso.github.io/attention-heads-playground/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Deep Learning" /><category term="Graph Neural Networks" /><category term="Interactive" /><summary type="html"><![CDATA[A graph neural network updates every node from its own features and an order-invariant aggregate of its neighbours' — the only form a layer can take when node indices carry no meaning. That single constraint produces message passing, message passing produces the GCN layer, the choice of aggregator sets a hard ceiling on which neighbourhoods a layer can tell apart, and repeated averaging drives every representation toward the same degree-dominated fixed point.]]></summary></entry><entry><title type="html">Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer</title><link href="https://alexdruso.github.io/attention-heads-playground/" rel="alternate" type="text/html" title="Attention Heads Are Learned: Watching Circuits Form in a Tiny Transformer" /><published>2026-07-28T00:00:00+00:00</published><updated>2026-07-28T00:00:00+00:00</updated><id>https://alexdruso.github.io/attention-heads-playground</id><content type="html" xml:base="https://alexdruso.github.io/attention-heads-playground/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -3254,6 +3253,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -3285,7 +3285,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -3299,7 +3299,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -4718,8 +4718,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Deep Learning" /><category term="Transformers" /><category term="Interpretability" /><category term="Interactive" /><summary type="html"><![CDATA[Nothing in a transformer specifies what any attention head should look at — the query and key matrices start as random noise and every pattern is a fit to the training task. Train a two-layer transformer from scratch on a repeated-sequence task and the canonical circuit appears: a previous-token head in layer 0 writing each position's predecessor into the residual stream, and an induction head in layer 1 using it to complete the copy. Knock out either one and accuracy collapses from 99.9% to chance.]]></summary></entry><entry><title type="html">Tabular Q-Learning, Explained by a Snake</title><link href="https://alexdruso.github.io/q-learning-snake/" rel="alternate" type="text/html" title="Tabular Q-Learning, Explained by a Snake" /><published>2026-07-20T00:00:00+00:00</published><updated>2026-07-20T00:00:00+00:00</updated><id>https://alexdruso.github.io/q-learning-snake</id><content type="html" xml:base="https://alexdruso.github.io/q-learning-snake/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Deep Learning" /><category term="Transformers" /><category term="Interpretability" /><category term="Interactive" /><summary type="html"><![CDATA[Nothing in a transformer specifies what any attention head should look at — the query and key matrices start as random noise and every pattern is a fit to the training task. Train a two-layer transformer from scratch on a repeated-sequence task and the canonical circuit appears: a previous-token head in layer 0 writing each position's predecessor into the residual stream, and an induction head in layer 1 using it to complete the copy. Knock out either one and accuracy collapses from 99.9% to chance.]]></summary></entry><entry><title type="html">Tabular Q-Learning, Explained by a Snake</title><link href="https://alexdruso.github.io/q-learning-snake/" rel="alternate" type="text/html" title="Tabular Q-Learning, Explained by a Snake" /><published>2026-07-20T00:00:00+00:00</published><updated>2026-07-20T00:00:00+00:00</updated><id>https://alexdruso.github.io/q-learning-snake</id><content type="html" xml:base="https://alexdruso.github.io/q-learning-snake/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -4752,6 +4751,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -4783,7 +4783,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -4797,7 +4797,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -5761,8 +5761,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Q-learning estimates the value of every action in every state directly from experience, with no model of the environment. These notes work through the tabular version end to end — state design, reward shaping, the temporal-difference update, and ε-greedy exploration — using the Snake agent from this site's game page as the running example, retrained from scratch in a live demo.]]></summary></entry><entry><title type="html">Self-Attention: The Content-Addressed Lookup at the Heart of Transformers</title><link href="https://alexdruso.github.io/self-attention/" rel="alternate" type="text/html" title="Self-Attention: The Content-Addressed Lookup at the Heart of Transformers" /><published>2026-07-18T00:00:00+00:00</published><updated>2026-07-18T00:00:00+00:00</updated><id>https://alexdruso.github.io/self-attention</id><content type="html" xml:base="https://alexdruso.github.io/self-attention/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Q-learning estimates the value of every action in every state directly from experience, with no model of the environment. These notes work through the tabular version end to end — state design, reward shaping, the temporal-difference update, and ε-greedy exploration — using the Snake agent from this site's game page as the running example, retrained from scratch in a live demo.]]></summary></entry><entry><title type="html">Self-Attention: The Content-Addressed Lookup at the Heart of Transformers</title><link href="https://alexdruso.github.io/self-attention/" rel="alternate" type="text/html" title="Self-Attention: The Content-Addressed Lookup at the Heart of Transformers" /><published>2026-07-18T00:00:00+00:00</published><updated>2026-07-18T00:00:00+00:00</updated><id>https://alexdruso.github.io/self-attention</id><content type="html" xml:base="https://alexdruso.github.io/self-attention/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -5795,6 +5794,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -5826,7 +5826,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -5840,7 +5840,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -7040,8 +7040,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Deep Learning" /><category term="Transformers" /><category term="Interactive" /><summary type="html"><![CDATA[Self-attention computes each token's new representation as a weighted average of every token's value vector, with the weights chosen by content: a softmax over query–key dot products. The 1/√d scaling is literally a softmax temperature, causal masking is a renormalized softmax over the prefix, and multiple heads run the same lookup in parallel subspaces so different relations can coexist. From Bahdanau's RNN attention to sinusoidal positions, the full residual + LayerNorm + FFN block, and the inference tricks — KV cache, GQA, FlashAttention — that make the O(n²) core affordable.]]></summary></entry><entry><title type="html">Implicit Neural Representations: When the Network Is the Image</title><link href="https://alexdruso.github.io/implicit-neural-representations/" rel="alternate" type="text/html" title="Implicit Neural Representations: When the Network Is the Image" /><published>2026-07-08T00:00:00+00:00</published><updated>2026-07-08T00:00:00+00:00</updated><id>https://alexdruso.github.io/implicit-neural-representations</id><content type="html" xml:base="https://alexdruso.github.io/implicit-neural-representations/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Deep Learning" /><category term="Transformers" /><category term="Interactive" /><summary type="html"><![CDATA[Self-attention computes each token's new representation as a weighted average of every token's value vector, with the weights chosen by content: a softmax over query–key dot products. The 1/√d scaling is literally a softmax temperature, causal masking is a renormalized softmax over the prefix, and multiple heads run the same lookup in parallel subspaces so different relations can coexist. From Bahdanau's RNN attention to sinusoidal positions, the full residual + LayerNorm + FFN block, and the inference tricks — KV cache, GQA, FlashAttention — that make the O(n²) core affordable.]]></summary></entry><entry><title type="html">Implicit Neural Representations: When the Network Is the Image</title><link href="https://alexdruso.github.io/implicit-neural-representations/" rel="alternate" type="text/html" title="Implicit Neural Representations: When the Network Is the Image" /><published>2026-07-08T00:00:00+00:00</published><updated>2026-07-08T00:00:00+00:00</updated><id>https://alexdruso.github.io/implicit-neural-representations</id><content type="html" xml:base="https://alexdruso.github.io/implicit-neural-representations/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -7074,6 +7073,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -7105,7 +7105,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -7119,7 +7119,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -8710,8 +8710,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[An implicit neural representation stores a signal as a function: a small network maps continuous (x, y) coordinates to RGB, so the image lives in the weights instead of a pixel grid. Why a plain ReLU MLP can only learn a blurry version (spectral bias), how Fourier features and SIREN's sine activations fix it, and what the functional view buys — rendering one trained network at any resolution, including scales it never saw. With live in-browser training, and a final demo that reruns the whole comparison on any image dropped into the page — processed entirely locally, nothing uploaded.]]></summary></entry><entry><title type="html">The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One</title><link href="https://alexdruso.github.io/forward-forward-algorithm/" rel="alternate" type="text/html" title="The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One" /><published>2026-07-05T00:00:00+00:00</published><updated>2026-07-05T00:00:00+00:00</updated><id>https://alexdruso.github.io/forward-forward-algorithm</id><content type="html" xml:base="https://alexdruso.github.io/forward-forward-algorithm/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[An implicit neural representation stores a signal as a function: a small network maps continuous (x, y) coordinates to RGB, so the image lives in the weights instead of a pixel grid. Why a plain ReLU MLP can only learn a blurry version (spectral bias), how Fourier features and SIREN's sine activations fix it, and what the functional view buys — rendering one trained network at any resolution, including scales it never saw. With live in-browser training, and a final demo that reruns the whole comparison on any image dropped into the page — processed entirely locally, nothing uploaded.]]></summary></entry><entry><title type="html">The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One</title><link href="https://alexdruso.github.io/forward-forward-algorithm/" rel="alternate" type="text/html" title="The Forward-Forward Algorithm: Two Forward Passes Instead of a Backward One" /><published>2026-07-05T00:00:00+00:00</published><updated>2026-07-05T00:00:00+00:00</updated><id>https://alexdruso.github.io/forward-forward-algorithm</id><content type="html" xml:base="https://alexdruso.github.io/forward-forward-algorithm/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -8744,6 +8743,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -8775,7 +8775,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -8789,7 +8789,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -10047,8 +10047,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Hinton's Forward-Forward algorithm trains a network without backpropagation: it replaces the forward-then-backward sweep with two forward passes — one on real data, one on fake — and lets every layer learn immediately from its own local 'goodness' objective. What goodness is, why layer normalization is the load-bearing trick, and a live in-browser training race between Forward-Forward and backprop.]]></summary></entry><entry><title type="html">World Models: Learning to Dream, Then Act</title><link href="https://alexdruso.github.io/world-models/" rel="alternate" type="text/html" title="World Models: Learning to Dream, Then Act" /><published>2026-06-23T00:00:00+00:00</published><updated>2026-06-23T00:00:00+00:00</updated><id>https://alexdruso.github.io/world-models</id><content type="html" xml:base="https://alexdruso.github.io/world-models/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[Hinton's Forward-Forward algorithm trains a network without backpropagation: it replaces the forward-then-backward sweep with two forward passes — one on real data, one on fake — and lets every layer learn immediately from its own local 'goodness' objective. What goodness is, why layer normalization is the load-bearing trick, and a live in-browser training race between Forward-Forward and backprop.]]></summary></entry><entry><title type="html">World Models: Learning to Dream, Then Act</title><link href="https://alexdruso.github.io/world-models/" rel="alternate" type="text/html" title="World Models: Learning to Dream, Then Act" /><published>2026-06-23T00:00:00+00:00</published><updated>2026-06-23T00:00:00+00:00</updated><id>https://alexdruso.github.io/world-models</id><content type="html" xml:base="https://alexdruso.github.io/world-models/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -10081,6 +10080,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -10112,7 +10112,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -10126,7 +10126,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -10928,8 +10928,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[A World Models agent splits into a large world model trained unsupervised and a tiny controller trained by evolution: V compresses each frame to a latent vector, M learns to predict the next latent given the action, and C maps that compressed state to an action — small enough to train entirely inside the model's own hallucinated rollouts, then transfer to reality.]]></summary></entry><entry><title type="html">Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines</title><link href="https://alexdruso.github.io/temperature-and-entropy-llms/" rel="alternate" type="text/html" title="Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines" /><published>2026-06-22T00:00:00+00:00</published><updated>2026-06-22T00:00:00+00:00</updated><id>https://alexdruso.github.io/temperature-and-entropy-llms</id><content type="html" xml:base="https://alexdruso.github.io/temperature-and-entropy-llms/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Reinforcement Learning" /><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[A World Models agent splits into a large world model trained unsupervised and a tiny controller trained by evolution: V compresses each frame to a latent vector, M learns to predict the next latent given the action, and C maps that compressed state to an action — small enough to train entirely inside the model's own hallucinated rollouts, then transfer to reality.]]></summary></entry><entry><title type="html">Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines</title><link href="https://alexdruso.github.io/temperature-and-entropy-llms/" rel="alternate" type="text/html" title="Temperature and Entropy: The One Dial Behind Softmax, LLMs, and Boltzmann Machines" /><published>2026-06-22T00:00:00+00:00</published><updated>2026-06-22T00:00:00+00:00</updated><id>https://alexdruso.github.io/temperature-and-entropy-llms</id><content type="html" xml:base="https://alexdruso.github.io/temperature-and-entropy-llms/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -10962,6 +10961,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -10993,7 +10993,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -11007,7 +11007,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
@@ -11917,8 +11917,7 @@
 })();
 </script>
 
-</div>]]></content><author><name></name></author><category term="Information Theory" /><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[The temperature parameter in an LLM divides the logits before the softmax. Raise it and the output distribution flattens, so its entropy rises — and that is not a loose analogy but the literal statistical-mechanics relationship: a softmax is a Boltzmann distribution with energy = −logit, and temperature trades expected energy against entropy, monotonically, from a deterministic argmax to the uniform distribution.]]></summary></entry><entry><title type="html">How Many Coin Tosses to Catch a Rigged Coin?</title><link href="https://alexdruso.github.io/how-many-tosses-rigged-coin/" rel="alternate" type="text/html" title="How Many Coin Tosses to Catch a Rigged Coin?" /><published>2026-06-19T00:00:00+00:00</published><updated>2026-06-19T00:00:00+00:00</updated><id>https://alexdruso.github.io/how-many-tosses-rigged-coin</id><content type="html" xml:base="https://alexdruso.github.io/how-many-tosses-rigged-coin/"><![CDATA[<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+</div>]]></content><author><name></name></author><category term="Information Theory" /><category term="Machine Learning" /><category term="Interactive" /><summary type="html"><![CDATA[The temperature parameter in an LLM divides the logits before the softmax. Raise it and the output distribution flattens, so its entropy rises — and that is not a loose analogy but the literal statistical-mechanics relationship: a softmax is a Boltzmann distribution with energy = −logit, and temperature trades expected energy against entropy, monotonically, from a deterministic argmax to the uniform distribution.]]></summary></entry><entry><title type="html">How Many Coin Tosses to Catch a Rigged Coin?</title><link href="https://alexdruso.github.io/how-many-tosses-rigged-coin/" rel="alternate" type="text/html" title="How Many Coin Tosses to Catch a Rigged Coin?" /><published>2026-06-19T00:00:00+00:00</published><updated>2026-06-19T00:00:00+00:00</updated><id>https://alexdruso.github.io/how-many-tosses-rigged-coin</id><content type="html" xml:base="https://alexdruso.github.io/how-many-tosses-rigged-coin/"><![CDATA[<style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -11951,6 +11950,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -11982,7 +11982,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -11996,7 +11996,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,

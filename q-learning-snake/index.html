@@ -25,11 +25,11 @@
     <meta property="twitter:title" content="Tabular Q-Learning, Explained by a Snake" />
     
 
-    <link rel="stylesheet" type="text/css" href="/style.css" />
+    <link rel="stylesheet" type="text/css" href="/style.css?v=1795043234" />
     <link rel="alternate" type="application/rss+xml" title="Alessandro Sanvito - Software Engineer at Optiver" href="/feed.xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
   </head>
 
@@ -89,8 +89,7 @@
   <h1>Tabular Q-Learning, Explained by a Snake</h1>
 
   <div class="entry">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
-<style>
+    <style>
 /* ============================================================
    Study Notes — shared design system
    Editorial: a single reading column, serif prose, sans headings
@@ -123,6 +122,7 @@
   --sn-radius: 6px;
   --sn-radius-sm: 4px;
   --sn-serif: "Source Serif 4", Charter, "Bitstream Charter", Georgia, serif;
+  --sn-sans: "Source Sans 3", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --sn-column: 760px;
   --sn-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.05);
   --sn-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
@@ -154,7 +154,7 @@
 }
 
 /* ---- reading column: title, body and date share one measure ---- */
-.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; }
+.study-note { max-width: var(--sn-column); margin: 0 auto; counter-reset: sn-sec; font-family: var(--sn-sans); }
 .post > h1 {
   max-width: 760px;
   margin-left: auto;
@@ -168,7 +168,7 @@
 .post > .date { max-width: 760px; margin: 2.5rem auto 0; font-size: 0.9rem; }
 @media (max-width: 640px) { .post > h1 { font-size: 2em; } }
 
-/* ---- prose is serif; headings, demos and controls stay sans ---- */
+/* ---- prose and headings are serif; demos and controls stay sans ---- */
 .study-note > p,
 .study-note > ul,
 .study-note > ol,
