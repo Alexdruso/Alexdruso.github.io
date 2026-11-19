@@ -8,11 +8,13 @@ on:
       - 'docs/**'
       - '.github/workflows/cv-build.yml'
       - 'Makefile'
+      - '.nvmrc'
   pull_request:
     paths:
       - 'docs/**'
       - '.github/workflows/cv-build.yml'
       - 'Makefile'
+      - '.nvmrc'
   workflow_dispatch:
 
 # Serialize runs so two builds don't try to commit the regenerated CV to the

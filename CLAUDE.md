@@ -71,7 +71,7 @@ stable — it's linked from outside the site.
 ## How the site is built and deployed
 
 CI lives in `.github/workflows/cv-build.yml` and runs on push to `master`
-(when `docs/**`, the workflow, or `Makefile` change) or via manual dispatch:
+(when `docs/**`, the workflow, `Makefile` or `.nvmrc` change) or via manual dispatch:
 
 1. Set up Node (version from `.nvmrc`) and `npm ci` in `docs/`.
 2. Install TeX Live + **xelatex** and fonts.
