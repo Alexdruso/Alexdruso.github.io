@@ -23,6 +23,16 @@ const path = Astro.url.pathname;
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Decide the theme before anything can paint. data-theme on <html> gives
+         the page its dark background even if the browser paints before <body>
+         exists (e.g. while a blocking <script src> in <head> loads, as on study
+         notes); the .dark-theme class itself goes on <body> just below. -->
+    <script is:inline>
+      try {
+        document.documentElement.dataset.theme = localStorage.getItem('theme') ||
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      } catch (e) {}
+    </script>
     <title>{title ? `${title} – ${SITE.name}` : SITE.name}</title>
 
     <Meta title={title} excerpt={excerpt} article={article} />
@@ -36,13 +46,12 @@ const path = Astro.url.pathname;
   </head>
 
   <body>
-    <!-- Apply the saved theme before any body content is parsed. If this ran at
-         the end of <body>, a browser that renders the page progressively (slow
+    <!-- Apply the theme before any body content is parsed. If this ran at the
+         end of <body>, a browser that renders the page progressively (slow
          network, larger HTML) would first paint the light theme, then switch:
          a white flash on every navigation in dark mode. -->
     <script is:inline>
-      if ((localStorage.getItem('theme') ||
-           (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark') {
+      if (document.documentElement.dataset.theme === 'dark') {
         document.body.classList.add('dark-theme');
       }
     </script>
@@ -96,6 +105,7 @@ const path = Astro.url.pathname;
       // Toggle theme
       themeToggle.addEventListener('click', () => {
         const isDark = document.body.classList.toggle('dark-theme');
+        document.documentElement.dataset.theme = isDark ? 'dark' : 'light';
         localStorage.setItem('theme', isDark ? 'dark' : 'light');
       });
 
@@ -103,6 +113,7 @@ const path = Astro.url.pathname;
       prefersDarkScheme.addEventListener('change', (e) => {
         if (!localStorage.getItem('theme')) {
           document.body.classList.toggle('dark-theme', e.matches);
+          document.documentElement.dataset.theme = e.matches ? 'dark' : 'light';
         }
       });
     </script>
