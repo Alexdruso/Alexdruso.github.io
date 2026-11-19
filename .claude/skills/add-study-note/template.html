@@ -1,19 +1,17 @@
 ---
-layout: post
 title: "TITLE: Subtitle that states the angle"
 date: 2026-01-01   # CHANGE ME: real YYYY-MM-DD, and match the filename's date prefix
 categories: [Topic, Interactive]
 excerpt: "One or two crisp sentences stating what the concept IS and the question this note answers. Concept-first, no hook, no 'by the end you'll…'. This text shows on the /study-notes/ index."
 ---
 
-{% include study-note-styles.html %}
 
 <div class="study-note">
 
 <style>
 /* Note-specific LAYOUT only. Colors come from --sn-* tokens; shared
    components (sections, buttons, sliders, tags, equations, notes, charts)
-   live in _includes/study-note-styles.html — reuse them, don't redefine. */
+   live in docs/src/styles/study-note.css — reuse them, don't redefine. */
 .xx-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin: 0.75rem 0; }
 .xx-readout  { font: 1.05rem var(--sn-mono); color: var(--sn-accent); min-width: 4ch; }
 </style>
@@ -48,12 +46,12 @@ excerpt: "One or two crisp sentences stating what the concept IS and the questio
 <script>
 (function () {
   const SN = document.querySelector(".study-note");
-  const readCols = () => { const cs = getComputedStyle(SN), c = n => cs.getPropertyValue(n).trim();
+  const readCols = () => { const c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), grid: c("--sn-grid"), muted: c("--sn-muted") }; };
   let COL = readCols();
   const redraw = [];
-  new MutationObserver(() => { COL = readCols(); redraw.forEach(f => f()); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  // StudyNote (docs/src/scripts/study-note.js) is loaded by the note layout.
+  StudyNote.onThemeChange(() => { COL = readCols(); redraw.forEach(f => f()); });
 
   const svg = document.getElementById("xx-chart");
   const slider = document.getElementById("xx-slider");

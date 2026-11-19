@@ -1,0 +1,861 @@
+---
+title: "A Day in Luca's Life: Finding Optimal Decisions with MDPs"
+date: 2026-05-21
+categories: [Reinforcement Learning, Interactive]
+excerpt: "A Markov Decision Process models sequential decisions under uncertainty, where today's choice shapes tomorrow's options. An interactive introduction to MDPs and value iteration, worked through one small example: should a 9-year-old study, play, or rest after school?"
+---
+
+<div class="study-note">
+
+<style>
+/* Note-specific layout. Shared components (sections, buttons, equations,
+   example boxes, ghost buttons, numerals, charts) live in study-note.css. */
+.concept-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+.concept-card {
+  padding: 0.9rem;
+  border-radius: var(--sn-radius-sm);
+  border: 1px solid var(--sn-border);
+  border-left: 3px solid var(--sn-accent);
+  background: var(--sn-panel);
+  font-size: 0.9rem;
+}
+.concept-card .clabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  opacity: 0.55;
+  margin-bottom: 0.4rem;
+}
+
+.state-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: var(--sn-accent-soft);
+  color: var(--sn-accent);
+  border: 1px solid var(--sn-accent-line);
+  cursor: pointer;
+  transition: all 0.15s var(--sn-ease);
+  font-family: inherit;
+}
+.state-badge:hover, .state-badge.active {
+  background: var(--sn-accent);
+  color: var(--sn-on-accent);
+  border-color: var(--sn-accent);
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--sn-radius-sm);
+  border: 1px solid var(--sn-border);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s var(--sn-ease);
+  background: var(--sn-panel-inset);
+  color: var(--sn-text);
+  font-family: inherit;
+}
+.action-btn:hover:not(:disabled) { border-color: var(--sn-accent-line); }
+.action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.action-btn[data-action="0"] { border-color: var(--sn-accent-line); }
+.action-btn[data-action="0"].active { background: var(--sn-accent); color: var(--sn-on-accent); border-color: var(--sn-accent); }
+.action-btn[data-action="1"] { border-color: rgba(180, 84, 75, 0.4); }
+.action-btn[data-action="1"].active { background: var(--sn-bad); color: #fff; border-color: var(--sn-bad); }
+.action-btn[data-action="2"] { border-color: rgba(15, 157, 140, 0.4); }
+.action-btn[data-action="2"].active { background: var(--sn-good); color: #fff; border-color: var(--sn-good); }
+
+.transition-info {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--sn-radius-sm);
+  background: var(--sn-accent-soft);
+  border: 1px solid var(--sn-accent-line);
+  min-height: 70px;
+  font-size: 0.9rem;
+}
+
+.prob-row { display: flex; align-items: center; gap: 0.5rem; margin: 0.25rem 0; }
+.prob-bar { height: 16px; border-radius: 4px; transition: width 0.3s; opacity: 0.85; }
+
+.play-display {
+  text-align: center;
+  padding: 1.25rem;
+  border-radius: var(--sn-radius);
+  background: var(--sn-panel);
+  border: 1px solid var(--sn-border);
+  margin-bottom: 0.75rem;
+  transition: border-color 0.3s;
+}
+.play-emoji { font-family: var(--sn-serif); font-style: italic; font-size: 2.4rem; line-height: 1; color: var(--sn-accent); }
+.play-name { font-size: 1.4rem; font-weight: 700; margin: 0.4rem 0 0.2rem; }
+.play-desc { opacity: 0.6; font-size: 0.85rem; }
+
+.score-row {
+  display: flex;
+  justify-content: center;
+  gap: 2.5rem;
+  margin: 0.75rem 0;
+}
+.score-item { text-align: center; }
+.score-item .slabel { font-size: 0.7rem; text-transform: uppercase; opacity: 0.55; }
+.score-item .sval { font-size: 2rem; }
+
+.action-row { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin: 0.75rem 0; }
+
+.play-log {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid var(--sn-border);
+  border-radius: var(--sn-radius-sm);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.82rem;
+  font-family: var(--sn-mono);
+}
+.log-entry { padding: 0.15rem 0; border-bottom: 1px solid var(--sn-border); }
+.lg { color: var(--sn-good); font-weight: 600; }
+.lbad { color: var(--sn-bad); }
+
+.vi-controls { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 0.75rem; }
+
+.vi-chart {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-end;
+  height: 160px;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px solid var(--sn-border);
+  margin-bottom: 0.75rem;
+}
+.vi-bar-group { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+.vi-bar { width: 100%; border-radius: 4px 4px 0 0; transition: height 0.35s ease, background 0.35s; min-height: 2px; }
+.vi-bv { font-size: 0.72rem; font-weight: 700; text-align: center; font-family: var(--sn-mono); }
+.vi-be { font-family: var(--sn-serif); font-style: italic; font-size: 1rem; color: var(--sn-accent); text-align: center; }
+.vi-bn { font-size: 0.62rem; opacity: 0.65; text-align: center; }
+
+.vi-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-top: 0.5rem; }
+.vi-table th, .vi-table td { padding: 0.35rem 0.5rem; border: 1px solid var(--sn-border); text-align: center; }
+.vi-table th { background: var(--sn-panel-inset); font-weight: 600; }
+.vi-table td.best { background: var(--sn-good-bg); color: var(--sn-good); font-weight: 700; }
+
+.policy-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+.policy-table th, .policy-table td { padding: 0.45rem 0.65rem; border: 1px solid var(--sn-border); text-align: center; }
+.policy-table th { background: var(--sn-panel-inset); }
+.policy-table td:last-child { text-align: left; font-size: 0.78rem; opacity: 0.75; }
+
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+.compare-box { padding: 1rem; border-radius: var(--sn-radius); border: 1px solid var(--sn-border); text-align: center; }
+.compare-box.yours { border-color: rgba(180, 84, 75, 0.45); }
+.compare-box.opt { border-color: rgba(15, 157, 140, 0.45); }
+.compare-score { font-size: 2.5rem; margin: 0.4rem 0; }
+.compare-box.yours .compare-score { color: var(--sn-bad); }
+.compare-box.opt .compare-score { color: var(--sn-good); }
+
+.flex-row { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.mb1 { margin-bottom: 0.5rem; }
+
+@keyframes popin { from { transform: scale(0.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.popin { animation: popin 0.25s ease; }
+
+.iter-label { font-size: 0.85rem; opacity: 0.65; }
+</style>
+
+<p>
+  A <strong>Markov Decision Process (MDP)</strong> is the standard model for sequential decision-making under uncertainty: an agent in some <em>state</em> chooses an <em>action</em>, collects a <em>reward</em>, and lands in a new state — and the objective is to pick actions that maximize reward accumulated over the long run, not just the reward available right now. The hard part is precisely that tension: a choice that pays off today can leave the agent worse off tomorrow.
+</p>
+
+<p>
+  To keep that abstract definition concrete, the whole note runs on one small example. Luca is 9 and has exactly one decision each afternoon after school: <strong>study, play video games, or take a nap?</strong> For any single afternoon the choice barely matters, but over a whole school year it does. Playing costs energy that hurts tomorrow's performance; studying is boring now but can mean better test scores next week; napping skips both. Maximizing happiness across the year is exactly the long-run trade-off an MDP captures.
+</p>
+
+<p>
+  The algorithm that solves it — <strong>value iteration</strong> — is short and worth understanding in full. The sections below build up the pieces one at a time, using Luca's afternoon as the running example, and end with a working solver.
+</p>
+
+<!-- ==================== MDP CONCEPT ==================== -->
+<div class="mdp-section">
+  <h3>The building blocks of an MDP</h3>
+  <p style="margin-top:0">Every MDP is defined by four things. Here's how they map to Luca's life:</p>
+
+  <div class="concept-grid">
+    <div class="concept-card" style="border-left-color:var(--sn-accent)">
+      <div class="clabel">States S</div>
+      Luca's situation, captured as his <strong>energy &amp; grade level</strong>.<br><br>
+      Exhausted &rarr; Tired &rarr; Balanced &rarr; Focused &rarr; Star
+    </div>
+    <div class="concept-card" style="border-left-color:var(--sn-bad)">
+      <div class="clabel">Actions A &amp; Rewards R(s,a)</div>
+      Three choices each afternoon — but the happiness they bring <strong>depends on Luca's state</strong>. A Star Student enjoys everything more:<br><br>
+      <small>
+      <table style="border-collapse:collapse;width:100%;font-size:0.8rem">
+        <tr><th style="text-align:left;padding:2px 4px"></th><th style="padding:2px 4px">Study</th><th style="padding:2px 4px">Play</th><th style="padding:2px 4px">Rest</th></tr>
+        <tr><td style="padding:2px 4px">Exhausted</td><td style="padding:2px 4px;text-align:center">+2</td><td style="padding:2px 4px;text-align:center">+4</td><td style="padding:2px 4px;text-align:center">0</td></tr>
+        <tr><td style="padding:2px 4px">Tired</td><td style="padding:2px 4px;text-align:center">+3</td><td style="padding:2px 4px;text-align:center">+5</td><td style="padding:2px 4px;text-align:center">+1</td></tr>
+        <tr><td style="padding:2px 4px">Balanced</td><td style="padding:2px 4px;text-align:center">+5</td><td style="padding:2px 4px;text-align:center">+7</td><td style="padding:2px 4px;text-align:center">+3</td></tr>
+        <tr><td style="padding:2px 4px">Focused</td><td style="padding:2px 4px;text-align:center">+8</td><td style="padding:2px 4px;text-align:center">+10</td><td style="padding:2px 4px;text-align:center">+6</td></tr>
+        <tr><td style="padding:2px 4px">Star</td><td style="padding:2px 4px;text-align:center"><strong>+12</strong></td><td style="padding:2px 4px;text-align:center"><strong>+14</strong></td><td style="padding:2px 4px;text-align:center"><strong>+10</strong></td></tr>
+      </table>
+      </small>
+    </div>
+    <div class="concept-card" style="border-left-color:var(--sn-warn)">
+      <div class="clabel">Transitions P(s'|s,a)</div>
+      Life is <strong>stochastic</strong>. Studying doesn't guarantee improvement — Luca might be too tired, or the test might be hard. Each action leads to next states with specific <em>probabilities</em>.
+    </div>
+    <div class="concept-card" style="border-left-color:var(--sn-good)">
+      <div class="clabel">Discount factor γ = 0.9</div>
+      Future happiness is worth slightly less than today's — not because it matters less, but because there's uncertainty about reaching that future. A reward tomorrow is worth 0.9× a reward today.
+    </div>
+  </div>
+</div>
+
+<!-- ==================== STATE GRAPH ==================== -->
+<div class="mdp-section">
+  <h3>Explore the transition graph</h3>
+  <p style="margin-top:0">Select a <strong>state</strong> (where Luca is) and an <strong>action</strong> (what he does) to see where he might end up — and with what probability.</p>
+
+  <div class="flex-row mb1" id="state-sel"></div>
+  <div class="flex-row mb1" id="action-sel"></div>
+
+  <div class="graph-wrap">
+    <svg id="mdp-svg" width="700" height="250" viewBox="0 0 700 250" style="max-width:100%;display:block;margin:0 auto"></svg>
+  </div>
+  <div class="transition-info" id="trans-info">
+    <span style="opacity:0.45">↑ Select a state and an action above to see the transitions</span>
+  </div>
+</div>
+
+<!-- ==================== BELLMAN ==================== -->
+<div class="mdp-section">
+  <h3>The Bellman equation — what's a state really worth?</h3>
+  <p style="margin-top:0">
+    To find the best policy we need to know the <strong>value</strong> of each state: roughly, "how much total happiness will Luca accumulate from now on, if he plays optimally starting from here?" Call it <em>V*(s)</em>.
+  </p>
+  <p>
+    The key insight (due to Richard Bellman, 1957) is that the value of a state can be defined <em>recursively</em>:
+  </p>
+  <div class="equation-box">
+    V*(s) = max<sub>a</sub> [ R(s,a) + γ &middot; &Sigma;<sub>s'</sub> P(s'|s,a) &middot; V*(s') ]
+  </div>
+  <p>Reading left to right: the value of state <em>s</em> equals the best action <em>a</em> you can take, where "best" means: (immediate reward) + (discount &times; expected value of next state).</p>
+
+  <div class="example-box">
+    <strong>Iteration 1</strong> (V = 0 everywhere): Q(Balanced, Study) = 5 + 0 = <strong>5</strong>, Q(Balanced, Play) = 7 + 0 = <strong>7</strong>, Q(Balanced, Rest) = 3 + 0 = <strong>3</strong>. Play wins on pure immediate reward.
+    <br><br>
+    <strong>After convergence</strong> (V approximately [74, 84, 96, 107, 114]):
+    <br>
+    Q(Balanced, Study) = 5 + 0.9&times;(0.1&times;84 + 0.3&times;96 + 0.6&times;107) = 5 + 91.5 = <strong>96.5 ← winner</strong><br>
+    Q(Balanced, Play)&nbsp; = 7 + 0.9&times;(0.4&times;84 + 0.4&times;96 + 0.2&times;107) = 7 + 84.4 = <strong>91.4</strong><br>
+    Q(Balanced, Rest)&nbsp; = 3 + 0.9&times;(0.5&times;96 + 0.4&times;107 + 0.1&times;114) = 3 + 92.2 = <strong>95.2</strong>
+    <br><br>
+    Play's +2 immediate lead is overwhelmed because Study transitions toward Focused and Star — states where the daily reward is 10–14, not 7. The long-term math is decisive.
+  </div>
+</div>
+
+<!-- ==================== PLAY AS LUCA ==================== -->
+<div class="mdp-section">
+  <h3>Play as Luca — try your own policy</h3>
+  <p style="margin-top:0">Make Luca's choices for <strong>10 days</strong>. Try to maximize his total happiness. Your choices will be compared against the optimal policy afterward!</p>
+
+  <div class="play-display" id="play-display">
+    <div class="play-emoji" id="play-emoji">s<sub>2</sub></div>
+    <div class="play-name" id="play-name">Balanced</div>
+    <div class="play-desc" id="play-desc">Feeling okay, grades fine</div>
+  </div>
+
+  <div class="score-row">
+    <div class="score-item"><div class="slabel">Day</div><div class="sval" id="play-day">1</div></div>
+    <div class="score-item"><div class="slabel">Total Happiness</div><div class="sval" id="play-score">0</div></div>
+  </div>
+
+  <div class="action-row" id="play-btns"></div>
+
+  <div class="play-log" id="play-log"></div>
+  <div id="play-result" style="display:none;margin-top:0.75rem;padding:1rem;border-radius:8px;border:1px solid var(--sn-accent);text-align:center"></div>
+  <div style="margin-top:0.6rem"><button class="reset-link" id="play-reset">↺ Reset</button></div>
+</div>
+
+<!-- ==================== VALUE ITERATION ==================== -->
+<div class="mdp-section">
+  <h3>Value iteration — watch V(s) converge</h3>
+  <p style="margin-top:0">Start with V(s) = 0 everywhere. Repeatedly apply the Bellman update. Each step gives a better estimate of how valuable each state truly is — the bar chart shows this live.</p>
+
+  <div class="vi-controls">
+    <button class="vi-btn" id="vi-step">Next iteration →</button>
+    <button class="vi-btn sec" id="vi-run">Run to convergence</button>
+    <button class="reset-link" id="vi-reset">↺ Reset</button>
+    <span class="iter-label" id="vi-label">Iteration 0 &nbsp;|&nbsp; &Delta; = —</span>
+  </div>
+
+  <div class="vi-chart" id="vi-chart"></div>
+
+  <details open>
+    <summary style="cursor:pointer;font-weight:600;margin-bottom:0.5rem">Q-value table (current iteration)</summary>
+    <div id="vi-qtable"></div>
+  </details>
+
+  <div id="vi-policy-wrap" style="display:none;margin-top:1.25rem">
+    <h4 style="margin-bottom:0.6rem">Optimal policy</h4>
+    <table class="policy-table" id="vi-policy"></table>
+    <p style="font-size:0.8rem;opacity:0.65;margin-top:0.4rem" id="vi-conv-note"></p>
+  </div>
+</div>
+
+<!-- ==================== COMPARISON ==================== -->
+<div class="mdp-section" id="compare-section">
+  <h3>How did you do vs. the optimal policy?</h3>
+  <p id="compare-hint" style="margin-top:0;opacity:0.65">
+    Complete 10 days above, then run value iteration to convergence — the comparison will appear here automatically.
+  </p>
+  <div id="compare-body" style="display:none">
+    <div class="compare-grid">
+      <div class="compare-box yours">
+        <div style="font-weight:600">Your policy</div>
+        <div class="compare-score" id="c-your"></div>
+        <div style="font-size:0.8rem;opacity:0.65">happiness over 10 days</div>
+      </div>
+      <div class="compare-box opt">
+        <div style="font-weight:600">Optimal policy</div>
+        <div class="compare-score" id="c-opt"></div>
+        <div style="font-size:0.8rem;opacity:0.65">same 10 days</div>
+      </div>
+    </div>
+    <div id="c-table" style="margin-top:1rem;overflow-x:auto"></div>
+    <p id="c-verdict" style="margin-top:0.75rem;font-weight:600;text-align:center"></p>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+//  MDP DEFINITION
+// ─────────────────────────────────────────────────────────────
+// theme-aware colors: read CSS tokens, re-read + recolor on light/dark toggle
+const SN = document.querySelector(".study-note");
+const readCols = () => {
+  const c = StudyNote.reader(SN);
+  return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
+           warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
+           softbg: c("--sn-accent-soft") };
+};
+let COL = readCols();
+const redrawFns = [];
+const onTheme = fn => { redrawFns.push(fn); return fn; };
+function updateActionColors() {
+  ACTIONS[0].color = COL.accent;
+  ACTIONS[1].color = COL.bad;
+  ACTIONS[2].color = COL.good;
+}
+StudyNote.onThemeChange(() => { COL = readCols(); updateActionColors(); redrawFns.forEach(f => f()); });
+
+const STATES = [
+  { id: 0, name: "Exhausted", desc: "Burnt out, grades slipping" },
+  { id: 1, name: "Tired",     sym: "s₁", desc: "Low energy, getting by" },
+  { id: 2, name: "Balanced",  sym: "s₂", desc: "Feeling okay, grades fine" },
+  { id: 3, name: "Focused",   sym: "s₃", desc: "Full of energy, doing great" },
+  { id: 4, name: "Star",      sym: "s₄", desc: "Top of the class!" }
+];
+
+const ACTIONS = [
+  { id: 0, name: "Study", color: COL.accent },
+  { id: 1, name: "Play",  color: COL.bad },
+  { id: 2, name: "Rest",  color: COL.good }
+];
+
+// REWARDS[state][action]: happiness = state wellbeing + action base
+// wellbeing: [0,1,3,6,10] | action base: study=2, play=4, rest=0
+const REWARDS = [
+  [ 2,  4,  0],  // Exhausted
+  [ 3,  5,  1],  // Tired
+  [ 5,  7,  3],  // Balanced
+  [ 8, 10,  6],  // Focused
+  [12, 14, 10]   // Star
+];
+
+const GAMMA = 0.9;
+
+// T[state][action] = [{s, p}]
+const T = [
+  [ // 0: Exhausted
+    [{s:0,p:.6},{s:1,p:.3},{s:2,p:.1}],
+    [{s:0,p:.9},{s:1,p:.1}],
+    [{s:0,p:.2},{s:1,p:.8}]
+  ],
+  [ // 1: Tired
+    [{s:0,p:.1},{s:1,p:.4},{s:2,p:.5}],
+    [{s:0,p:.5},{s:1,p:.4},{s:2,p:.1}],
+    [{s:1,p:.4},{s:2,p:.5},{s:3,p:.1}]
+  ],
+  [ // 2: Balanced
+    [{s:1,p:.1},{s:2,p:.3},{s:3,p:.6}],
+    [{s:1,p:.4},{s:2,p:.4},{s:3,p:.2}],
+    [{s:2,p:.5},{s:3,p:.4},{s:4,p:.1}]
+  ],
+  [ // 3: Focused
+    [{s:2,p:.1},{s:3,p:.3},{s:4,p:.6}],
+    [{s:1,p:.3},{s:2,p:.4},{s:3,p:.3}],
+    [{s:3,p:.4},{s:4,p:.6}]
+  ],
+  [ // 4: Star
+    [{s:3,p:.1},{s:4,p:.9}],
+    [{s:2,p:.3},{s:3,p:.3},{s:4,p:.4}],
+    [{s:3,p:.1},{s:4,p:.9}]
+  ]
+];
+
+const NS = 'http://www.w3.org/2000/svg';
+const POS = [
+  {x:80, y:130}, {x:220,y:130}, {x:360,y:130}, {x:500,y:130}, {x:640,y:130}
+];
+const R = 42; // node radius
+
+// ─────────────────────────────────────────────────────────────
+//  BELLMAN HELPERS
+// ─────────────────────────────────────────────────────────────
+function qValues(V, s) {
+  return ACTIONS.map((a, ai) => {
+    let q = REWARDS[s][ai];
+    for (const {s: sp, p} of T[s][ai]) q += GAMMA * p * V[sp];
+    return q;
+  });
+}
+
+function bellman(V) {
+  return V.map((_, s) => Math.max(...qValues(V, s)));
+}
+
+function policy(V) {
+  return V.map((_, s) => {
+    const qs = qValues(V, s);
+    return qs.indexOf(Math.max(...qs));
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+//  STATE GRAPH
+// ─────────────────────────────────────────────────────────────
+(function buildGraph() {
+  const svg = document.getElementById('mdp-svg');
+  let selState = null, selAction = null;
+
+  // Arrowhead markers
+  const defs = document.createElementNS(NS, 'defs');
+  [...ACTIONS, {id:'gray', color: COL.muted}].forEach(a => {
+    const m = document.createElementNS(NS, 'marker');
+    m.setAttribute('id', `arr${a.id}`);
+    m.setAttribute('markerWidth','10'); m.setAttribute('markerHeight','7');
+    m.setAttribute('refX','9'); m.setAttribute('refY','3.5');
+    m.setAttribute('orient','auto');
+    const poly = document.createElementNS(NS, 'polygon');
+    poly.setAttribute('points','0 0,10 3.5,0 7');
+    poly.setAttribute('fill', a.color);
+    m.appendChild(poly); defs.appendChild(m);
+  });
+  svg.appendChild(defs);
+
+  const arrowLayer = document.createElementNS(NS, 'g');
+  svg.appendChild(arrowLayer);
+
+  // Draw nodes
+  STATES.forEach(st => {
+    const g = document.createElementNS(NS, 'g');
+    g.style.cursor = 'pointer';
+    g.addEventListener('click', () => pickState(st.id));
+
+    const c = document.createElementNS(NS, 'circle');
+    c.setAttribute('cx', POS[st.id].x); c.setAttribute('cy', POS[st.id].y);
+    c.setAttribute('r', R); c.setAttribute('fill', COL.softbg);
+    c.setAttribute('stroke', COL.accent); c.setAttribute('stroke-width','2');
+    c.setAttribute('id', 'nc'+st.id);
+
+    const em = document.createElementNS(NS, 'text');
+    em.setAttribute('x', POS[st.id].x); em.setAttribute('y', POS[st.id].y - 10);
+    em.setAttribute('text-anchor','middle'); em.setAttribute('dominant-baseline','middle');
+    em.setAttribute('font-size','19'); em.setAttribute('font-style','italic'); em.style.fontFamily = 'var(--sn-serif)'; em.style.fill = COL.accent; em.innerHTML = `s<tspan baseline-shift="sub" font-size="12">${st.id}</tspan>`;
+
+    const lbl = document.createElementNS(NS, 'text');
+    lbl.setAttribute('x', POS[st.id].x); lbl.setAttribute('y', POS[st.id].y + 16);
+    lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-size','10');
+    lbl.setAttribute('fill', COL.muted); lbl.setAttribute('id','nl'+st.id);
+    lbl.textContent = st.name;
+
+    g.appendChild(c); g.appendChild(em); g.appendChild(lbl);
+    svg.appendChild(g);
+  });
+
+  // State buttons
+  const sDiv = document.getElementById('state-sel');
+  STATES.forEach(st => {
+    const b = document.createElement('button');
+    b.className = 'state-badge'; b.dataset.id = st.id;
+    b.textContent = `${st.name}`;
+    b.addEventListener('click', () => pickState(st.id));
+    sDiv.appendChild(b);
+  });
+
+  // Action buttons
+  const aDiv = document.getElementById('action-sel');
+  ACTIONS.forEach(ac => {
+    const b = document.createElement('button');
+    b.className = 'action-btn'; b.dataset.action = ac.id;
+    b.textContent = `${ac.name}`;
+    b.addEventListener('click', () => pickAction(ac.id));
+    aDiv.appendChild(b);
+  });
+
+  function pickState(id) {
+    selState = id;
+    document.querySelectorAll('#state-sel .state-badge').forEach(b => {
+      b.classList.toggle('active', +b.dataset.id === id);
+    });
+    STATES.forEach(st => {
+      const nc = document.getElementById('nc'+st.id);
+      const nl = document.getElementById('nl'+st.id);
+      if (st.id === id) {
+        nc.setAttribute('fill', COL.accent); nc.setAttribute('stroke', COL.accent);
+        nl.setAttribute('fill','#fff');
+      } else {
+        nc.setAttribute('fill', COL.softbg); nc.setAttribute('stroke', COL.accent);
+        nl.setAttribute('fill', COL.muted);
+      }
+    });
+    render();
+  }
+
+  function pickAction(id) {
+    selAction = id;
+    document.querySelectorAll('#action-sel .action-btn').forEach(b => {
+      b.classList.toggle('active', +b.dataset.action === id);
+    });
+    render();
+  }
+
+  function render() {
+    arrowLayer.innerHTML = '';
+    if (selState === null || selAction === null) return;
+
+    const ac = ACTIONS[selAction];
+    const trans = T[selState][selAction];
+    const from = POS[selState];
+
+    trans.forEach(({s: to, p}) => {
+      const toPos = POS[to];
+      if (to === selState) {
+        drawSelf(from, p, ac);
+      } else {
+        drawEdge(from, toPos, p, ac, to > selState);
+      }
+    });
+
+    // Info panel
+    let html = `<strong>${STATES[selState].name}</strong> takes action <strong>${ac.name}</strong> (immediate reward: +${REWARDS[selState][selAction]}) and lands in:<br><br>`;
+    trans.forEach(({s: to, p}) => {
+      const pct = Math.round(p*100);
+      html += `<div class="prob-row">
+        <span style="width:130px;font-size:0.88rem">${STATES[to].name}</span>
+        <div class="prob-bar" style="width:${pct*1.8}px;background:${ac.color}"></div>
+        <strong>${pct}%</strong>
+      </div>`;
+    });
+    document.getElementById('trans-info').innerHTML = html;
+  }
+
+  function drawSelf(pos, p, ac) {
+    const path = document.createElementNS(NS, 'path');
+    const r2 = 22;
+    path.setAttribute('d', `M ${pos.x-r2} ${pos.y-R} A ${r2} ${r2} 0 1 1 ${pos.x+r2} ${pos.y-R}`);
+    path.setAttribute('fill','none'); path.setAttribute('stroke', ac.color);
+    path.setAttribute('stroke-width', Math.max(1.5, p*5));
+    path.setAttribute('marker-end', `url(#arr${ac.id})`);
+    path.setAttribute('opacity','0.8');
+    arrowLayer.appendChild(path);
+
+    const lbl = document.createElementNS(NS, 'text');
+    lbl.setAttribute('x', pos.x); lbl.setAttribute('y', pos.y - R - r2*2 - 6);
+    lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-size','11');
+    lbl.setAttribute('fill', ac.color); lbl.setAttribute('font-weight','700');
+    lbl.textContent = Math.round(p*100)+'%';
+    arrowLayer.appendChild(lbl);
+  }
+
+  function drawEdge(from, to, p, ac, goRight) {
+    const dx = to.x-from.x, dy = to.y-from.y;
+    const dist = Math.sqrt(dx*dx+dy*dy);
+    const ux = dx/dist, uy = dy/dist;
+    const sx = from.x + ux*R, sy = from.y + uy*R;
+    const ex = to.x - ux*(R+8), ey = to.y - uy*(R+8);
+    const offset = goRight ? -35 : 35;
+    const mx = (sx+ex)/2 - uy*offset, my = (sy+ey)/2 + ux*offset;
+
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', `M ${sx} ${sy} Q ${mx} ${my} ${ex} ${ey}`);
+    path.setAttribute('fill','none'); path.setAttribute('stroke', ac.color);
+    path.setAttribute('stroke-width', Math.max(1.5, p*5));
+    path.setAttribute('marker-end', `url(#arr${ac.id})`);
+    path.setAttribute('opacity','0.8');
+    arrowLayer.appendChild(path);
+
+    const t = 0.5;
+    const lx = (1-t)*(1-t)*sx + 2*(1-t)*t*mx + t*t*ex;
+    const ly = (1-t)*(1-t)*sy + 2*(1-t)*t*my + t*t*ey;
+    const lbl = document.createElementNS(NS, 'text');
+    lbl.setAttribute('x', lx); lbl.setAttribute('y', ly - 6);
+    lbl.setAttribute('text-anchor','middle'); lbl.setAttribute('font-size','11');
+    lbl.setAttribute('fill', ac.color); lbl.setAttribute('font-weight','700');
+    lbl.textContent = Math.round(p*100)+'%';
+    arrowLayer.appendChild(lbl);
+  }
+
+  onTheme(() => {
+    ACTIONS.forEach(a => { const poly = document.querySelector(`#arr${a.id} polygon`); if (poly) poly.setAttribute('fill', a.color); });
+    const gpoly = document.querySelector('#arrgray polygon'); if (gpoly) gpoly.setAttribute('fill', COL.muted);
+    STATES.forEach(st => {
+      const nc = document.getElementById('nc'+st.id);
+      const nl = document.getElementById('nl'+st.id);
+      if (st.id === selState) { nc.setAttribute('fill', COL.accent); nc.setAttribute('stroke', COL.accent); nl.setAttribute('fill', '#fff'); }
+      else { nc.setAttribute('fill', COL.softbg); nc.setAttribute('stroke', COL.accent); nl.setAttribute('fill', COL.muted); }
+    });
+    render();
+  });
+})();
+
+// ─────────────────────────────────────────────────────────────
+//  PLAY AS LUCA
+// ─────────────────────────────────────────────────────────────
+const play = { state: 2, day: 1, score: 0, done: false, hist: [] };
+
+function sample(s, a) {
+  let r = Math.random(), cum = 0;
+  for (const {s: sp, p} of T[s][a]) { cum += p; if (r < cum) return sp; }
+  return T[s][a][T[s][a].length-1].s;
+}
+
+function updatePlayUI() {
+  const st = STATES[play.state];
+  document.getElementById('play-emoji').innerHTML = `s<sub>${st.id}</sub>`;
+  document.getElementById('play-name').textContent = st.name;
+  document.getElementById('play-desc').textContent = st.desc;
+  document.getElementById('play-day').textContent = play.day;
+  document.getElementById('play-score').textContent = play.score;
+}
+
+function makeMove(aId) {
+  if (play.done) return;
+  const ac = ACTIONS[aId];
+  const from = play.state;
+  const next = sample(from, aId);
+  const reward = REWARDS[from][aId];
+  play.score += reward;
+  play.hist.push({s: from, a: aId, ns: next, r: reward});
+
+  const log = document.getElementById('play-log');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry popin';
+  const dir = next > from ? ' ↑' : next < from ? ` <span class="lbad">↓</span>` : '';
+  entry.innerHTML = `<strong>Day ${play.day}</strong>: ${STATES[from].name} → ${ac.name} → ${STATES[next].name} <span class="lg">+${reward}</span>${dir}`;
+  log.prepend(entry);
+
+  play.state = next;
+  play.day++;
+  if (play.day > 10) {
+    play.done = true;
+    document.querySelectorAll('#play-btns .action-btn').forEach(b => b.disabled = true);
+    const res = document.getElementById('play-result');
+    res.style.display = 'block';
+    res.innerHTML = `<strong>10 days done!</strong> Your total happiness: <span style="font-size:1.5rem;font-weight:700;color:${COL.accent}">${play.score}</span><br><span style="opacity:0.65;font-size:0.88rem">Run value iteration to convergence below, then scroll down to see how you compare!</span>`;
+    tryShowComparison();
+  }
+  updatePlayUI();
+}
+
+// Inject play buttons
+const pBtns = document.getElementById('play-btns');
+ACTIONS.forEach(ac => {
+  const b = document.createElement('button');
+  b.className = 'action-btn'; b.dataset.action = ac.id;
+  b.style.fontSize = '1rem'; b.style.padding = '0.65rem 1.3rem';
+  b.innerHTML = `${ac.name}`;
+  b.addEventListener('click', () => makeMove(ac.id));
+  pBtns.appendChild(b);
+});
+
+document.getElementById('play-reset').addEventListener('click', () => {
+  Object.assign(play, {state:2, day:1, score:0, done:false, hist:[]});
+  document.getElementById('play-log').innerHTML = '';
+  document.getElementById('play-result').style.display = 'none';
+  document.getElementById('compare-body').style.display = 'none';
+  document.getElementById('compare-hint').style.display = '';
+  document.querySelectorAll('#play-btns .action-btn').forEach(b => b.disabled = false);
+  updatePlayUI();
+});
+
+updatePlayUI();
+
+// ─────────────────────────────────────────────────────────────
+//  VALUE ITERATION
+// ─────────────────────────────────────────────────────────────
+const vi = { V: new Array(5).fill(0), iter: 0, done: false };
+
+function viStep() {
+  if (vi.done) return;
+  const newV = bellman(vi.V);
+  const delta = Math.max(...newV.map((v,i) => Math.abs(v - vi.V[i])));
+  vi.V = newV; vi.iter++;
+  vi.done = delta < 0.001;
+
+  document.getElementById('vi-label').innerHTML =
+    `Iteration ${vi.iter} &nbsp;|&nbsp; &Delta; = ${delta.toFixed(4)}${vi.done ? ' &nbsp;✓ Converged!' : ''}`;
+
+  renderChart(); renderQTable(); renderPolicy();
+
+  if (vi.done) {
+    document.getElementById('vi-step').disabled = true;
+    document.getElementById('vi-run').disabled = true;
+    document.getElementById('vi-conv-note').textContent =
+      `Converged after ${vi.iter} iterations (Δ < 0.001).`;
+    tryShowComparison();
+  }
+}
+
+function renderChart() {
+  const chart = document.getElementById('vi-chart');
+  const maxV = Math.max(...vi.V, 0.01);
+  const pol = policy(vi.V);
+  chart.innerHTML = '';
+  STATES.forEach((st, i) => {
+    const g = document.createElement('div');
+    g.className = 'vi-bar-group';
+    const bar = document.createElement('div');
+    bar.className = 'vi-bar';
+    bar.style.height = Math.max((vi.V[i]/maxV)*130, 2) + 'px';
+    bar.style.background = ACTIONS[pol[i]].color;
+    const bv = document.createElement('div'); bv.className = 'vi-bv'; bv.textContent = vi.V[i].toFixed(1);
+    const be = document.createElement('div'); be.className = 'vi-be'; be.innerHTML = `s<sub>${st.id}</sub>`;
+    const bn = document.createElement('div'); bn.className = 'vi-bn'; bn.textContent = st.name;
+    g.appendChild(bar); g.appendChild(bv); g.appendChild(be); g.appendChild(bn);
+    chart.appendChild(g);
+  });
+}
+
+function renderQTable() {
+  const pol = policy(vi.V);
+  let html = `<table class="vi-table"><thead><tr>
+    <th>State</th>${ACTIONS.map(a=>`<th>${a.name}</th>`).join('')}<th>V*(s)</th>
+  </tr></thead><tbody>`;
+  STATES.forEach((st, s) => {
+    const qs = qValues(vi.V, s);
+    const best = pol[s];
+    html += `<tr><td>${st.name}</td>
+      ${qs.map((q,a)=>`<td class="${a===best?'best':''}">${q.toFixed(2)}</td>`).join('')}
+      <td><strong>${vi.V[s].toFixed(2)}</strong></td></tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('vi-qtable').innerHTML = html;
+}
+
+function renderPolicy() {
+  const pol = policy(vi.V);
+  const wrap = document.getElementById('vi-policy-wrap');
+  wrap.style.display = 'block';
+  const qs_all = STATES.map((_, s) => qValues(vi.V, s));
+
+  let html = `<thead><tr><th>State</th><th>Best action</th><th>Why (from Q-values)</th></tr></thead><tbody>`;
+  STATES.forEach((st, s) => {
+    const a = pol[s];
+    const ac = ACTIONS[a];
+    const qs = qs_all[s];
+    const sorted = [...qs].map((q,i)=>({q,i})).sort((a,b)=>b.q-a.q);
+    const margin = sorted[0].q - sorted[1].q;
+    html += `<tr>
+      <td>${st.name}</td>
+      <td><strong>${ac.name}</strong></td>
+      <td>Q = ${qs[a].toFixed(2)}, leads by ${margin.toFixed(2)} over next best</td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('vi-policy').innerHTML = html;
+}
+
+document.getElementById('vi-step').addEventListener('click', viStep);
+document.getElementById('vi-run').addEventListener('click', () => {
+  document.getElementById('vi-run').disabled = true;
+  document.getElementById('vi-step').disabled = true;
+  const tick = setInterval(() => { viStep(); if (vi.done) clearInterval(tick); }, 55);
+});
+document.getElementById('vi-reset').addEventListener('click', () => {
+  Object.assign(vi, {V: new Array(5).fill(0), iter: 0, done: false});
+  document.getElementById('vi-label').innerHTML = 'Iteration 0 &nbsp;|&nbsp; &Delta; = —';
+  document.getElementById('vi-step').disabled = false;
+  document.getElementById('vi-run').disabled = false;
+  document.getElementById('vi-conv-note').textContent = '';
+  document.getElementById('vi-policy-wrap').style.display = 'none';
+  renderChart(); renderQTable();
+});
+
+renderChart(); renderQTable();
+onTheme(() => { renderChart(); renderQTable(); if (vi.iter > 0) renderPolicy(); });
+
+// ─────────────────────────────────────────────────────────────
+//  COMPARISON
+// ─────────────────────────────────────────────────────────────
+function tryShowComparison() {
+  if (!play.done || !vi.done) return;
+  const pol = policy(vi.V);
+
+  let optScore = 0;
+  const rows = play.hist.map((h, i) => {
+    const oa = pol[h.s];
+    const or = REWARDS[h.s][oa];
+    optScore += or;
+    return {day: i+1, s: h.s, ya: h.a, oa, ns: h.ns, yr: h.r, or};
+  });
+
+  document.getElementById('compare-hint').style.display = 'none';
+  document.getElementById('compare-body').style.display = 'block';
+  document.getElementById('c-your').textContent = play.score;
+  document.getElementById('c-opt').textContent = optScore;
+
+  const diff = optScore - play.score;
+  const verdict = document.getElementById('c-verdict');
+  if (diff <= 0) {
+    verdict.textContent = `You matched or beat the optimal policy! (by ${Math.abs(diff)} points)`;
+    verdict.style.color = COL.good;
+  } else if (diff <= 6) {
+    verdict.textContent = `Very close! The optimal policy earned just ${diff} more points.`;
+    verdict.style.color = COL.warn;
+  } else {
+    verdict.textContent = `The optimal policy earned ${diff} more points — look at which states it handled differently.`;
+    verdict.style.color = COL.bad;
+  }
+
+  let html = `<table class="vi-table"><thead><tr>
+    <th>Day</th><th>State</th><th>You</th><th>Optimal</th><th>Your reward</th><th>Opt reward</th>
+  </tr></thead><tbody>`;
+  rows.forEach(row => {
+    const changed = row.oa !== row.ya;
+    html += `<tr>
+      <td>${row.day}</td>
+      <td>${STATES[row.s].name}</td>
+      <td>${ACTIONS[row.ya].name}</td>
+      <td class="${changed?'best':''}">${ACTIONS[row.oa].name}</td>
+      <td>+${row.yr}</td>
+      <td>${row.or > row.yr ? `<strong style="color:${COL.good}">+${row.or}</strong>` : `+${row.or}`}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  document.getElementById('c-table').innerHTML = html;
+}
+</script>
+
+</div>

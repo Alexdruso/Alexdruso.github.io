@@ -1,13 +1,7 @@
-# Jekyll build output
-docs/_site/
-docs/.sass-cache/
-docs/.jekyll-cache/
-docs/.jekyll-metadata
-.jekyll-cache
-
-# Ruby dependencies
-docs/vendor/
-docs/.bundle/
+# Astro build output and caches
+docs/dist/
+docs/.astro/
+docs/node_modules/
 
 # OS generated files
 .DS_Store
@@ -22,11 +16,10 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
-*.swo 
+*.swo
 
+# LaTeX intermediates
 cv.aux
 cv.log
 cv.out
 cv.pdf
-
-.jekyll_cache/

@@ -1,0 +1,9 @@
+---
+import { SITE } from '../site';
+const links = SITE.footerLinks;
+// The icons are inline-blocks, so the spaces between links are the gaps.
+---
+<a href={`mailto:${links.email}`}><i class="svg-icon email"></i></a>{' '}
+<a href={`https://github.com/${links.github}`}><i class="svg-icon github"></i></a>{' '}
+<a href={`https://www.linkedin.com/in/${links.linkedin}`}><i class="svg-icon linkedin"></i></a>{' '}
+{links.rss && <a href="/feed.xml"><i class="svg-icon rss"></i></a>}

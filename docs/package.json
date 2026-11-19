@@ -1,0 +1,20 @@
+{
+  "name": "alexdruso-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check-links": "node scripts/check-links.mjs dist"
+  },
+  "dependencies": {
+    "astro": "^7.4.13",
+    "marked": "^18.2.1",
+    "sass": "^1.108.2",
+    "yaml": "^2.9.1"
+  },
+  "engines": {
+    "node": ">=22.23.4"
+  }
+}
