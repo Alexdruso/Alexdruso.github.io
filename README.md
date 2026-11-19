@@ -53,11 +53,12 @@ everything to static HTML at build time.
 
 ## Local development
 
-Requires Node ≥ 22.23. The `Makefile` is the front door; run targets from the
-repo root.
+Requires Node ≥ 22.23 (`.nvmrc` pins Node 22 for nvm/fnm; `make dev` installs it
+from NodeSource if needed). The `Makefile` is the front door; run targets from
+the repo root.
 
 ```bash
-make dev      # install node/xelatex if missing (Debian/Ubuntu, uses sudo) + npm ci
+make dev      # install Node 22 / xelatex if missing (Debian/Ubuntu, uses sudo) + npm ci
 make serve    # dev server with live reload → http://localhost:4321/
 make site     # production build into docs/dist/ + link check
 make cv       # build the CV PDF from docs/cv-src into docs/static/public/

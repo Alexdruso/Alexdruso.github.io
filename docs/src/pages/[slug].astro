@@ -2,6 +2,9 @@
 // One page per study note (formerly _layouts/post.html), served at /slug/.
 import Base from '../layouts/Base.astro';
 import '../styles/study-note.css';
+// Shared note runtime (window.StudyNote). Loaded as a classic blocking script
+// in <head>, as a fingerprinted file, so the notes' inline scripts can call it.
+import studyNoteJs from '../scripts/study-note.js?url';
 import { notes, formatDate, type Note } from '../lib/notes';
 
 export function getStaticPaths() {
@@ -11,6 +14,7 @@ export function getStaticPaths() {
 const { note } = Astro.props as { note: Note };
 ---
 <Base title={note.title} excerpt={note.excerpt} article>
+  <script is:inline slot="head" src={studyNoteJs}></script>
   <article class="post">
     <h1>{note.title}</h1>
 

@@ -16,6 +16,9 @@ export default defineConfig({
   // "Full list on <a>GitHub</a>" and between inline-block footer icons.
   compressHTML: false,
   vite: {
+    // Emit imported assets (e.g. the study-note runtime, imported with ?url) as
+    // fingerprinted files that browsers cache, never as inline data: URIs.
+    build: { assetsInlineLimit: 0 },
     css: {
       preprocessorOptions: {
         // style.scss still uses Sass @import; keep the build output quiet.

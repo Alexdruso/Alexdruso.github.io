@@ -484,16 +484,14 @@ excerpt: "An implicit neural representation stores a signal as a function: a sma
   /* ---------- shared: theme-adaptive colors ---------- */
   var SN = document.querySelector(".study-note");
   function readCols() {
-    var cs = getComputedStyle(SN);
-    function c(n) { return cs.getPropertyValue(n).trim(); }
+    var c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), strong: c("--sn-accent-strong"), good: c("--sn-good"),
              bad: c("--sn-bad"), warn: c("--sn-warn"), muted: c("--sn-muted"),
              grid: c("--sn-grid"), text: c("--sn-text") };
   }
   var COL = readCols();
   var redrawFns = [];
-  new MutationObserver(function () { COL = readCols(); redrawFns.forEach(function (f) { f(); }); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  StudyNote.onThemeChange(function () { COL = readCols(); redrawFns.forEach(function (f) { f(); }); });
 
   /* ================================================================
      Tiny INR engine: Float32Array MLP + Adam, minibatch SGD.

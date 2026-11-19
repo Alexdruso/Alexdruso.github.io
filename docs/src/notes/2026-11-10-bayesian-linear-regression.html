@@ -389,15 +389,14 @@ excerpt: "Bayesian linear regression treats the weights as a random variable and
   "use strict";
   const SN = document.querySelector(".study-note");
   const readCols = () => {
-    const cs = getComputedStyle(SN), c = n => cs.getPropertyValue(n).trim();
+    const c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), strong: c("--sn-accent-strong"), text: c("--sn-text"),
              muted: c("--sn-muted"), grid: c("--sn-grid"), inset: c("--sn-panel-inset"),
              panel: c("--sn-panel") };
   };
   let COL = readCols();
   const redraw = [];
-  new MutationObserver(() => { COL = readCols(); redraw.forEach(f => f()); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  StudyNote.onThemeChange(() => { COL = readCols(); redraw.forEach(f => f()); });
   const $ = id => document.getElementById(id);
 
   // ---------- helpers ----------

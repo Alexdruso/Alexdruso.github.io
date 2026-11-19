@@ -751,8 +751,7 @@ excerpt: "A graph neural network updates every node from its own features and an
      ================================================================ */
   var SN = document.querySelector(".study-note");
   function readCols() {
-    var cs = getComputedStyle(SN);
-    function c(n) { return cs.getPropertyValue(n).trim(); }
+    var c = StudyNote.reader(SN);
     return {
       accent: c("--sn-accent"), accentStrong: c("--sn-accent-strong"),
       accentSoft: c("--sn-accent-soft"), accentLine: c("--sn-accent-line"),
@@ -764,10 +763,10 @@ excerpt: "A graph neural network updates every node from its own features and an
   }
   var COL = readCols();
   var redraw = [];
-  new MutationObserver(function () {
+  StudyNote.onThemeChange(function () {
     COL = readCols();
     for (var i = 0; i < redraw.length; i++) redraw[i]();
-  }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  });
 
   /* colour blending between tokens (never literal hex ramps) */
   var RGB = {};

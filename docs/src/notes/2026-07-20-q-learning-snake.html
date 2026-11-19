@@ -263,8 +263,7 @@ excerpt: "Q-learning estimates the value of every action in every state directly
   /* ---- shared theme plumbing (pattern from the authoring guide) ---- */
   const SN = document.querySelector(".study-note");
   const readCols = () => {
-    const cs = getComputedStyle(SN);
-    const c = n => cs.getPropertyValue(n).trim();
+    const c = StudyNote.reader(SN);
     return {
       accent: c("--sn-accent"), accentStrong: c("--sn-accent-strong"),
       accentSoft: c("--sn-accent-soft"), accentLine: c("--sn-accent-line"),
@@ -276,8 +275,7 @@ excerpt: "Q-learning estimates the value of every action in every state directly
   let COL = readCols();
   const redrawFns = [];
   const onTheme = fn => { redrawFns.push(fn); return fn; };
-  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  StudyNote.onThemeChange(() => { COL = readCols(); redrawFns.forEach(f => f()); });
 
   const DIRS = ["up", "right", "down", "left"];
   const DELTA = { up: [0, -1], right: [1, 0], down: [0, 1], left: [-1, 0] };

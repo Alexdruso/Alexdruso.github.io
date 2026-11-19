@@ -356,15 +356,14 @@ excerpt: "The Black–Scholes formula — N(d₁), N(d₂) — is easy to memori
 
   // ---- theme-aware colors ----
   const SN = document.querySelector(".study-note");
-  const readCols = () => { const cs = getComputedStyle(SN); const c = n => cs.getPropertyValue(n).trim();
+  const readCols = () => { const c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), accentSoft: c("--sn-accent-soft"), good: c("--sn-good"),
              bad: c("--sn-bad"), warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
              panel: c("--sn-panel") }; };
   let COL = readCols();
   const redrawFns = [];
   const onTheme = fn => { redrawFns.push(fn); return fn; };
-  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  StudyNote.onThemeChange(() => { COL = readCols(); redrawFns.forEach(f => f()); });
 
   // ---- math helpers ----
   const SQRT2PI = Math.sqrt(2 * Math.PI);

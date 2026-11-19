@@ -46,12 +46,12 @@ excerpt: "One or two crisp sentences stating what the concept IS and the questio
 <script>
 (function () {
   const SN = document.querySelector(".study-note");
-  const readCols = () => { const cs = getComputedStyle(SN), c = n => cs.getPropertyValue(n).trim();
+  const readCols = () => { const c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), grid: c("--sn-grid"), muted: c("--sn-muted") }; };
   let COL = readCols();
   const redraw = [];
-  new MutationObserver(() => { COL = readCols(); redraw.forEach(f => f()); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  // StudyNote (docs/src/scripts/study-note.js) is loaded by the note layout.
+  StudyNote.onThemeChange(() => { COL = readCols(); redraw.forEach(f => f()); });
 
   const svg = document.getElementById("xx-chart");
   const slider = document.getElementById("xx-slider");

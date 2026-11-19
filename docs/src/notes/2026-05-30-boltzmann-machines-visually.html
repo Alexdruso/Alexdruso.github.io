@@ -393,8 +393,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
   const hex2rgb = h => { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(x => x + x).join(""); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; };
   const mix = (a, b, t) => { const A = hex2rgb(a), B = hex2rgb(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * t)).join(",")})`; };
   const readCols = () => {
-    const cs = getComputedStyle(SN);
-    const c = n => cs.getPropertyValue(n).trim();
+    const c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
              warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
              inset: c("--sn-panel-inset"), line: c("--sn-accent-line") };
@@ -402,8 +401,7 @@ excerpt: "Hopfield networks slide downhill into the nearest memory — and get s
   let COL = readCols();
   const redrawFns = [];
   const onTheme = fn => { redrawFns.push(fn); return fn; };
-  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  StudyNote.onThemeChange(() => { COL = readCols(); redrawFns.forEach(f => f()); });
 
   const sigmoid = x => 1 / (1 + Math.exp(-x));
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));

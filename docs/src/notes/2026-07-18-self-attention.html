@@ -546,7 +546,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
 
   /* ---------- theme-adaptive color plumbing (see docs/src/notes/CLAUDE.md) ---------- */
   const SN = document.querySelector(".study-note");
-  const readCols = () => { const cs = getComputedStyle(SN); const c = n => cs.getPropertyValue(n).trim();
+  const readCols = () => { const c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), accentStrong: c("--sn-accent-strong"),
              onAccent: c("--sn-on-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
              warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
@@ -554,8 +554,7 @@ excerpt: "Self-attention computes each token's new representation as a weighted 
   let COL = readCols();
   const redrawFns = [];
   const onTheme = fn => { redrawFns.push(fn); return fn; };
-  new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  StudyNote.onThemeChange(() => { COL = readCols(); redrawFns.forEach(f => f()); });
 
   /* ---------- shared data ---------- */
   const TOKENS = ["the","robot","picked","up","the","ball","because","it","was","heavy"];

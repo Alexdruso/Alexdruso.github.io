@@ -344,8 +344,7 @@ excerpt: "A Markov Decision Process models sequential decisions under uncertaint
 // theme-aware colors: read CSS tokens, re-read + recolor on light/dark toggle
 const SN = document.querySelector(".study-note");
 const readCols = () => {
-  const cs = getComputedStyle(SN);
-  const c = n => cs.getPropertyValue(n).trim();
+  const c = StudyNote.reader(SN);
   return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
            warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid"),
            softbg: c("--sn-accent-soft") };
@@ -358,8 +357,7 @@ function updateActionColors() {
   ACTIONS[1].color = COL.bad;
   ACTIONS[2].color = COL.good;
 }
-new MutationObserver(() => { COL = readCols(); updateActionColors(); redrawFns.forEach(f => f()); })
-  .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+StudyNote.onThemeChange(() => { COL = readCols(); updateActionColors(); redrawFns.forEach(f => f()); });
 
 const STATES = [
   { id: 0, name: "Exhausted", desc: "Burnt out, grades slipping" },

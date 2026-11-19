@@ -444,14 +444,13 @@ excerpt: "Nothing in a transformer specifies what any attention head should look
 
   /* ---------- theme tokens: read at runtime, redraw on toggle ---------- */
   function readCols() {
-    var cs = getComputedStyle(SN), c = function (n) { return cs.getPropertyValue(n).trim(); };
+    var c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), grid: c("--sn-grid"), muted: c("--sn-muted"),
              text: c("--sn-text"), good: c("--sn-good"), bad: c("--sn-bad"),
              panel: c("--sn-panel-inset"), border: c("--sn-border") };
   }
   var COL = readCols(), redrawFns = [];
-  new MutationObserver(function () { COL = readCols(); RGB = {}; redrawFns.forEach(function (f) { f(); }); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  StudyNote.onThemeChange(function () { COL = readCols(); RGB = {}; redrawFns.forEach(function (f) { f(); }); });
 
   var RGB = {};
   function toRgb(col) {

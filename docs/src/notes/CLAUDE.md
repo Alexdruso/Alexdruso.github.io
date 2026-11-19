@@ -118,20 +118,31 @@ gradients. Accent reference: `#0891b2` (light) / `#22d3ee` (dark) / `#06b6d4` (m
 ## Adaptive charts (JS-drawn SVG/canvas)
 
 Hardcoded hex in JS does not react to the theme toggle. Read tokens at runtime and
-redraw on toggle. Pattern used across the notes:
+redraw on toggle, using the shared runtime `window.StudyNote`
+(`src/scripts/study-note.js`, loaded in `<head>` of every note page, so it is
+available to the note's inline scripts):
+
+- `StudyNote.reader(el)` → a function `c("--sn-accent")` returning the trimmed
+  computed value of a token on `el` (defaults to the first `.study-note`).
+- `StudyNote.onThemeChange(fn)` → calls `fn` every time the site theme toggles
+  (one shared `MutationObserver` on `<body>`'s class). Don't create your own.
+
+Pattern used across the notes:
 
 ```js
 const SN = document.querySelector(".study-note");
-const readCols = () => { const cs = getComputedStyle(SN); const c = n => cs.getPropertyValue(n).trim();
+const readCols = () => { const c = StudyNote.reader(SN);
   return { accent: c("--sn-accent"), good: c("--sn-good"), bad: c("--sn-bad"),
            warn: c("--sn-warn"), muted: c("--sn-muted"), grid: c("--sn-grid") }; };
 let COL = readCols();
 const redrawFns = [];
 const onTheme = fn => { redrawFns.push(fn); return fn; };
-new MutationObserver(() => { COL = readCols(); redrawFns.forEach(f => f()); })
-  .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+StudyNote.onThemeChange(() => { COL = readCols(); redrawFns.forEach(f => f()); });
 // ...then in each demo: use COL.accent/COL.grid/... and call onTheme(draw);
 ```
+
+If several notes need the same new helper, add it to `src/scripts/study-note.js`
+instead of copying it into each note.
 
 For interpolated colors (e.g. energy/weight ramps) blend between tokens with a small
 `hex2rgb`/`mix` helper (see the Boltzmann note) instead of literal blue→red ramps.

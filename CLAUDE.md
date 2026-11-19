@@ -36,6 +36,7 @@ only package manager is npm (in `docs/`).
     │   │   ├── data.ts      # parses the YAML files above (typed)
     │   │   └── notes.ts     # loads src/notes/*.html: front matter + body, sorting, dates
     │   ├── notes/           # the interactive Study Notes (HTML) + notes/CLAUDE.md
+    │   ├── scripts/study-note.js  # shared note runtime (window.StudyNote)
     │   ├── layouts/         # Base.astro (site shell) → Page.astro
     │   ├── components/      # Meta, FooterLinks, CommandPalette, Analytics
     │   ├── pages/
@@ -72,7 +73,7 @@ stable — it's linked from outside the site.
 CI lives in `.github/workflows/cv-build.yml` and runs on push to `master`
 (when `docs/**`, the workflow, or `Makefile` change) or via manual dispatch:
 
-1. Set up Node 22 and `npm ci` in `docs/`.
+1. Set up Node (version from `.nvmrc`) and `npm ci` in `docs/`.
 2. Install TeX Live + **xelatex** and fonts.
 3. `make clean && make cv` → compiles `docs/cv-src/cv.tex` **twice** with
    `xelatex` (for reference resolution) and copies the result to
@@ -92,11 +93,12 @@ So: the **committed CV PDF is a build artifact** — CI regenerates it from
 ## Local development
 
 The `Makefile` is the front door. Run targets from the **repo root**. Astro
-needs **Node ≥ 22.23** (see `engines` in `docs/package.json`); distro `nodejs`
-packages are often older, so prefer nvm/fnm or the NodeSource packages.
+needs **Node ≥ 22.23** (`engines` in `docs/package.json`, checked by
+`docs/scripts/check-node.mjs`; `make serve`/`make site` refuse to run on an older
+Node). `.nvmrc` pins the major version for nvm/fnm and for CI.
 
 ```bash
-make dev      # install node/xelatex if missing (Debian/Ubuntu, uses sudo) + npm ci
+make dev      # install Node 22 (NodeSource) / xelatex if missing or too old (Debian/Ubuntu, sudo) + npm ci
 make serve    # astro dev server with live reload → http://localhost:4321/
 make site     # production build into docs/dist/ + internal link check
 make cv       # build the CV PDF from docs/cv-src into docs/static/public/
@@ -159,8 +161,11 @@ interactive study notes and **takes precedence for anything under
   (editorial system: serif prose in one reading column, numbered sections, no
   emoji, one cyan-teal accent with light + dark variants). **Never** hardcode
   brand colors, and never use the old purple/blue palette.
-- JS-drawn SVG/canvas must read tokens at runtime and redraw on theme toggle
-  (there's a documented `MutationObserver` pattern).
+- JS-drawn SVG/canvas must read tokens at runtime and redraw on theme toggle,
+  via the shared runtime `window.StudyNote` (`src/scripts/study-note.js`:
+  `StudyNote.reader(el)` and `StudyNote.onThemeChange(fn)`), which
+  `[slug].astro` loads in `<head>`. Shared note helpers go there, not copied
+  into each note.
 - The shared JS keys off specific ids/class names (e.g. `data-action` hooks,
   `bm-cell.on`, `vi-table td.best`). Restyle freely but **do not rename** the
   selectors the JS reads.

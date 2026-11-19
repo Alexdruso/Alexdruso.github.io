@@ -24,13 +24,14 @@ Key non-negotiables it enforces:
   which the layout adds; notes contain no templating (plain HTML/CSS/JS only).
 - Use the `--sn-*` design tokens; **never** hardcode brand colors or use the old
   purple/blue palette.
-- JS-drawn SVG/canvas must read tokens at runtime and redraw on theme toggle (the
-  `MutationObserver` pattern).
+- JS-drawn SVG/canvas must read tokens at runtime (`StudyNote.reader`) and redraw on
+  theme toggle (`StudyNote.onThemeChange`); both come from the shared runtime
+  `docs/src/scripts/study-note.js`, which the note layout loads.
 - Concept-first voice; front matter has `categories` and an `excerpt` (shown on the index).
 
 `.claude/skills/add-study-note/template.html` is a minimal, conventions-correct starting
 scaffold (front matter + `.study-note` wrapper + one slider demo + one adaptive SVG chart
-with the MutationObserver redraw). Copy it as your starting point.
+with the theme-change redraw). Copy it as your starting point.
 
 ## Research and fact-check first (deep-research)
 
@@ -121,7 +122,7 @@ uses locally. Toggle the theme with the bottom-right button.
   are safe, but there is also no `{{ ... }}` / `{% ... %}`: write links as plain root-relative
   URLs (`/self-attention/`).
 - **Theme is applied via `body.dark-theme`** (toggle button + localStorage). The driver
-  forces dark by adding that class directly, then waits ~600ms for the MutationObserver
+  forces dark by adding that class directly, then waits ~600ms for the theme-change
   redraw — if your chart ignores the token-reread pattern, the dark screenshot will reveal
   hardcoded colors.
 - **`screenshots/` and `node_modules/` are gitignored** in the skill dir — they're

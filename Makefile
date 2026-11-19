@@ -1,19 +1,26 @@
 .PHONY: cv clean
-.PHONY: dev serve site
+.PHONY: dev serve site node-check
 
 # Get the absolute path of the project root
 ROOT_DIR := $(shell pwd)
+
+# Succeeds when node exists and satisfies docs/package.json "engines.node".
+NODE_OK = node $(ROOT_DIR)/docs/scripts/check-node.mjs --quiet >/dev/null 2>&1
 
 # Create necessary directories
 $(shell mkdir -p $(ROOT_DIR)/docs/static/public)
 
 dev:
 	@echo "Setting up development dependencies..."
-	@# Install system packages on Debian/Ubuntu if missing (may prompt for sudo)
-	@if ! command -v node >/dev/null 2>&1; then \
-		echo "node not found — installing nodejs and npm (sudo may be required)"; \
-		sudo apt-get update && sudo apt-get install -y nodejs npm; \
+	@# Install system packages on Debian/Ubuntu if missing (may prompt for sudo).
+	@# Astro needs a recent Node 22 and distro nodejs packages are usually older,
+	@# so install it from NodeSource when node is missing or too old.
+	@if ! $(NODE_OK); then \
+		echo "Node missing or too old — installing Node 22 from NodeSource (sudo may be required)"; \
+		curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - && \
+		sudo apt-get install -y nodejs; \
 	fi
+	@node $(ROOT_DIR)/docs/scripts/check-node.mjs
 	@if ! command -v xelatex >/dev/null 2>&1; then \
 		echo "xelatex not found — enabling 'universe' repo and installing TeX Live (sudo may be required)"; \
 		# Ensure add-apt-repository is available \
@@ -27,10 +34,14 @@ dev:
 	@cd $(ROOT_DIR)/docs && npm ci
 	@echo "Development dependencies installed."
 
-serve:
+node-check:
+	@node $(ROOT_DIR)/docs/scripts/check-node.mjs --quiet || { \
+		echo "Run 'make dev', or 'nvm install' (reads .nvmrc)."; exit 1; }
+
+serve: node-check
 	@cd $(ROOT_DIR)/docs && npm run dev
 
-site:
+site: node-check
 	@cd $(ROOT_DIR)/docs && npm run build && npm run check-links
 
 cv:

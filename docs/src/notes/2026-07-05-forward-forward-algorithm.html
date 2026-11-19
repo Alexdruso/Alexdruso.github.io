@@ -419,8 +419,7 @@ excerpt: "Hinton's Forward-Forward algorithm trains a network without backpropag
   /* ---------- shared: theme-adaptive colors ---------- */
   var SN = document.querySelector(".study-note");
   function readCols() {
-    var cs = getComputedStyle(SN);
-    function c(n) { return cs.getPropertyValue(n).trim(); }
+    var c = StudyNote.reader(SN);
     return { accent: c("--sn-accent"), strong: c("--sn-accent-strong"), soft: c("--sn-accent-soft"),
              line: c("--sn-accent-line"), good: c("--sn-good"), bad: c("--sn-bad"), warn: c("--sn-warn"),
              muted: c("--sn-muted"), grid: c("--sn-grid"), text: c("--sn-text"),
@@ -428,8 +427,7 @@ excerpt: "Hinton's Forward-Forward algorithm trains a network without backpropag
   }
   var COL = readCols();
   var redrawFns = [];
-  new MutationObserver(function () { COL = readCols(); redrawFns.forEach(function (f) { f(); }); })
-    .observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  StudyNote.onThemeChange(function () { COL = readCols(); redrawFns.forEach(function (f) { f(); }); });
 
   function sig(x) { return 1 / (1 + Math.exp(-x)); }
   function rgbOf(col) {
