@@ -15,6 +15,12 @@ html {
   font-size: 100%;
 }
 
+// Set by the inline script in Base.astro's <head>, before <body> exists, so a
+// paint that happens that early is already dark (see .dark-theme below).
+html[data-theme="dark"] {
+  background-color: $dark-bg;
+}
+
 body {
   background: $white;
   font: 17px/1.6 $serif;

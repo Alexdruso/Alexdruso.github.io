@@ -181,10 +181,13 @@ interactive study notes and **takes precedence for anything under
   `Base.astro`. Astro compiles and fingerprints it under `/_astro/`, so there's
   no cache-busting to do by hand.
 - Dark mode is a site-wide feature: the toggle button in `Base.astro` adds/removes
-  `.dark-theme` on `<body>` and persists to `localStorage`. The saved theme is
-  applied by a tiny `is:inline` script placed **first inside `<body>`**, so it
-  runs before any content can be painted; moving it later reintroduces a white
-  flash on navigation in dark mode (browsers render partial HTML progressively).
+  `.dark-theme` on `<body>` and persists to `localStorage`. To avoid a white
+  flash on navigation in dark mode, the theme is applied before anything can
+  paint: an `is:inline` script in `<head>` sets `data-theme` on `<html>` (which
+  `style.scss` gives the dark background, covering paints before `<body>` exists,
+  e.g. while a note's blocking head script loads), and a second one placed
+  **first inside `<body>`** adds `.dark-theme`. Keep both where they are, and keep
+  `data-theme` in sync whenever the theme changes.
   Study-note tokens key off `.dark-theme .study-note`.
 
 ## Conventions & gotchas for assistants
