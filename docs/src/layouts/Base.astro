@@ -36,6 +36,16 @@ const path = Astro.url.pathname;
   </head>
 
   <body>
+    <!-- Apply the saved theme before any body content is parsed. If this ran at
+         the end of <body>, a browser that renders the page progressively (slow
+         network, larger HTML) would first paint the light theme, then switch:
+         a white flash on every navigation in dark mode. -->
+    <script is:inline>
+      if ((localStorage.getItem('theme') ||
+           (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')) === 'dark') {
+        document.body.classList.add('dark-theme');
+      }
+    </script>
     <div class="wrapper-masthead">
       <div class="container">
         <header class="masthead clearfix">
@@ -78,20 +88,10 @@ const path = Astro.url.pathname;
       </svg>
     </button>
 
-    <!-- Inline (not bundled) so the saved theme applies before first paint. -->
+    <!-- Theme switcher (the saved theme is applied at the top of <body>). -->
     <script is:inline>
-      // Theme switcher
       const themeToggle = document.querySelector('.theme-toggle');
       const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-
-      // Check for saved theme preference or use system preference
-      const currentTheme = localStorage.getItem('theme') ||
-        (prefersDarkScheme.matches ? 'dark' : 'light');
-
-      // Apply theme on load
-      if (currentTheme === 'dark') {
-        document.body.classList.add('dark-theme');
-      }
 
       // Toggle theme
       themeToggle.addEventListener('click', () => {
