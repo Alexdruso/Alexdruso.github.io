@@ -18,7 +18,7 @@ everything to static HTML at build time.
 ```
 .
 ├── Makefile                       # make dev / serve / site / cv / clean
-├── .github/workflows/cv-build.yml # CI: build CV + site, deploy to gh-pages
+├── .github/workflows/cv-build.yml # CI: build CV + site, deploy to GitHub Pages
 └── docs/                          # *** the Astro project root ***
     ├── astro.config.mjs
     ├── package.json               # astro, sass, yaml, marked
@@ -85,9 +85,11 @@ CI lives in `.github/workflows/cv-build.yml`:
   links/images.
 - **Push to `master`** runs the full `build` job: build the CV with xelatex,
   commit the regenerated PDF back to the branch, build the site, check links,
-  and deploy `docs/dist` to the `gh-pages` branch via `peaceiris/actions-gh-pages`.
+  and publish `docs/dist` to GitHub Pages with GitHub's own Pages actions
+  (`upload-pages-artifact` + `deploy-pages`; Pages source: GitHub Actions).
 
-Do not commit to `gh-pages` by hand — CI owns it.
+Nothing is committed for deploys: the built site goes straight from the workflow
+to Pages.
 
 ## License
 

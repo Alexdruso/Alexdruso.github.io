@@ -21,7 +21,7 @@ only package manager is npm (in `docs/`).
 .
 ├── Makefile                 # `make dev`, `make serve`, `make site`, `make cv`, `make clean`
 ├── README.md                # human-facing project overview
-├── .github/workflows/cv-build.yml   # CI: build CV + site, deploy to gh-pages
+├── .github/workflows/cv-build.yml   # CI: build CV + site, deploy to GitHub Pages
 └── docs/                    # *** the Astro project root ***
     ├── astro.config.mjs     # site URL, publicDir, trailing slashes, HTML/Sass options
     ├── package.json         # astro, sass, yaml, marked; scripts: dev/build/preview/check-links
@@ -53,8 +53,7 @@ only package manager is npm (in `docs/`).
     │                        # study-note.css (the study-note design system)
     ├── static/              # copied verbatim to the site root (Astro's publicDir)
     │   ├── images/          # avatar
-    │   ├── public/          # generated — Alessandro_Sanvito_CV.pdf lives here
-    │   └── .nojekyll        # stops GitHub Pages from running Jekyll on the output
+    │   └── public/          # generated — Alessandro_Sanvito_CV.pdf lives here
     └── cv-src/              # LaTeX source for the CV (Awesome CV template)
         ├── cv.tex           # main file; \input's the cv/*.tex sections
         ├── awesome-cv.cls   # template class
@@ -80,7 +79,10 @@ CI lives in `.github/workflows/cv-build.yml` and runs on push to `master`
    `docs/static/public/Alessandro_Sanvito_CV.pdf`.
 4. Commit the regenerated PDF back to the branch (only if it changed).
 5. `npm run build` in `docs/` (→ `docs/dist/`), then `npm run check-links`.
-6. Deploy `docs/dist` to the `gh-pages` branch via `peaceiris/actions-gh-pages`.
+6. Upload `docs/dist` as a Pages artifact (`actions/upload-pages-artifact`); a
+   separate `deploy` job publishes it with `actions/deploy-pages` (master only).
+   The repo's Pages source is **GitHub Actions**: no branch holds the built site,
+   and GitHub never runs its own Jekyll build.
 
 Pull requests run a fast `verify` job instead: `npm ci`, build, link check.
 
@@ -206,5 +208,6 @@ interactive study notes and **takes precedence for anything under
 - Do your work on a feature branch and commit/push there; never push to
   `master` without explicit permission.
 - Production deploys happen automatically from `master` via the workflow above;
-  do not commit to the `gh-pages` branch by hand (CI owns it).
+  there is no deploy branch to commit to. Re-run the workflow (or dispatch it
+  on `master`) to redeploy.
 - Do not open a pull request unless explicitly asked.
