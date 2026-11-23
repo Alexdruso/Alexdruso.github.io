@@ -1,8 +1,16 @@
 ---
 import Page from '../layouts/Page.astro';
+
+const pdf = '/public/Alessandro_Sanvito_CV.pdf';
 ---
-<Page title="CV | Alessandro Sanvito">
+<Page title="CV">
   <div class="pdf-container">
-    <iframe src="/public/Alessandro_Sanvito_CV.pdf" width="100%" height="800px" frameborder="0"></iframe>
+    <p class="pdf-actions">
+      <a href={pdf} download><i class="fas fa-download"></i> Download PDF</a>
+      <a href={pdf} target="_blank" rel="noopener"><i class="fas fa-external-link-alt"></i> Open in a new tab</a>
+    </p>
+    <!-- Mobile browsers render embedded PDFs poorly (iOS shows only the first
+         page, Android often nothing), so the preview is desktop-only. -->
+    <iframe src={pdf} title="Alessandro Sanvito – CV (PDF)" width="100%" height="800px" frameborder="0"></iframe>
   </div>
 </Page>
