@@ -58,7 +58,14 @@ const path = Astro.url.pathname;
     <div class="wrapper-masthead">
       <div class="container">
         <header class="masthead clearfix">
-          <a href="/" class="site-avatar"><img src={SITE.avatar} alt={SITE.name} /></a>
+          <a href="/" class="site-avatar">
+            <!-- Shown at 100px: 2x variants instead of the full-size photo,
+                 which stays the og:image (social previews want a large one). -->
+            <picture>
+              <source srcset="/images/me-200.webp" type="image/webp" />
+              <img src="/images/me-200.jpg" width="100" height="100" alt={SITE.name} />
+            </picture>
+          </a>
 
           <div class="site-info">
             <h1 class="site-name"><a href="/">{SITE.name}</a></h1>
