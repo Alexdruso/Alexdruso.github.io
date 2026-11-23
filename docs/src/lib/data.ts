@@ -31,8 +31,13 @@ export interface Publication {
   tier?: string;
   year: number;
   first_author?: boolean;
-  arxiv?: string;
   tldr?: string;
+  project?: string;
+  pdf?: string;
+  arxiv?: string;
+  doi?: string;
+  code?: string;
+  bibtex?: string;
 }
 
 export const navigation = parse(navigationYml) as NavItem[];

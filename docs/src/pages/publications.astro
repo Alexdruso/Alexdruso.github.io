@@ -4,8 +4,12 @@ import { publications } from '../lib/data';
 
 // Newest first; papers from the same year keep their order in publications.yml.
 const pubs = [...publications].sort((a, b) => b.year - a.year);
+
+// The title links to the most useful landing page available.
+const titleHref = (pub: (typeof pubs)[number]) =>
+  pub.project ?? (pub.doi ? `https://doi.org/${pub.doi}` : pub.arxiv);
 ---
-<Page title="Publications | Alessandro Sanvito">
+<Page title="Publications">
   <div class="publications">
     <p class="publications-header">
       Peer-reviewed work in computer vision (ICCV, IEEE IV) and recommender systems (ACM RecSys Challenge).
@@ -22,7 +26,7 @@ const pubs = [...publications].sort((a, b) => b.year - a.year);
         </div>
 
         <h2 class="publication-title">
-          {pub.arxiv ? <a href={pub.arxiv} target="_blank" rel="noopener">{pub.title}</a> : pub.title}
+          {titleHref(pub) ? <a href={titleHref(pub)} target="_blank" rel="noopener">{pub.title}</a> : pub.title}
         </h2>
 
         <p class="publication-authors">
@@ -33,12 +37,39 @@ const pubs = [...publications].sort((a, b) => b.year - a.year);
 
         <p class="publication-tldr">{pub.tldr}</p>
 
-        {pub.arxiv && (
-          <p class="publication-links">
-            <a href={pub.arxiv} target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> arXiv</a>
-          </p>
+        <p class="publication-links">
+          {pub.project && <a href={pub.project} target="_blank" rel="noopener"><i class="fas fa-globe"></i> Project page</a>}
+          {pub.pdf && <a href={pub.pdf} target="_blank" rel="noopener"><i class="fas fa-file-pdf"></i> PDF</a>}
+          {pub.arxiv && <a href={pub.arxiv} target="_blank" rel="noopener"><i class="fas fa-scroll"></i> arXiv</a>}
+          {pub.doi && <a href={`https://doi.org/${pub.doi}`} target="_blank" rel="noopener"><i class="fas fa-link"></i> DOI</a>}
+          {pub.code && <a href={pub.code} target="_blank" rel="noopener"><i class="fab fa-github"></i> Code</a>}
+        </p>
+
+        {pub.bibtex && (
+          <details class="publication-bibtex">
+            <summary><i class="fas fa-quote-right"></i> BibTeX</summary>
+            <div class="bibtex-block">
+              <pre><code>{pub.bibtex.trim()}</code></pre>
+              <button type="button" class="bibtex-copy">Copy</button>
+            </div>
+          </details>
         )}
       </article>
     ))}
   </div>
+
+  <script is:inline>
+    document.querySelectorAll('.bibtex-copy').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const text = btn.parentElement.querySelector('code').textContent;
+        try {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = 'Copied';
+        } catch (e) {
+          btn.textContent = 'Select and copy';
+        }
+        setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+  </script>
 </Page>

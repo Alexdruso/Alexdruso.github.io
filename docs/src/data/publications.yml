@@ -1,6 +1,11 @@
 # Source of truth for the website's publications page.
 # Keep in sync with docs/cv-src/cv/publications.tex and Google Scholar.
 # Sorted reverse-chronologically; the publications page sorts by `year` anyway.
+#
+# `tldr` is a one-line, plain-language summary for non-specialists.
+# Optional links, shown in this order: project (project page), pdf, arxiv,
+# doi (bare DOI, no URL prefix), code. `bibtex` is shown in a collapsible
+# block with a copy button; DOI metadata comes from Crossref.
 
 - title: "HINT: Learning Complete Human Neural Representations from Limited Viewpoints"
   authors:
@@ -14,8 +19,20 @@
   year: 2024
   tier: top
   first_author: true
-  tldr: "Builds complete 3D human avatars from a handful of camera views using a sagittal-plane symmetry prior and explicit body-model supervision — designed for sparse-view setups like in-vehicle perception."
+  tldr: "Builds a complete 3D model of a person, including the sides no camera saw, from just a few views, by assuming the body is roughly left-right symmetric. Aimed at cameras inside vehicles, which only ever see people from a few angles."
+  pdf: "https://arxiv.org/pdf/2405.19712"
   arxiv: "https://arxiv.org/abs/2405.19712"
+  doi: "10.1109/IV55156.2024.10588836"
+  bibtex: |
+    @inproceedings{sanvito2024hint,
+      title     = {{HINT}: Learning Complete Human Neural Representations from Limited Viewpoints},
+      author    = {Sanvito, Alessandro and Ramazzina, Andrea and Walz, Stefanie and Bijelic, Mario and Heide, Felix},
+      booktitle = {2024 IEEE Intelligent Vehicles Symposium (IV)},
+      pages     = {1556--1563},
+      year      = {2024},
+      publisher = {IEEE},
+      doi       = {10.1109/IV55156.2024.10588836}
+    }
 
 - title: "ScatterNeRF: Seeing Through Fog with Physically-Based Inverse Neural Rendering"
   authors:
@@ -30,8 +47,22 @@
   year: 2023
   tier: top
   first_author: false
-  tldr: "A NeRF that disentangles fog from the underlying scene using physics-based scattering losses, enabling clearer reconstruction in adverse weather for autonomous driving."
+  tldr: "Rebuilds a 3D scene from photos taken in fog and separates the fog from what is behind it, using the physics of how light scatters, so a car's cameras can see the road clearly in bad weather."
+  project: "https://light.princeton.edu/publication/scatternerf/"
+  pdf: "https://light.princeton.edu/wp-content/uploads/2023/09/ScatterNeRF-main.pdf"
   arxiv: "https://arxiv.org/abs/2305.02103"
+  doi: "10.1109/ICCV51070.2023.01646"
+  code: "https://github.com/princeton-computational-imaging/scatternerf"
+  bibtex: |
+    @inproceedings{ramazzina2023scatternerf,
+      title     = {{ScatterNeRF}: Seeing Through Fog with Physically-Based Inverse Neural Rendering},
+      author    = {Ramazzina, Andrea and Bijelic, Mario and Walz, Stefanie and Sanvito, Alessandro and Scheuble, Dominik and Heide, Felix},
+      booktitle = {2023 IEEE/CVF International Conference on Computer Vision (ICCV)},
+      pages     = {17911--17922},
+      year      = {2023},
+      publisher = {IEEE},
+      doi       = {10.1109/ICCV51070.2023.01646}
+    }
 
 - title: "United We Stand, Divided We Fall: Leveraging Ensembles of Recommenders to Compete with Budget Constrained Resources"
   authors:
@@ -43,7 +74,20 @@
   year: 2022
   tier: strong
   first_author: false
-  tldr: "Ensemble of lightweight recommenders that beats heavyweight competitors under tight compute budgets — entry to the ACM RecSys Challenge 2022."
+  tldr: "Combines many small, cheap recommendation models instead of training one large one, to compete in the ACM RecSys Challenge 2022 (fashion recommendations) on a limited compute budget. Finished 11th."
+  doi: "10.1145/3556702.3556845"
+  code: "https://github.com/Alexdruso/recsys2022"
+  bibtex: |
+    @inproceedings{maldini2022united,
+      title     = {United We Stand, Divided We Fall: Leveraging Ensembles of Recommenders to Compete with Budget Constrained Resources},
+      author    = {Maldini, Pietro and Sanvito, Alessandro and Surricchio, Mattia},
+      booktitle = {Proceedings of the Recommender Systems Challenge 2022},
+      series    = {RecSysChallenge '22},
+      pages     = {34--38},
+      year      = {2022},
+      publisher = {ACM},
+      doi       = {10.1145/3556702.3556845}
+    }
 
 - title: "Lightweight and Scalable Model for Tweet Engagements Predictions in a Resource-constrained Environment"
   authors:
@@ -63,4 +107,18 @@
   year: 2021
   tier: strong
   first_author: false
-  tldr: "Optimized LightGBM pipeline for predicting Twitter engagements at scale — finished 4th overall and 1st among academic teams in the ACM RecSys Challenge 2021."
+  tldr: "Predicts whether a user will like, reply to or retweet a tweet, using a fast tree-based model (LightGBM) that fits on modest hardware. Finished 4th overall and 1st among academic teams in the ACM RecSys Challenge 2021."
+  pdf: "https://re.public.polimi.it/retrieve/3a33b0d4-7133-439a-b1f6-53c635600307/lightweight-and-scalable-model-for-tweet-engagements-predictions-in-a-resource-constrained-environment.pdf"
+  doi: "10.1145/3487572.3487597"
+  code: "https://github.com/Alexdruso/recsys-challenge-2021-twitter-1"
+  bibtex: |
+    @inproceedings{carminati2021lightweight,
+      title     = {Lightweight and Scalable Model for Tweet Engagements Predictions in a Resource-constrained Environment},
+      author    = {Carminati, Luca and Lodigiani, Giacomo and Maldini, Pietro and Meta, Samuele and Metaj, Stiven and Pisa, Arcangelo and Sanvito, Alessandro and Surricchio, Mattia and P{\'e}rez Maurera, Fernando Benjam{\'i}n and Bernardis, Cesare and Ferrari Dacrema, Maurizio},
+      booktitle = {Proceedings of the Recommender Systems Challenge 2021},
+      series    = {RecSysChallenge '21},
+      pages     = {28--33},
+      year      = {2021},
+      publisher = {ACM},
+      doi       = {10.1145/3487572.3487597}
+    }

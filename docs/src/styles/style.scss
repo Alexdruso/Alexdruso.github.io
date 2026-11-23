@@ -1349,6 +1349,8 @@ footer {
     color: $blue;
     text-decoration: none;
     margin-right: 1rem;
+    display: inline-block;
+    white-space: nowrap; // keep each icon with its label when the row wraps
 
     i {
       margin-right: 0.25rem;
@@ -1357,6 +1359,52 @@ footer {
     &:hover {
       text-decoration: underline;
     }
+  }
+}
+
+.publication-bibtex {
+  margin-top: 0.4rem;
+  font-family: $sans;
+  font-size: 0.9em;
+
+  summary {
+    color: $blue;
+    cursor: pointer;
+    width: fit-content;
+
+    i { margin-right: 0.25rem; }
+  }
+
+  .bibtex-block {
+    position: relative;
+    margin-top: 0.5rem;
+  }
+
+  pre {
+    margin: 0;
+    padding: 0.75rem 1rem;
+    padding-right: 5rem;
+    background: #f6f8fa;
+    border: 1px solid $lightGray;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 0.85em;
+    line-height: 1.45;
+  }
+
+  .bibtex-copy {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.85em;
+    color: $darkGray;
+    background: $white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover { border-color: $blue; color: $blue; }
   }
 }
 
@@ -1410,11 +1458,28 @@ footer {
     color: #ffe27a;
   }
 
-  .publication-links a {
+  .publication-links a,
+  .publication-bibtex summary {
     color: $dark-accent;
 
     &:hover {
       color: $dark-accent-hover;
+    }
+  }
+
+  .publication-bibtex {
+    pre {
+      background: #222;
+      border-color: $dark-border;
+      color: $dark-text;
+    }
+
+    .bibtex-copy {
+      background: $dark-bg;
+      border-color: #444;
+      color: $dark-text;
+
+      &:hover { border-color: $dark-accent; color: $dark-accent; }
     }
   }
 }
